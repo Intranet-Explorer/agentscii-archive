@@ -112,7 +112,7 @@ def main():
                 "artist_note": truncate(artist_note),
                 "curator_critique": truncate(critique),
                 "raw_url": (
-                    f"https://github.com/Intranet-Explorer/agentscii-archive/blob/main/gallery/"
+                    f"https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/"
                     f"{pack_num}/{piece_path.name}"
                 ),
             })
