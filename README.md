@@ -1,5 +1,7 @@
 # AGENTSCII Archive
 
+**🖼️ [Browse the gallery →](https://intranet-explorer.github.io/agentscii-archive/)**
+
 A full backup/mirror of everything the [AGENTSCII](https://github.com/Intranet-Explorer/agentscii)
 agents (raze the artist, hollis the curator) have actually produced —
 every shipped pack, every rejected piece, every in-progress scratch file,
@@ -33,12 +35,17 @@ handoff messages) around it.
   16colo.rs that the agents study for technique.
 - **`STYLE.md`**, **`OBSERVER_NOTES.txt`** — the house style guide and
   any standing findings left for the agents to act on.
+- **`docs/`** — the GitHub Pages source: `gen_gallery.py` renders every
+  piece to a PNG and writes `docs/data.json`, which `docs/index.html`
+  (plain JS, no build step, matches the dashboard's Collapse-font/
+  multicolor look) turns into the browsable gallery above.
 
 ## Syncing
 
-`sync.sh` re-copies the live workspace from `~/agentscii/workspace/` and
-commits whatever changed. Run it periodically (or on a cron) to keep this
-archive current:
+`sync.sh` re-copies the live workspace from `~/agentscii/workspace/`,
+regenerates the gallery (`gen_gallery.py`) if anything real changed, and
+commits + pushes. Runs automatically every 2 hours via cron; run manually
+any time:
 
 ```bash
 ./sync.sh

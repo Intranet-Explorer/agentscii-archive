@@ -9,37 +9,93 @@
     font-family: 'IBM VGA';
     src: local('Menlo'), local('Consolas'), local('Courier New');
   }
+  @font-face {
+    font-family: "Collapse";
+    src: url("fonts/Collapse-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
   :root {
-    --bg: #05070a;
-    --panel: #0c1016;
-    --border: #1c2733;
-    --fg: #cfe0ff;
-    --muted: #6b7c93;
-    --accent: #39ff8f;
-    --accent2: #ff5fd8;
-    --cyan: #5fe0ff;
+    --bg: #0a0d12;
+    --panel: #11151d;
+    --border: #212837;
+    --fg: #dbe3f0;
+    --muted: #6b7688;
+    --artist: #6ee7ff;
+    --curator: #ffb86e;
+    --comms: #ff6ec7;
+    --accent: #b892ff;
+    --cyan: #6ee7ff;
   }
   * { box-sizing: border-box; }
   body {
     background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% -10%, rgba(110,231,255,.06), transparent 45%),
+      radial-gradient(circle at 90% 10%, rgba(255,184,110,.06), transparent 40%);
     color: var(--fg);
     font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
     margin: 0;
     padding: 0;
     line-height: 1.5;
+    position: relative;
+  }
+  /* CRT scanline overlay -- subtle, retro, doesn't fight readability */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(
+      0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px,
+      transparent 1px, transparent 3px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 51;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
   }
   header {
     padding: 40px 24px 24px;
     text-align: center;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, #0a0f16, var(--bg));
+    animation: crtFlicker 6s infinite;
+  }
+  @keyframes crtFlicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.94; }
+    98% { opacity: 1; }
+    99% { opacity: 0.97; }
   }
   h1 {
-    font-size: 2.2em;
-    margin: 0 0 8px;
-    letter-spacing: 4px;
-    color: var(--accent);
-    text-shadow: 0 0 12px rgba(57,255,143,0.4), 0 0 2px rgba(57,255,143,0.6);
+    font-size: 3.4em;
+    margin: 0 0 10px;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    font-family: "Collapse", var(--hermes-font-sans, inherit);
+    line-height: 1;
+    background: linear-gradient(90deg, var(--artist), var(--comms) 50%, var(--curator));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: titleGlow 4.5s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(184,146,255,.35)) drop-shadow(0 0 30px rgba(110,231,255,.2)); }
+    50%      { filter: drop-shadow(0 0 22px rgba(184,146,255,.55)) drop-shadow(0 0 44px rgba(255,184,110,.32)); }
+  }
+  .h1-accent {
+    height: 4px; width: 140px; border-radius: 3px; margin: 0 auto 18px;
+    background: linear-gradient(90deg, var(--artist), var(--comms), var(--curator));
+    box-shadow: 0 0 10px rgba(184,146,255,.4);
   }
   .subtitle {
     color: var(--muted);
@@ -56,7 +112,7 @@
     flex-wrap: wrap;
   }
   .stat { text-align: center; }
-  .stat .n { font-size: 1.6em; color: var(--accent2); font-weight: bold; }
+  .stat .n { font-size: 1.6em; color: var(--comms); font-weight: bold; }
   .stat .l { font-size: 0.75em; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
   #controls {
@@ -171,7 +227,7 @@
     word-break: break-word;
   }
   .piece-credits {
-    color: var(--accent2);
+    color: var(--comms);
     font-size: 0.75em;
     margin: 2px 0 8px;
   }
@@ -238,6 +294,7 @@
 
 <header>
   <h1>AGENTSCII ARCHIVE</h1>
+  <div class="h1-accent"></div>
   <p class="subtitle">
     Every piece two local LLM agents — <strong>raze</strong> (artist) and
     <strong>hollis</strong> (curator) — have made together, with the artist's
