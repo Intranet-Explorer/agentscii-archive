@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENTSCII Archive Gallery</title>
+<style>
+  @font-face {
+    font-family: 'IBM VGA';
+    src: local('Menlo'), local('Consolas'), local('Courier New');
+  }
+  :root {
+    --bg: #05070a;
+    --panel: #0c1016;
+    --border: #1c2733;
+    --fg: #cfe0ff;
+    --muted: #6b7c93;
+    --accent: #39ff8f;
+    --accent2: #ff5fd8;
+    --cyan: #5fe0ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+  header {
+    padding: 40px 24px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0a0f16, var(--bg));
+  }
+  h1 {
+    font-size: 2.2em;
+    margin: 0 0 8px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(57,255,143,0.4), 0 0 2px rgba(57,255,143,0.6);
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95em;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .subtitle a { color: var(--cyan); }
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat .n { font-size: 1.6em; color: var(--accent2); font-weight: bold; }
+  .stat .l { font-size: 0.75em; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  #controls {
+    max-width: 1200px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  #search {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 0.9em;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 200px;
+  }
+  #search:focus { outline: 1px solid var(--accent); }
+  .pack-count { color: var(--muted); font-size: 0.85em; }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .pack-block {
+    margin-bottom: 40px;
+  }
+  .pack-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .pack-header h2 {
+    margin: 0;
+    color: var(--cyan);
+    font-size: 1.15em;
+    letter-spacing: 1px;
+  }
+  .pack-note {
+    color: var(--muted);
+    font-size: 0.85em;
+    margin: 0 0 16px;
+    white-space: pre-wrap;
+    max-height: 4.5em;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+  .pack-note.expanded { max-height: none; }
+  .pack-note::after {
+    content: "▾ more";
+    position: absolute;
+    bottom: 0; right: 0;
+    background: linear-gradient(90deg, transparent, var(--bg) 40%);
+    padding-left: 30px;
+    color: var(--accent);
+    font-size: 0.9em;
+  }
+  .pack-note.expanded::after { content: ""; }
+
+  .piece-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .piece-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .piece-card:hover { border-color: var(--accent); }
+  .piece-image-wrap {
+    background: #000;
+    position: relative;
+    max-height: 320px;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+  .piece-image-wrap img {
+    width: 100%;
+    display: block;
+    image-rendering: pixelated;
+  }
+  .piece-image-wrap .fade {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--panel));
+    pointer-events: none;
+  }
+  .no-image {
+    color: var(--muted);
+    text-align: center;
+    padding: 40px 10px;
+    font-size: 0.85em;
+  }
+  .piece-body { padding: 12px 14px 14px; }
+  .piece-title {
+    font-weight: bold;
+    color: var(--fg);
+    font-size: 0.95em;
+    word-break: break-word;
+  }
+  .piece-credits {
+    color: var(--accent2);
+    font-size: 0.75em;
+    margin: 2px 0 8px;
+  }
+  .why-block {
+    font-size: 0.78em;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .why-block strong {
+    color: var(--cyan);
+    display: block;
+    font-size: 0.85em;
+    margin-bottom: 2px;
+  }
+  .why-block p { margin: 0 0 8px; white-space: pre-wrap; }
+  .raw-link {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.75em;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .raw-link:hover { color: var(--accent); border-color: var(--accent); }
+  .truncated-note {
+    font-size: 0.7em;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Lightbox */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: 92vw;
+    max-height: 92vh;
+    image-rendering: pixelated;
+    box-shadow: 0 0 40px rgba(57,255,143,0.15);
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8em;
+    padding: 30px 24px 50px;
+  }
+  footer a { color: var(--cyan); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AGENTSCII ARCHIVE</h1>
+  <p class="subtitle">
+    Every piece two local LLM agents — <strong>raze</strong> (artist) and
+    <strong>hollis</strong> (curator) — have made together, with the artist's
+    intent and the curator's actual reasoning for accepting it. Rendered from
+    the real SGR-coded <code>.ans</code> files, not screenshots.
+    See <a href="https://github.com/Intranet-Explorer/agentscii">the harness</a>
+    that runs them and <a href="https://github.com/Intranet-Explorer/agentscii-dashboard">the live dashboard</a>.
+  </p>
+  <div class="stats">
+    <div class="stat"><div class="n" id="stat-packs">–</div><div class="l">packs</div></div>
+    <div class="stat"><div class="n" id="stat-pieces">–</div><div class="l">pieces</div></div>
+  </div>
+</header>
+
+<div id="controls">
+  <input id="search" type="text" placeholder="Search titles, credits, notes…">
+  <span class="pack-count" id="visible-count"></span>
+</div>
+
+<main id="gallery">
+  <p style="color:var(--muted);text-align:center;">Loading…</p>
+</main>
+
+<div id="lightbox"><img id="lightbox-img" src="" alt=""></div>
+
+<footer>
+  Generated by <code>gen_gallery.py</code> from the live workspace archive.
+  Original ANSI compositions by raze &amp; hollis — not reproductions of any
+  existing copyrighted work.
+</footer>
+
+<script>
+async function main() {
+  const res = await fetch('data.json');
+  const packs = await res.json();
+
+  document.getElementById('stat-packs').textContent = packs.length;
+  const totalPieces = packs.reduce((s, p) => s + p.pieces.length, 0);
+  document.getElementById('stat-pieces').textContent = totalPieces;
+
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+
+  // newest pack first
+  const ordered = [...packs].reverse();
+
+  for (const pack of ordered) {
+    const block = document.createElement('section');
+    block.className = 'pack-block';
+    block.dataset.searchable = (
+      pack.pack + ' ' + pack.note + ' ' +
+      pack.pieces.map(p => p.title + ' ' + p.credits + ' ' + p.artist_note + ' ' + p.curator_critique).join(' ')
+    ).toLowerCase();
+
+    const header = document.createElement('div');
+    header.className = 'pack-header';
+    header.innerHTML = `<h2>${escapeHtml(pack.pack)}</h2><span style="color:var(--muted);font-size:0.8em;">${pack.pieces.length} piece${pack.pieces.length === 1 ? '' : 's'}</span>`;
+    block.appendChild(header);
+
+    if (pack.note) {
+      const note = document.createElement('p');
+      note.className = 'pack-note';
+      note.textContent = pack.note;
+      note.addEventListener('click', () => note.classList.toggle('expanded'));
+      block.appendChild(note);
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'piece-grid';
+
+    for (const piece of pack.pieces) {
+      const card = document.createElement('div');
+      card.className = 'piece-card';
+
+      let imgHtml = '<div class="no-image">no render available</div>';
+      if (piece.image) {
+        imgHtml = `<div class="piece-image-wrap" data-full="${piece.image}">
+          <img src="${piece.image}" loading="lazy" alt="${escapeHtml(piece.title)}">
+          <div class="fade"></div>
+        </div>`;
+      }
+
+      let why = '';
+      if (piece.artist_note) {
+        why += `<div class="why-block"><strong>Artist's intent</strong><p>${escapeHtml(piece.artist_note)}</p></div>`;
+      }
+      if (piece.curator_critique) {
+        why += `<div class="why-block"><strong>Curator's reasoning</strong><p>${escapeHtml(piece.curator_critique)}</p></div>`;
+      }
+      if (piece.truncated) {
+        why += `<div class="truncated-note">Full piece is longer than this preview — see the raw file.</div>`;
+      }
+
+      card.innerHTML = `
+        ${imgHtml}
+        <div class="piece-body">
+          <div class="piece-title">${escapeHtml(piece.title)}</div>
+          ${piece.credits ? `<div class="piece-credits">${escapeHtml(piece.credits)}</div>` : ''}
+          ${why}
+          <a class="raw-link" href="${piece.raw_url}" target="_blank" rel="noopener">view raw .ans →</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    }
+
+    block.appendChild(grid);
+    gallery.appendChild(block);
+  }
+
+  // lightbox
+  gallery.addEventListener('click', (e) => {
+    const wrap = e.target.closest('.piece-image-wrap');
+    if (!wrap) return;
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    lbImg.src = wrap.dataset.full;
+    lb.classList.add('open');
+  });
+  document.getElementById('lightbox').addEventListener('click', () => {
+    document.getElementById('lightbox').classList.remove('open');
+  });
+
+  // search
+  const searchInput = document.getElementById('search');
+  const visibleCount = document.getElementById('visible-count');
+  function applySearch() {
+    const q = searchInput.value.trim().toLowerCase();
+    let shown = 0;
+    for (const block of gallery.querySelectorAll('.pack-block')) {
+      const match = !q || block.dataset.searchable.includes(q);
+      block.classList.toggle('hidden', !match);
+      if (match) shown++;
+    }
+    visibleCount.textContent = q ? `${shown} / ${ordered.length} packs match` : '';
+  }
+  searchInput.addEventListener('input', applySearch);
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+main().catch(e => {
+  document.getElementById('gallery').innerHTML =
+    `<p style="color:#ff5f5f;text-align:center;">Failed to load gallery data: ${e}</p>`;
+});
+</script>
+
+</body>
+</html>
