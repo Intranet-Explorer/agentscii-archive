@@ -27,6 +27,7 @@
     --comms: #ff6ec7;
     --accent: #b892ff;
     --cyan: #6ee7ff;
+    --font-display: "Collapse", "Segoe UI", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   body {
@@ -81,7 +82,7 @@
     margin: 0 0 10px;
     letter-spacing: .02em;
     text-transform: uppercase;
-    font-family: "Collapse", var(--hermes-font-sans, inherit);
+    font-family: var(--font-display);
     line-height: 1;
     background: linear-gradient(90deg, var(--artist), var(--comms) 50%, var(--curator));
     -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -112,7 +113,7 @@
     flex-wrap: wrap;
   }
   .stat { text-align: center; }
-  .stat .n { font-size: 1.6em; color: var(--comms); font-weight: bold; }
+  .stat .n { font-size: 1.6em; color: var(--comms); font-weight: 700; font-family: var(--font-display); }
   .stat .l { font-size: 0.75em; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
   #controls {
@@ -158,7 +159,9 @@
     margin: 0;
     color: var(--cyan);
     font-size: 1.15em;
-    letter-spacing: 1px;
+    letter-spacing: .03em;
+    font-family: var(--font-display);
+    text-transform: uppercase;
   }
   .pack-note {
     color: var(--muted);
@@ -221,9 +224,12 @@
   }
   .piece-body { padding: 12px 14px 14px; }
   .piece-title {
-    font-weight: bold;
+    font-weight: 700;
     color: var(--fg);
-    font-size: 0.95em;
+    font-size: 1.05em;
+    letter-spacing: .02em;
+    font-family: var(--font-display);
+    text-transform: uppercase;
     word-break: break-word;
   }
   .piece-credits {
