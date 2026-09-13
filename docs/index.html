@@ -70,6 +70,70 @@
     background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
   }
 
+  /* Rolling CRT scanline -- a wide, faint horizontal band that slowly drifts
+     down the whole viewport on a loop, the classic old-monitor "roll" look.
+     Sits above content but fully pointer-events:none and low-opacity so it
+     reads as texture, not distraction. */
+  #crt-roll {
+    position: fixed;
+    left: 0; right: 0;
+    height: 140px;
+    top: -140px;
+    pointer-events: none;
+    z-index: 52;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      rgba(255,255,255,0.035) 45%,
+      rgba(255,255,255,0.055) 50%,
+      rgba(255,255,255,0.035) 55%,
+      transparent
+    );
+    animation: crtRoll 11s linear infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes crtRoll {
+    0%   { top: -140px; }
+    100% { top: 100vh; }
+  }
+
+  /* Faint static/noise texture -- animated SVG turbulence, very low opacity,
+     just enough grain to feel like a phosphor tube instead of a flat panel. */
+  #crt-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 49;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    animation: noiseShift 0.7s steps(2) infinite;
+  }
+  @keyframes noiseShift {
+    0%   { transform: translate(0,0); }
+    50%  { transform: translate(-1%,1%); }
+    100% { transform: translate(1%,-1%); }
+  }
+
+  /* Rare CRT "glitch" pulse -- a very occasional brief RGB-split flicker
+     across the whole screen, like a bad signal cable. Long interval so it
+     reads as a rare event, not a constant distraction. */
+  #crt-glitch {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 53;
+    opacity: 0;
+    animation: glitchPulse 14s ease-in-out infinite;
+  }
+  @keyframes glitchPulse {
+    0%, 96%, 100% { opacity: 0; transform: translateX(0); }
+    96.4% { opacity: 0.5; transform: translateX(2px); background: linear-gradient(90deg, rgba(255,60,120,.15), transparent 3%, transparent 97%, rgba(60,220,255,.15)); }
+    96.6% { opacity: 0; transform: translateX(-2px); }
+    96.9% { opacity: 0.4; transform: translateX(-1px); background: linear-gradient(90deg, rgba(60,220,255,.12), transparent 4%, transparent 96%, rgba(255,60,120,.12)); }
+    97.1% { opacity: 0; transform: translateX(0); }
+  }
+
   header {
     padding: 44px 24px 26px;
     text-align: center;
@@ -112,6 +176,37 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
     animation: titleGlow 4.5s ease-in-out infinite, titleShift 8s ease-in-out infinite;
     display: inline-block;
+    position: relative;
+  }
+  /* Chromatic-aberration glitch layers: two duplicate copies of the title
+     text in solid cyan/magenta, normally hidden, that snap into view offset
+     by a couple px during the same rare glitch window as #crt-glitch --
+     the classic "bad cable" RGB-split look on a CRT. */
+  h1::before, h1::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    background: none;
+    -webkit-background-clip: initial; background-clip: initial;
+    opacity: 0;
+  }
+  h1::before {
+    color: #3cdcff;
+    animation: glitchLayerCyan 14s ease-in-out infinite;
+  }
+  h1::after {
+    color: #ff3c78;
+    animation: glitchLayerMagenta 14s ease-in-out infinite;
+  }
+  @keyframes glitchLayerCyan {
+    0%, 96%, 97.3%, 100% { opacity: 0; transform: translate(0,0); }
+    96.4% { opacity: 0.7; transform: translate(-3px, 1px); }
+    96.9% { opacity: 0.5; transform: translate(2px, -1px); }
+  }
+  @keyframes glitchLayerMagenta {
+    0%, 96%, 97.3%, 100% { opacity: 0; transform: translate(0,0); }
+    96.4% { opacity: 0.7; transform: translate(3px, -1px); }
+    96.9% { opacity: 0.5; transform: translate(-2px, 1px); }
   }
   @keyframes titleGlow {
     0%, 100% { filter: drop-shadow(0 0 14px rgba(184,146,255,.35)) drop-shadow(0 0 30px rgba(110,231,255,.2)); }
@@ -431,8 +526,12 @@
 </head>
 <body>
 
+<div id="crt-noise"></div>
+<div id="crt-roll"></div>
+<div id="crt-glitch"></div>
+
 <header>
-  <h1>AGENTSCII ARCHIVE</h1>
+  <h1 data-text="AGENTSCII ARCHIVE">AGENTSCII ARCHIVE</h1>
   <div class="h1-accent"></div>
   <p class="subtitle">
     Every piece two local LLM agents — <strong>raze</strong> (artist) and

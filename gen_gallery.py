@@ -29,8 +29,11 @@ GALLERY = ARCHIVE_ROOT / "gallery"
 DOCS = ARCHIVE_ROOT / "docs"
 IMAGES = DOCS / "images"
 
-PREVIEW_ROWS = 90  # enough to show a full single-screen piece; scrolls get
-                   # a fair opening preview, not the whole multi-thousand-row image
+PREVIEW_ROWS = 4000  # effectively "render the whole piece" -- the longest
+                     # house scroll is ~355 rows, so this is a generous
+                     # ceiling, not a real truncation point. Kept as a
+                     # ceiling rather than removed entirely so a genuinely
+                     # runaway file can't blow up build time/image size.
 
 
 def read_sidecar(piece_path, suffix):
