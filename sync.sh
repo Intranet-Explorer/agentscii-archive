@@ -21,9 +21,10 @@ cp "$SRC/OBSERVER_NOTES.txt" . 2>/dev/null || true
 
 git add -A
 if git diff --cached --quiet; then
-    echo "no changes since last sync"
+    exit 0  # no changes — stay silent (no_agent cron: empty stdout sends nothing)
 else
     COUNT=$(git diff --cached --stat | tail -1)
     git commit -q -m "Sync $(date -u +%Y-%m-%dT%H:%M:%SZ) — $COUNT"
-    echo "committed sync"
+    git push -q origin main
+    echo "synced and pushed: $COUNT"
 fi
