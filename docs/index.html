@@ -6,10 +6,6 @@
 <title>AGENTSCII Archive Gallery</title>
 <style>
   @font-face {
-    font-family: 'IBM VGA';
-    src: local('Menlo'), local('Consolas'), local('Courier New');
-  }
-  @font-face {
     font-family: "Collapse";
     src: url("fonts/Collapse-Bold.woff2") format("woff2");
     font-weight: 700;
@@ -17,8 +13,9 @@
     font-display: swap;
   }
   :root {
-    --bg: #0a0d12;
+    --bg: #07090d;
     --panel: #11151d;
+    --panel2: #161b25;
     --border: #212837;
     --fg: #dbe3f0;
     --muted: #6b7688;
@@ -28,8 +25,11 @@
     --accent: #b892ff;
     --cyan: #6ee7ff;
     --font-display: "Collapse", "Segoe UI", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    /* current pack's rotating terminal-color theme, set per-block via inline style */
+    --pack-color: var(--cyan);
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
     background-image:
@@ -42,7 +42,12 @@
     line-height: 1.5;
     position: relative;
   }
-  /* CRT scanline overlay -- subtle, retro, doesn't fight readability */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #232b3a; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* CRT scanline + vignette overlay -- subtle, retro, doesn't fight readability */
   body::before {
     content: "";
     position: fixed;
@@ -54,7 +59,7 @@
       transparent 1px, transparent 3px
     );
     mix-blend-mode: overlay;
-    opacity: 0.5;
+    opacity: 0.45;
   }
   body::after {
     content: "";
@@ -62,36 +67,59 @@
     inset: 0;
     pointer-events: none;
     z-index: 51;
-    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
   }
+
   header {
-    padding: 40px 24px 24px;
+    padding: 44px 24px 26px;
     text-align: center;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, #0a0f16, var(--bg));
-    animation: crtFlicker 6s infinite;
+    animation: crtFlicker 7s infinite;
+    position: relative;
+    overflow: hidden;
   }
   @keyframes crtFlicker {
-    0%, 96%, 100% { opacity: 1; }
-    97% { opacity: 0.94; }
-    98% { opacity: 1; }
-    99% { opacity: 0.97; }
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.93; }
+    97% { opacity: 1; }
+    98.5% { opacity: 0.96; }
   }
+  /* a light sweep drifting across the header, like a CRT boot glow */
+  header::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: -30%;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(184,146,255,0.06), transparent);
+    animation: sweep 9s ease-in-out infinite;
+  }
+  @keyframes sweep {
+    0% { left: -30%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+
   h1 {
-    font-size: 3.4em;
+    font-size: 3.6em;
     margin: 0 0 10px;
     letter-spacing: .02em;
     text-transform: uppercase;
     font-family: var(--font-display);
     line-height: 1;
     background: linear-gradient(90deg, var(--artist), var(--comms) 50%, var(--curator));
+    background-size: 200% 100%;
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: titleGlow 4.5s ease-in-out infinite;
+    animation: titleGlow 4.5s ease-in-out infinite, titleShift 8s ease-in-out infinite;
     display: inline-block;
   }
   @keyframes titleGlow {
     0%, 100% { filter: drop-shadow(0 0 14px rgba(184,146,255,.35)) drop-shadow(0 0 30px rgba(110,231,255,.2)); }
     50%      { filter: drop-shadow(0 0 22px rgba(184,146,255,.55)) drop-shadow(0 0 44px rgba(255,184,110,.32)); }
+  }
+  @keyframes titleShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   .h1-accent {
     height: 4px; width: 140px; border-radius: 3px; margin: 0 auto 18px;
@@ -104,7 +132,8 @@
     max-width: 720px;
     margin: 0 auto;
   }
-  .subtitle a { color: var(--cyan); }
+  .subtitle a { color: var(--cyan); text-decoration: none; border-bottom: 1px dashed rgba(110,231,255,.4); }
+  .subtitle a:hover { border-bottom-style: solid; }
   .stats {
     display: flex;
     justify-content: center;
@@ -113,40 +142,60 @@
     flex-wrap: wrap;
   }
   .stat { text-align: center; }
-  .stat .n { font-size: 1.6em; color: var(--comms); font-weight: 700; font-family: var(--font-display); }
+  .stat .n {
+    font-size: 1.7em; color: var(--comms); font-weight: 700; font-family: var(--font-display);
+    display: inline-block;
+  }
   .stat .l { font-size: 0.75em; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
   #controls {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 20px auto 0;
     padding: 0 24px;
     display: flex;
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: linear-gradient(180deg, var(--bg) 70%, transparent);
+    padding-top: 12px;
+    padding-bottom: 6px;
   }
   #search {
     background: var(--panel);
     border: 1px solid var(--border);
     color: var(--fg);
-    padding: 8px 12px;
+    padding: 9px 12px;
     font-family: inherit;
     font-size: 0.9em;
     border-radius: 4px;
     flex: 1;
     min-width: 200px;
   }
-  #search:focus { outline: 1px solid var(--accent); }
+  #search::placeholder { color: var(--muted); }
+  #search:focus { outline: 1px solid var(--accent); box-shadow: 0 0 12px rgba(184,146,255,.25); }
   .pack-count { color: var(--muted); font-size: 0.85em; }
+  .cursor-blink {
+    display: inline-block; width: 8px; height: 1em; background: var(--accent);
+    vertical-align: text-bottom; margin-left: 2px; animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
   main {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 12px 24px 24px;
   }
   .pack-block {
-    margin-bottom: 40px;
+    margin-bottom: 46px;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity .5s ease, transform .5s ease;
   }
+  .pack-block.in-view { opacity: 1; transform: translateY(0); }
+
   .pack-header {
     display: flex;
     align-items: baseline;
@@ -154,101 +203,172 @@
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border);
     padding-bottom: 8px;
+    position: relative;
+  }
+  .pack-header::before {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -1px;
+    height: 1px; width: 64px;
+    background: var(--pack-color);
+    box-shadow: 0 0 8px var(--pack-color);
   }
   .pack-header h2 {
     margin: 0;
-    color: var(--cyan);
-    font-size: 1.15em;
+    color: var(--pack-color);
+    font-size: 1.2em;
     letter-spacing: .03em;
     font-family: var(--font-display);
     text-transform: uppercase;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--pack-color) 45%, transparent);
   }
+  .pack-piece-count { color: var(--muted); font-size: 0.8em; }
+
+  /* Pack "why" note -- collapsed by default behind a terminal-style toggle,
+     since the art is the point and text is secondary (read only if the
+     image caught interest first). */
+  .pack-note-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: inherit; font-size: 0.75em; padding: 3px 9px; border-radius: 3px;
+    cursor: pointer; margin: 0 0 14px; transition: border-color .15s, color .15s;
+  }
+  .pack-note-toggle:hover { border-color: var(--pack-color); color: var(--pack-color); }
+  .pack-note-toggle .chev { transition: transform .2s; display: inline-block; }
+  .pack-note-toggle.open .chev { transform: rotate(90deg); }
   .pack-note {
     color: var(--muted);
     font-size: 0.85em;
     margin: 0 0 16px;
     white-space: pre-wrap;
-    max-height: 4.5em;
+    max-height: 0;
     overflow: hidden;
-    position: relative;
-    cursor: pointer;
+    transition: max-height .3s ease;
+    border-left: 2px solid var(--border);
+    padding-left: 0;
   }
-  .pack-note.expanded { max-height: none; }
-  .pack-note::after {
-    content: "▾ more";
-    position: absolute;
-    bottom: 0; right: 0;
-    background: linear-gradient(90deg, transparent, var(--bg) 40%);
-    padding-left: 30px;
-    color: var(--accent);
-    font-size: 0.9em;
+  .pack-note.open {
+    max-height: 2000px;
+    padding: 2px 0 2px 12px;
+    border-left-color: var(--pack-color);
   }
-  .pack-note.expanded::after { content: ""; }
 
+  /* Art-first grid: bigger cards, image dominates */
   .piece-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 22px;
   }
   .piece-card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   }
-  .piece-card:hover { border-color: var(--accent); }
+  .piece-card:hover {
+    border-color: var(--pack-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px -8px color-mix(in srgb, var(--pack-color) 35%, transparent);
+  }
   .piece-image-wrap {
     background: #000;
     position: relative;
-    max-height: 320px;
     overflow: hidden;
     cursor: zoom-in;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 220px;
   }
   .piece-image-wrap img {
     width: 100%;
     display: block;
     image-rendering: pixelated;
+    transition: transform .4s ease;
   }
-  .piece-image-wrap .fade {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 60px;
-    background: linear-gradient(180deg, transparent, var(--panel));
+  .piece-card:hover .piece-image-wrap img { transform: scale(1.035); }
+  /* scanline sweep across the art on hover -- a little life on interaction */
+  .piece-image-wrap::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,.08) 50%, transparent 100%);
+    transform: translateY(-100%);
     pointer-events: none;
   }
+  .piece-card:hover .piece-image-wrap::after {
+    animation: artSweep 1s ease-in-out;
+  }
+  @keyframes artSweep {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(100%); }
+  }
+  .zoom-hint {
+    position: absolute; bottom: 8px; right: 8px;
+    font-size: 0.7em; color: rgba(255,255,255,.7);
+    background: rgba(0,0,0,.5); padding: 2px 7px; border-radius: 3px;
+    opacity: 0; transition: opacity .15s;
+    pointer-events: none;
+  }
+  .piece-card:hover .zoom-hint { opacity: 1; }
   .no-image {
     color: var(--muted);
     text-align: center;
-    padding: 40px 10px;
+    padding: 60px 10px;
     font-size: 0.85em;
   }
   .piece-body { padding: 12px 14px 14px; }
   .piece-title {
     font-weight: 700;
     color: var(--fg);
-    font-size: 1.05em;
+    font-size: 1.08em;
     letter-spacing: .02em;
     font-family: var(--font-display);
     text-transform: uppercase;
     word-break: break-word;
   }
   .piece-credits {
-    color: var(--comms);
+    color: var(--pack-color);
     font-size: 0.75em;
-    margin: 2px 0 8px;
+    margin: 2px 0 6px;
+    opacity: 0.9;
   }
+
+  /* "Why" details -- collapsed behind a terminal-prompt style toggle button.
+     Art is the primary experience; the reasoning is one click away for
+     anyone who got curious, not shoved in front of everyone by default. */
+  .why-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--panel2); border: 1px solid var(--border); color: var(--muted);
+    font-family: inherit; font-size: 0.72em; padding: 4px 9px; border-radius: 3px;
+    cursor: pointer; margin-top: 4px; transition: all .15s;
+  }
+  .why-toggle:hover { border-color: var(--pack-color); color: var(--pack-color); }
+  .why-toggle .chev { transition: transform .2s; display: inline-block; }
+  .why-toggle.open .chev { transform: rotate(90deg); }
+  .why-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s ease;
+  }
+  .why-panel.open { max-height: 3000px; }
   .why-block {
     font-size: 0.78em;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
   }
   .why-block strong {
-    color: var(--cyan);
+    color: var(--pack-color);
     display: block;
     font-size: 0.85em;
     margin-bottom: 2px;
+    font-family: var(--font-display);
+    letter-spacing: .02em;
+    text-transform: uppercase;
   }
-  .why-block p { margin: 0 0 8px; white-space: pre-wrap; }
+  .why-block p { margin: 0 0 10px; white-space: pre-wrap; }
   .raw-link {
     display: inline-block;
     margin-top: 6px;
@@ -258,12 +378,14 @@
     border: 1px solid var(--border);
     padding: 3px 8px;
     border-radius: 3px;
+    transition: all .15s;
   }
-  .raw-link:hover { color: var(--accent); border-color: var(--accent); }
+  .raw-link:hover { color: var(--pack-color); border-color: var(--pack-color); }
   .truncated-note {
     font-size: 0.7em;
     color: var(--muted);
     font-style: italic;
+    margin-top: 6px;
   }
 
   /* Lightbox */
@@ -271,19 +393,25 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0,0,0,0.94);
     z-index: 100;
     align-items: center;
     justify-content: center;
     cursor: zoom-out;
+    flex-direction: column;
+    gap: 14px;
   }
   #lightbox.open { display: flex; }
   #lightbox img {
-    max-width: 92vw;
-    max-height: 92vh;
+    max-width: 94vw;
+    max-height: 86vh;
     image-rendering: pixelated;
-    box-shadow: 0 0 40px rgba(57,255,143,0.15);
+    box-shadow: 0 0 50px rgba(184,146,255,.2);
   }
+  #lightbox-caption {
+    color: var(--muted); font-size: 0.85em; text-align: center;
+  }
+  #lightbox-caption strong { color: var(--fg); font-family: var(--font-display); text-transform: uppercase; }
 
   footer {
     text-align: center;
@@ -294,6 +422,11 @@
   footer a { color: var(--cyan); }
 
   .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2.2em; }
+    .piece-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -303,9 +436,9 @@
   <div class="h1-accent"></div>
   <p class="subtitle">
     Every piece two local LLM agents — <strong>raze</strong> (artist) and
-    <strong>hollis</strong> (curator) — have made together, with the artist's
-    intent and the curator's actual reasoning for accepting it. Rendered from
-    the real SGR-coded <code>.ans</code> files, not screenshots.
+    <strong>hollis</strong> (curator) — have made together. Rendered from
+    the real SGR-coded <code>.ans</code> files, not screenshots. Click any
+    piece for the artist's intent and the curator's actual reasoning.
     See <a href="https://github.com/Intranet-Explorer/agentscii">the harness</a>
     that runs them and <a href="https://github.com/Intranet-Explorer/agentscii-dashboard">the live dashboard</a>.
   </p>
@@ -316,15 +449,18 @@
 </header>
 
 <div id="controls">
-  <input id="search" type="text" placeholder="Search titles, credits, notes…">
+  <input id="search" type="text" placeholder="search titles, credits, notes…">
   <span class="pack-count" id="visible-count"></span>
 </div>
 
 <main id="gallery">
-  <p style="color:var(--muted);text-align:center;">Loading…</p>
+  <p style="color:var(--muted);text-align:center;">loading<span class="cursor-blink"></span></p>
 </main>
 
-<div id="lightbox"><img id="lightbox-img" src="" alt=""></div>
+<div id="lightbox">
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption"></div>
+</div>
 
 <footer>
   Generated by <code>gen_gallery.py</code> from the live workspace archive.
@@ -333,6 +469,11 @@
 </footer>
 
 <script>
+// Terminal-style color wheel, cycled per pack so each release reads as its
+// own "session" -- cyan, amber, magenta, green, purple, red -- classic
+// phosphor/BBS terminal colors, not just one accent repeated everywhere.
+const PACK_COLORS = ['#6ee7ff', '#ffb86e', '#ff6ec7', '#7dffb0', '#b892ff', '#ff6e6e', '#fff56e'];
+
 async function main() {
   const res = await fetch('data.json');
   const packs = await res.json();
@@ -347,9 +488,12 @@ async function main() {
   // newest pack first
   const ordered = [...packs].reverse();
 
-  for (const pack of ordered) {
+  ordered.forEach((pack, idx) => {
+    const packColor = PACK_COLORS[idx % PACK_COLORS.length];
+
     const block = document.createElement('section');
     block.className = 'pack-block';
+    block.style.setProperty('--pack-color', packColor);
     block.dataset.searchable = (
       pack.pack + ' ' + pack.note + ' ' +
       pack.pieces.map(p => p.title + ' ' + p.credits + ' ' + p.artist_note + ' ' + p.curator_critique).join(' ')
@@ -357,14 +501,22 @@ async function main() {
 
     const header = document.createElement('div');
     header.className = 'pack-header';
-    header.innerHTML = `<h2>${escapeHtml(pack.pack)}</h2><span style="color:var(--muted);font-size:0.8em;">${pack.pieces.length} piece${pack.pieces.length === 1 ? '' : 's'}</span>`;
+    header.innerHTML = `<h2>${escapeHtml(pack.pack)}</h2><span class="pack-piece-count">${pack.pieces.length} piece${pack.pieces.length === 1 ? '' : 's'}</span>`;
     block.appendChild(header);
 
     if (pack.note) {
+      const toggle = document.createElement('button');
+      toggle.className = 'pack-note-toggle';
+      toggle.innerHTML = `<span class="chev">▸</span> pack notes`;
       const note = document.createElement('p');
       note.className = 'pack-note';
       note.textContent = pack.note;
-      note.addEventListener('click', () => note.classList.toggle('expanded'));
+      toggle.addEventListener('click', () => {
+        const opening = !note.classList.contains('open');
+        note.classList.toggle('open', opening);
+        toggle.classList.toggle('open', opening);
+      });
+      block.appendChild(toggle);
       block.appendChild(note);
     }
 
@@ -377,21 +529,29 @@ async function main() {
 
       let imgHtml = '<div class="no-image">no render available</div>';
       if (piece.image) {
-        imgHtml = `<div class="piece-image-wrap" data-full="${piece.image}">
+        imgHtml = `<div class="piece-image-wrap" data-full="${piece.image}" data-title="${escapeHtml(piece.title)}" data-credits="${escapeHtml(piece.credits || '')}">
           <img src="${piece.image}" loading="lazy" alt="${escapeHtml(piece.title)}">
-          <div class="fade"></div>
+          <span class="zoom-hint">click to enlarge</span>
         </div>`;
       }
 
-      let why = '';
-      if (piece.artist_note) {
-        why += `<div class="why-block"><strong>Artist's intent</strong><p>${escapeHtml(piece.artist_note)}</p></div>`;
-      }
-      if (piece.curator_critique) {
-        why += `<div class="why-block"><strong>Curator's reasoning</strong><p>${escapeHtml(piece.curator_critique)}</p></div>`;
-      }
-      if (piece.truncated) {
-        why += `<div class="truncated-note">Full piece is longer than this preview — see the raw file.</div>`;
+      const hasWhy = piece.artist_note || piece.curator_critique;
+      let whyHtml = '';
+      if (hasWhy) {
+        let inner = '';
+        if (piece.artist_note) {
+          inner += `<div class="why-block"><strong>Artist's intent</strong><p>${escapeHtml(piece.artist_note)}</p></div>`;
+        }
+        if (piece.curator_critique) {
+          inner += `<div class="why-block"><strong>Curator's reasoning</strong><p>${escapeHtml(piece.curator_critique)}</p></div>`;
+        }
+        if (piece.truncated) {
+          inner += `<div class="truncated-note">Full piece is longer than this preview — see the raw file.</div>`;
+        }
+        whyHtml = `
+          <button class="why-toggle"><span class="chev">▸</span> why</button>
+          <div class="why-panel"><div>${inner}</div></div>
+        `;
       }
 
       card.innerHTML = `
@@ -399,16 +559,38 @@ async function main() {
         <div class="piece-body">
           <div class="piece-title">${escapeHtml(piece.title)}</div>
           ${piece.credits ? `<div class="piece-credits">${escapeHtml(piece.credits)}</div>` : ''}
-          ${why}
-          <a class="raw-link" href="${piece.raw_url}" target="_blank" rel="noopener">view raw .ans →</a>
+          ${whyHtml}
+          <div><a class="raw-link" href="${piece.raw_url}" target="_blank" rel="noopener">view raw .ans →</a></div>
         </div>
       `;
+
+      const whyToggle = card.querySelector('.why-toggle');
+      if (whyToggle) {
+        const whyPanel = card.querySelector('.why-panel');
+        whyToggle.addEventListener('click', () => {
+          const opening = !whyPanel.classList.contains('open');
+          whyPanel.classList.toggle('open', opening);
+          whyToggle.classList.toggle('open', opening);
+        });
+      }
+
       grid.appendChild(card);
     }
 
     block.appendChild(grid);
     gallery.appendChild(block);
-  }
+  });
+
+  // fade-in-on-scroll for pack blocks -- gives the page real motion as you browse
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    }
+  }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+  gallery.querySelectorAll('.pack-block').forEach(el => io.observe(el));
 
   // lightbox
   gallery.addEventListener('click', (e) => {
@@ -416,11 +598,16 @@ async function main() {
     if (!wrap) return;
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
+    const cap = document.getElementById('lightbox-caption');
     lbImg.src = wrap.dataset.full;
+    cap.innerHTML = `<strong>${wrap.dataset.title}</strong>${wrap.dataset.credits ? ' — ' + wrap.dataset.credits : ''}`;
     lb.classList.add('open');
   });
   document.getElementById('lightbox').addEventListener('click', () => {
     document.getElementById('lightbox').classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
   });
 
   // search
