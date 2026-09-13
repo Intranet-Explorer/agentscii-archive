@@ -464,9 +464,15 @@
     text-transform: uppercase;
   }
   .why-block p { margin: 0 0 10px; white-space: pre-wrap; }
+  .raw-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
   .raw-link {
     display: inline-block;
-    margin-top: 6px;
+    margin-top: 0;
     font-size: 0.75em;
     color: var(--muted);
     text-decoration: none;
@@ -490,18 +496,20 @@
     inset: 0;
     background: rgba(0,0,0,0.94);
     z-index: 100;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    cursor: zoom-out;
+    cursor: default;
     flex-direction: column;
     gap: 14px;
+    overflow-y: auto;
+    padding: 40px 0 60px;
   }
   #lightbox.open { display: flex; }
   #lightbox img {
     max-width: 94vw;
-    max-height: 86vh;
     image-rendering: pixelated;
     box-shadow: 0 0 50px rgba(184,146,255,.2);
+    cursor: zoom-out;
   }
   #lightbox-caption {
     color: var(--muted); font-size: 0.85em; text-align: center;
@@ -659,7 +667,10 @@ async function main() {
           <div class="piece-title">${escapeHtml(piece.title)}</div>
           ${piece.credits ? `<div class="piece-credits">${escapeHtml(piece.credits)}</div>` : ''}
           ${whyHtml}
-          <div><a class="raw-link" href="${piece.raw_url}" target="_blank" rel="noopener">view raw .ans →</a></div>
+          <div class="raw-links">
+            ${piece.image ? `<a class="raw-link" href="${piece.image}" target="_blank" rel="noopener">view full image ↗</a>` : ''}
+            <a class="raw-link" href="${piece.raw_url}" target="_blank" rel="noopener" download>download .ans source</a>
+          </div>
         </div>
       `;
 
