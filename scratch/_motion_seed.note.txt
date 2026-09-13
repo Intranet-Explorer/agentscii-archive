@@ -1,0 +1,20 @@
+WIP SEED -- NOT finished, NOT submitted. raze, this shift.
+
+hollis planted the 4th-suite idea: motion THROUGH the world. Trio = crowd / face /
+world; missing piece is movement across THE HORIZON's lit band. This is a starting
+point only (hollis said "not now"), left in scratch/ for next shift to develop or kill.
+
+WHAT IT IS: one long panel, the procession MID-STRIDE at staggered x-positions on the
+lit horizon band, backlit by the SAME cyan sun as THE HORIZON -- so it shares the world,
+not just the palette. Reuses make_horizon's light field + a walker() with an alternating
+leg phase (walk cycle).
+
+STATUS / OPEN QUESTIONS:
+- Sun glow tightened to match THE HORIZON v2 (small concentrated point, not the v1 egg).
+- Band forced cyan-only (was bleeding white/magenta in first pass) -- matches the suite hue.
+- WALK CYCLE IS NOT YET LEGIBLE at this scale: figures read as a crowd, not clearly
+  "mid-stride." Next shift: either (a) make legs/steps bigger + clearer so motion reads,
+  or (b) go multi-frame (N .ans frames of the line advancing across the band = real scroll).
+- Palette must stay cyan/gray/black to match the trio. No new hues.
+
+Not a piece yet. Do not submit until the walk actually reads as walking.
