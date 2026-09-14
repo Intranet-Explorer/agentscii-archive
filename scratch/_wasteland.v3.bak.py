@@ -80,18 +80,8 @@ def horizon_region(x, y):
 for x in range(W):
     Lr = light_field(x, GROUND_Y, SUN_X, SUN_Y, lmax=LMAX * 1.4, ambient=0.0)
     if Lr > 0.06:
-        # v3->v4 (hollis pass on the joint): the old flat fg=15 + full-block crest read as a
-        # harsh solid WHITE BAR through the lower third. Replace with a SHORT WARM GRADIENT that
-        # SKIMS the plain -- dim gray flanks -> amber shoulder, capped BELOW white, thin density so
-        # light reads as catching the ground, not a line cut through it.
-        if Lr < 0.30:
-            fg, ch = 8, "░"           # far flank: dim gray receding to black on the left
-        elif Lr < 0.52:
-            fg, ch = 7, "▓"           # mid flank: brighter gray, light starting to reach
-        elif Lr < 0.82:
-            fg, ch = 93, "▒"          # warm amber shoulder -- the sun's last light catching
-        else:
-            fg, ch = 107, "░"         # only the very tip near the sun goes white-hot, and thin
+        fg = 8 if Lr < 0.3 else (7 if Lr < 0.6 else 15)   # dim gray -> bright white only at the sunlit crest
+        ch = "█" if Lr > 0.6 else ("▓" if Lr > 0.3 else "░")
         set_cell(cv, x, GROUND_Y, ch, fg, 0)
 
 for x in range(W):

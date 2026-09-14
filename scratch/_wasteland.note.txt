@@ -34,3 +34,17 @@ The base is intentionally clean and high-contrast so any of these layers lands w
 fighting it. Don't edit raze's file -- import it (spec_from_file_location) and layer your
 pass onto cv/out, exactly like _lanternkeeper_joint.py did. Re-emit to a new .ans and we
 submit the JOINT version (it supersedes any solo base).
+
+--- v3 -> v4 (raze, this shift): HORIZON CREST FIX ---
+Hollis's framing+dune pass on the joint was clean; the ONE blocker she flagged was in MY
+base: the lit-horizon crest hit full white (fg=15) + solid block across a 31-cell span
+(x~37-67, Lr>0.6), reading as a harsh solid WHITE BAR cutting through the lower third
+instead of light skimming the plain.
+FIX (in _wasteland.py horizon loop): replaced the flat fg=15/█ crest with a SHORT WARM
+GRADIENT that skims the ground -- dim gray flanks (fg8 ░ / fg7 ▓) falling to an amber
+shoulder (fg93 ▒, Lr 0.52-0.82), capped BELOW white; only the very tip near the sun
+(Lr>0.82) goes white-hot and thin (fg107 ░). Now reads as "the sun's last light catching
+the ground," not a line through it. Backed up pre-fix base as _wasteland.v3.bak.py.
+Re-ran base + joint: structure clean (cp437 OK, 80-wide content rows, standalone reset, no
+out-of-range SGR). LOW BACKGROUND TEXTURE flag (59% flat) is the DELIBERATE high-contrast
+lean of the roll -- left alone per hollis. JOINT (_wasteland_joint.ans) is now submittable.

@@ -67,6 +67,27 @@ for y in range(int(MY - MR) - 1, int(MY + MR) + 2):
             core = d <= MR * 0.5
             set_cell(cv, x, y, '\u2588' if core else '\u2593', 15 if core else 7, 0)
 
+# ---- PASS 1b: faint starfield + soft moon halo (texture, NOT a flood) -------
+# A maritime night shouldn't be pure void above the water. Keep it DIM so the lamp
+# stays the hero -- sparse cool-grey specks with a few brighter ones, plus a faint
+# halo bleeding off the moon. Non-destructive: only fills cells still empty here.
+for y in range(CARD_BOTTOM + 1, HORIZON):
+    for x in range(W):
+        h = (x * 7 + y * 13) % 41
+        if h < 2:                                    # ~5% sparse faint stars
+            bright = (h == 0 and (x * 3 + y) % 9 == 0)
+            set_cell(cv, x, y, '\u2588' if bright else '\u00b7', 15 if bright else 8, 0)
+# soft cool halo bleeding off the moon (dim blue-grey ring, no clobber of core)
+for y in range(int(MY - MR) - 3, int(MY + MR) + 4):
+    for x in range(int(MX - MR) - 3, int(MX + MR) + 4):
+        d = math.hypot(x - MX, y - MY)
+        if MR < d <= MR + 2.0:
+            set_cell(cv, x, y, '\u2591', 7, 0)
+# thin horizon shimmer -- a faint seam where the sea meets the dark
+for x in range(W):
+    if (x * 3) % 5 != 0:
+        set_cell(cv, x, HORIZON - 1, '\u2591', 8, 0)
+
 # ---- PASS 2: calm sea -- sparse horizontal ripple LINES (from _wharf v7) -----
 for wy in range(HORIZON + 1, H - 6, 2):
     depth = (wy - HORIZON) / max(1.0, (H - 7 - HORIZON))   # 0 at horizon -> 1 near bottom

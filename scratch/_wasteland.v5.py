@@ -130,15 +130,26 @@ def joint(cx, cy, r):
                 ch, fg = hue_ramp(L(x, y))
                 set_cell(cv, x, y, ch, fg, 0)
 
+
+def gap(cx, cy, r):
+    """Carve NEGATIVE SPACE at a joint -- the opposite of fusing. A thin black ring at
+    neck/waist/knee so adjacent capsule segments read as SEPARATE masses instead of one
+    fused column (the v3/v4 legibility bug: every surface shared one continuous hue_ramp
+    with no void between them, so head/torso/legs collapsed into a bar)."""
+    for y in range(int(cy) - int(round(r)), int(cy) + int(round(r)) + 1):
+        for x in range(int(cx) - int(round(r)), int(cx) + int(round(r)) + 1):
+            if math.hypot(x - cx, y - cy) <= r:
+                set_cell(cv, x, y, " ", 0, 0)
+
 # --- CONTRAPPOSTO proportions: weight on the LEFT leg (straight), free RIGHT knee bent;
 #     hips tilt up on the weight side, shoulders counter-tilt over the weight foot. ----
-hip_dx = 3.0
+hip_dx = 4.0
 hip_lx, hip_rx = HIP_X - hip_dx, HIP_X + hip_dx
 hip_l_y = HIP_Y - 1.0                  # weight-side (left) hip lifts -> leg straightens
 hip_r_y = HIP_Y + 1.5                  # free-side (right) hip drops -> the loosening
 torso_h = 7.0
 shoulder_y = HIP_Y - torso_h
-sh_dx = 2.4
+sh_dx = 3.2
 sh_lx, sh_rx = HIP_X - sh_dx, HIP_X + sh_dx
 sh_l_y = shoulder_y + 1.2              # weight-side (left) shoulder drops
 sh_r_y = shoulder_y - 1.2             # free-side (right) shoulder rises
@@ -167,6 +178,12 @@ cap(knee_rx, knee_ry, hip_rx - 1.0, GROUND_Y - 1, 2.2)                        # 
 cap(sh_lx, sh_l_y, HIP_X - 4.5, HIP_Y + 3.0, 1.8)                             # left arm down
 joint(HIP_X - 4.5, HIP_Y + 3.0, 1.6)
 cap(sh_rx, sh_r_y, HIP_X + 5.0, HIP_Y + 2.0, 1.7)                             # right arm out
+
+# --- NEGATIVE-SPACE SEPARATION (v5 legibility pass): carve void at the major joints so the
+#     body reads as distinct masses -- head/neck, waist, knee -- not one fused column. -----
+gap(HIP_X, shoulder_y - 1.0, 2.6)     # neck: separate head from torso
+gap(waist_x, waist_y, 3.0)            # waist: separate pelvis from chest
+gap(knee_rx, knee_ry, 2.6)           # free knee: separate thigh from shin
 
 # --- HEAD: a 3/4 skull lit by the same field, one constructed eye toward the sun ------
 HCX, HCY, HR = HIP_X - 0.5, shoulder_y - 4.0, 3.6

@@ -31,8 +31,7 @@
 
 import sys, math
 sys.path.insert(0, "scratch")
-from canvas import (Canvas, sgr, RAMP, copy_region, write_ans, hygiene_gate,
-                 texture_fill)
+from canvas import Canvas, sgr, RAMP, copy_region, write_ans, hygiene_gate
 
 W = 80
 H = 46
@@ -198,30 +197,6 @@ cv.set(int(EX - ER * 0.35), int(EY - ER * 0.35), "\u2588", 15, 0)
 cv.set(int(EX - ER * 0.35) + 1, int(EY - ER * 0.35), "\u2588", 15, 0)
 
 # ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-# PASS 5 -- NEGATIVE-SPACE TEXTURE (Methodology: real ACiD work rarely leaves flat
-#   black behind a subject; the powergrid/neo_tokyo references fill the void with
-#   directional texture). The interior void here was flat black (inspect flagged
-#   LOW BACKGROUND TEXTURE ~52%). Two sparse, dim, non-uniform passes over the blank
-#   cells BETWEEN the title cards -- never over the mask/eye/carapace or the card text --
-#   so the void reads as lit atmosphere receding into dark, not a hole. Kept very low
-#   density + dim hues so it recedes behind the bright eye and carapace ring.
-def _blank(x, y):
-    ch, fg, bg = cv.get(x, y)
-    return ch == ' ' and fg == 0
-
-# interior band only: below the top card (y>=9), above the bottom card (y<=38).
-def _interior(x, y):
-    return 9 <= y <= 38 and _blank(x, y)
-
-# pass A: a sparse deep-blue atmospheric field (the "lit out of the dark" lean).
-texture_fill(cv, _interior, fg=4, density=0.16, seed=7)
-# pass B: an even sparser warm ember accent scattered in -- breaks uniformity so the
-#   void isn't one flat hue, without competing with the saturated carapace ring.
-def _interior2(x, y):
-    return 9 <= y <= 38 and _blank(x, y)
-texture_fill(cv, _interior2, fg=103, density=0.05, seed=41)
-
 # TITLE CARD (boxed, house style) -- top and bottom, drawn LAST so nothing clobbers it.
 # ---------------------------------------------------------------------------
 RULE = "\u2550"
