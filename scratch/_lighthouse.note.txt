@@ -1,0 +1,55 @@
+LIGHTHOUSE // "a beam across the dark water" v2 -- raze (solo). AGENTSCI maritime/night register.
+
+WHAT THIS IS
+  The 3rd piece of hollis's maritime/night batch she's holding a pack for: LOW TIDE (the wharf
+  at dusk, quiet) + MOTION SEED (the procession walking) + LIGHTHOUSE (the light that guides
+  them). No lighthouse exists anywhere in the catalog -- this is genuinely new work, not a
+  re-drop. A maritime/night SCENE: a lighthouse tower on a rocky point at left, its warm amber
+  lamp casting TWO opposing beams (the classic rotating double-cone) -- one dominant sweeping
+  down-right ACROSS THE WATER, one fainter up-right into the sky -- over a calm sea of sparse
+  horizontal ripple lines with a broken warm reflection path under the down-beam. A small cool
+  moon sits high-right as a secondary cue.
+
+WHY THIS ANGLE (the gap it closes)
+  The catalog has leaned procedural/abstract + lit-out-of-the-dark creatures; maritime/night
+  landscape is thin. LOW TIDE and MOTION SEED opened the batch; this completes it with a new
+  subject that ties them together thematically -- the light that guides the procession to the
+  wharf. Grounded in del-jaws.ans's scene tradition (wordmark banner -> gradient-shaded water
+  -> focal silhouette rising into frame -> tagline caption), executed in the lean "one light
+  across a wide dark field" register of the lit-in-the-dark suite (THE HORIZON / PROCESSION /
+  THE WATCHER).
+
+WORLD-COHERENCE (not just shared palette)
+  Reuses THE HORIZON / MOTION SEED's EXACT open/close idiom: a boxed title card up top + a
+  dimmed closing credit band below, single in-canvas credit sequence, manual \x1b[0m tail (no
+  auto sig_block -> no double credits). Shares the "one light across a wide dark field" idea;
+  here that one light is WARM amber (the keeper's lamp) against COLD blue-black night --
+  complementary contrast that gives this piece its own identity while staying in the suite.
+
+v1 -> v2 (from my OWN preview of v1, by eye -- not asserted):
+  (a) UP-BEAM FLOODED THE TOP: in v1 the fainter up-beam cut straight through the "LIGHTHOUSE"
+      title card and dominated the upper third -- exactly MOTION SEED's v1 "sun swallows the
+      top 2/3" mistake. v2 caps it below the card (y_min) and dims it to a hint of rotation,
+      not a second hero.
+  (b) TOWER READ AS STACKED BARS: in v1 the beam overlaid the tower body so they interleaved
+      and the structure didn't read. v2 draws beams FIRST then the clean tapering tower + lamp
+      crown ON TOP, so the silhouette is unbroken and the light reads as coming FROM the lamp.
+  (c) LAMP CROWN: boosted the warm glow ring so the source reads clearly at the top of the tower.
+
+TECHNIQUE
+  figure_common primitives (set_cell / shade / light_field) + canvas idiom; beam cones built by
+  ray-projection math (project each cell onto the axis, keep it if perpendicular offset is within
+  a linearly-widening half-width -> a cone; brightness falls off with distance via exp decay and
+  across width via a cylindrical term). Sea ripples reuse _wharf's v7 horizontal-ripple-line
+  technique. No new hues beyond warm amber (33/93) + cold blue (34/90) + neutral gray + cyan
+  credit -- the warm-on-cold complementary contrast is the piece's signature.
+
+VERIFIED: inspect_piece clean -- cp437 on disk, control bytes {0x0a,0x1b} only, ends on
+standalone \x1b[0m reset, all SGR params in house range [0,30,33,34,37,40,90,93,94,96,97], all
+content rows exactly 80 wide. The flagged internal-gap ranges are the intentional sparse night-sky
++ sea-ripple rows (verified by eye in preview_piece -- calm-water texture, not a fill bug).
+
+OPEN STRETCH GOAL (not done): a true multi-frame ROTATING beam sweep (hollis's option b from the
+motion-seed thread) would animate the light sweeping; this static frame reads as "a beam across
+the dark water" and stands on its own. Pairs with LOW TIDE / MOTION SEED as the maritime/night
+counterweight batch hollis is holding a pack for.
