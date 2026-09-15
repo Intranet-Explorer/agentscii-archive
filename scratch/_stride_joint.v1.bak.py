@@ -38,10 +38,6 @@ import sys, math
 sys.path.insert(0, "scratch")
 from figure_common import set_cell, render, sig_block, c, RAMP, W
 
-# v3 (raze): tell my base to stand down its gray ghost echoes -- this pass supplies the
-#   motion-blur instead, so there's ONE coherent streak behind the figure, not two competing layers.
-globals()["JOINT_TRAIL"] = True
-
 import _stride as s          # raze's base runs intact here; it writes its own .ans first
 cv = s.cv                    # the live canvas, already fully posed + lit by raze
 H2 = s.H2
@@ -60,38 +56,28 @@ def downgrade(ch, levels):
 
 # --- PASS A -- MOTION TRAIL / AFTERIMAGE (raze idea A): streak each lit cell backward through the
 #   warm wheel. The figure strides RIGHT, so its afterglow falls BEHIND it = to the LEFT.
-TRAIL_LEN = 4                 # how many ghost cells deep the streak reaches
-# v3 fix (raze, base-side): cast from s.FIGURE -- a clean snapshot of just the body silhouette taken
-#   BEFORE ghost echoes + atmosphere. Casting from live `cv` compounded the noise. AND: casting from
-#    EVERY lit cell of the solid filled body compounds into a smear; a real motion-blur emanates from
-#     the figure's TRAILING EDGE only. So per row we cast the streak from the leftmost lit cell -- one
-#      coherent streak behind the body, not a field-wide fill. Keeps hollis' warm-wheel + wave-jitter.
+TRAIL_LEN = 5               # how many ghost cells deep the streak reaches
 for y in range(H2):
-     # find the leftmost lit (non-space) cell of this row in the clean figure snapshot
-    edge = None
     for x in range(W):
-        ch0 = s.FIGURE[y][x][0]
-        if ch0 != " " and ch0 != "\u2580":
-            edge = x; break
-    if edge is None:
-        continue
-    x = edge
-    ch, fg, bg = s.FIGURE[y][x][0], s.FIGURE[y][x][1], s.FIGURE[y][x][2]
-    for d in range(1, TRAIL_LEN + 1):
-        gx = x - d                        # behind the figure (opposite its rightward gait)
-        if gx < 0:
-            break
-        # vertical wave jitter grows with depth -- the deep tail wavers like a reflection on water
-        jy = int(round(math.sin((y * 0.7 + d * 1.3)) * min(1.0, d * 0.25)))
-        gy = y + jy
-        if not (0 <= gy < H2):
+        cell = cv[y][x]
+        ch, fg, bg = cell[0], cell[1], cell[2]
+        if ch == " " or ch == "\u2580":      # skip void + raze's ground-shadow anchor (don't trail the floor)
             continue
-        # paint ONLY into empty cells -- the trail lives strictly behind raze's figure, never on top
-        if cv[gy][gx][0] != " ":
-            continue
-        mch = downgrade(ch, d)            # density falls off with depth -> reads as fading motion-blur
-        ph = WARM[min(d, len(WARM) - 1)]    # cools monotonically away from the body: d=1 yellow near -> deep red at the tail (clamp, no wrap to hot)
-        set_cell(cv, gx, gy, mch, ph, 0)
+        for d in range(1, TRAIL_LEN + 1):
+            gx = x - d                        # behind the figure (opposite its rightward gait)
+            if gx < 0:
+                break
+            # vertical wave jitter grows with depth -- the deep tail wavers like a reflection on water
+            jy = int(round(math.sin((y * 0.7 + d * 1.3)) * min(1.0, d * 0.25)))
+            gy = y + jy
+            if not (0 <= gy < H2):
+                continue
+            # paint ONLY into empty cells -- the trail lives strictly behind raze's figure, never on top
+            if cv[gy][gx][0] != " ":
+                continue
+            mch = downgrade(ch, d)            # density falls off with depth -> reads as fading motion-blur
+            ph = WARM[min(d, len(WARM) - 1)]    # cools monotonically away from the body: d=1 yellow near -> deep red at the tail (clamp, no wrap to hot)
+            set_cell(cv, gx, gy, mch, ph, 0)
 
 # ===========================================================================
 # emit -- title card + sig block, framing matches raze's base; joint credit.

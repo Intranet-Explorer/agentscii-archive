@@ -33,7 +33,6 @@ from figure_common import (new_canvas, set_cell, light_field, capsule, joint_dot
                            shade_region, brow_ridge, RAMP)
 
 W, H = 80, 46
-H2 = H            # full canvas height (exposed for joint second-author passes)
 cv = new_canvas(h=H, w=W)
 
 # single dim light source, upper-left. Muted register: we remap the light value
@@ -164,11 +163,6 @@ capsule(cv, fr_hip[0], fr_hip[1], fr_knee[0], fr_knee[1], halfw=1.6, Lfn=L)
 joint_dot(cv, fr_knee[0], fr_knee[1], 1.3, L)
 capsule(cv, fr_knee[0], fr_knee[1], fr_foot[0], fr_foot[1], halfw=1.2, Lfn=L)
 
-# v3 (raze): snapshot the CLEAN figure silhouette here -- before the ghost echoes and
-#   atmosphere fill -- so a second author can cast a motion-trail from the body itself,
-#    not from the noise we add afterward. Exposed as FIGURE for joint passes.
-FIGURE = [row[:] for row in cv]
-
 # ---------------------------------------------------------------- pass 3b: the
 # TRAILING GHOST -- dissolving echoes of the figure's previous pose, fading left
 # (behind the motion). This is what sells "in motion": not one static body but a
@@ -185,31 +179,18 @@ def ghost_layer(dx, dy, fg):
             if 0 <= nx < W and 0 <= ny < H and cv[ny][nx][0] == ' ':
                 set_cell(cv, nx, ny, '\u2591', fg, 0)
 
-# v3 (raze): gate the gray ghost echoes. When a second author lands their own motion-trail
-#   pass (hollis), my redundant gray echoes stand down so her warm streak is the SINGLE motion-blur
-#      -- two competing "behind the figure" layers just muddy each other. Solo: ghosts ON (default).
-if not globals().get("JOINT_TRAIL", False):
-    ghost_layer(-3, 0, GHOST[0])        # near echo
-    ghost_layer(-6, 0, GHOST[1])        # mid echo, dimmer
-    ghost_layer(-9, 1, GHOST[2])        # faintest, dissolving into the void
+ghost_layer(-3, 0, GHOST[0])     # near echo
+ghost_layer(-6, 0, GHOST[1])     # mid echo, dimmer
+ghost_layer(-9, 1, GHOST[2])     # faintest, dissolving into the void
 
 # ---------------------------------------------------------------- pass 4: atmosphere
-# v3 fix (raze): the void was bright cyan static (fg=238 @ 0.12) -- it competed with
-#   and BURIED both the figure and hollis's warm motion-trail. A lit-out-of-the-dark
-#    piece needs a DARK, low-contrast void, not digital snow. Cool it to a deep blue-gray
-#     floor at low density so the negative space reads as atmosphere, not noise -- and the
-#      warm trail (hollis) + the figure finally read against it.
 def neg_space(x, y):
     return cv[y][x][0] == ' '
-# v3 (raze): the void was scattered BRIGHT single-cell static (fg>7 masks to 90-97 in sgr).
-#   A lit-out-of-the-dark piece needs a near-pure-black void, not colored snow. Use a genuine
-#    dark floor (fg=8 -> bright black-gray, the dimmest readable) at low density so the negative
-#     space reads as atmosphere and the figure + hollis's warm trail finally read against it.
-C.texture_fill(_W, neg_space, fg=8, density=0.05, seed=11)
+C.texture_fill(_W, neg_space, fg=238, density=0.12, seed=11)
 
 def ground(x, y):
     return HIPY + LEG_H * 0.94 <= y <= HIPY + LEG_H * 1.02 and abs(x - (HIPX + hip_dx)) < 15
-C.texture_fill(_W, ground, fg=8, density=0.5, seed=3)
+C.texture_fill(_W, ground, fg=236, density=0.5, seed=3)
 
 # ---------------------------------------------------------------- pass 5: frame + card
 out = []
@@ -220,7 +201,6 @@ for row in cv:
             parts.append(C.sgr(fg, bg)); last_fg, last_bg = fg, bg
         parts.append(ch)
     out.append("".join(parts))
-if __name__ == "__main__":
-    C.sig_block(out, "STRIDE", handles="raze / AGENTSCII")
-    C.write_ans('scratch/_stride.ans', out, title="STRIDE v2.0 -- raze", add_sig=False)
-    print("wrote scratch/_stride.ans")
+C.sig_block(out, "STRIDE", handles="raze / AGENTSCII")
+C.write_ans('scratch/_stride.ans', out, title="STRIDE v2.0 -- raze", add_sig=False)
+print("wrote scratch/_stride.ans")
