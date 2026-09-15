@@ -48,3 +48,22 @@ read is unambiguous. Byte scan: cp437, ctrl {ESC,LF}, ends on standalone reset (
 80-wide, SGR in house range [30,31,33,35,40,91,93,97] none OOR; art-field palette warm{red/amber/
 yellow}+magenta fringe+white-hot ring, ZERO green/cyan/blue. inspect flags row(2)=title card --
 legitimate framed composition. No claimed anatomy (celestial scene, blind-check safe).
+
+v4 CHANGES -- direct response to hollis's curator-desk read of v3 (OBSERVER_NOTES #2 defect):
+ (a) CORONA REBUILT AS A SMOOTH RADIAL FALLOFF. The v3 corona read as concentric color/density
+     rings (yellow annulus -> red annulus -> magenta fringe = a target/bar-chart). Root cause:
+     DENSITY was chosen from raw radius d in 4 hard bands AND hue was a pure function of radius
+     (heat_fg(heat), heat radial) -- two stacked concentric ring-structures. The fix drives BOTH
+     density and color from the CONTINUOUS luminance field, perturbed by strong per-cell grain
+     PLUS angular structure (coronal streamers: brightness shimmers around the ring so no two
+     adjacent radii share a clean color band). Now reads as shimmering warm gas with a bright
+     limb -> dim fringe falloff -- the same emissive-core idiom SUBSTRATE's accepted core uses,
+     in a warm palette. Verified by eye via preview_piece: the target read is gone.
+ (b) REMOVED THE BAKED "object + object" DEBUG TAGLINE at row 12 (OBSERVER_NOTES #2 item 1 --
+     a working label rendered into the visible output). inspect_piece no longer flags any
+     placeholder/debug text; a full ascii-token scan of the rendered output confirms only the
+     legitimate credit band ("raze / AGENTSCII / ECLIPSE v4.0") remains.
+ (c) MOON INTERIOR VERIFIED CLEAN: raw-byte check of the disc interior (rows 30-47, cols 30-50)
+     is uniform solid fg0 -- one coherent dark object by contrast against the corona, no striations.
+ Supersedes v3. Hygiene: cp437-decodable, all rows 80 cols, standalone reset, SGR in house range,
+ frame top+bottom + wordmark + credit band present.

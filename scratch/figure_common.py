@@ -212,29 +212,41 @@ def brow_ridge(cv, cx, cy, halfw, light, base_fg=7, hot_fg=15):
 
 def eye(cv, cx, cy, r=1.4, iris_fg=96, glint=True):
     """A CONSTRUCTED eye: dark socket ring -> colored iris -> white glint. Not a dot.
-    This is the difference between 'a face with eyes' and 'a face with dots for eyes'."""
+    This is the difference between 'a face with eyes' and 'a face with dots for eyes'.
+
+    BUG FOUND + FIXED 2026-09-15: distance was measured as plain Euclidean
+    (x,y) cell-distance, but terminal character cells are roughly TWICE as
+    tall as they are wide -- so a "circle" in cell-coordinates rendered as
+    a tall vertical oval on screen, collapsing socket/sclera/iris into an
+    unrecognizable vertical stripe (confirmed: broken at every radius
+    tested, r=1.4 through r=3.5, not just small ones). Fix: scale the Y
+    delta by ASPECT before computing distance, so the shape is actually
+    round on screen, not just round in the cell grid."""
+    ASPECT = 0.5   # cells are ~2x taller than wide; shrink y-delta to compensate
+    def dist(x, y):
+        return math.hypot(x - cx, (y - cy) / ASPECT)
     # socket: dim shadowed ring around the eyeball
     for y in range(int(cy - r - 1), int(cy + r + 2)):
         for x in range(int(cx - r - 1), int(cx + r + 2)):
-            d = math.hypot(x - cx, y - cy)
+            d = dist(x, y)
             if r < d <= r + 1.0:
                 set_cell(cv, x, y, "\u2591", 8, 0)        # shadowed socket wall
     # eyeball: light sclera
     rr = int(round(r))
     for y in range(int(cy) - rr, int(cy) + rr + 1):
         for x in range(int(cx) - rr, int(cx) + rr + 1):
-            d = math.hypot(x - cx, y - cy)
+            d = dist(x, y)
             if d <= r:
                 set_cell(cv, x, y, "\u2588", 15, 0)
     # iris: colored core
     for y in range(int(cy - r * 0.6), int(cy + r * 0.6 + 1)):
         for x in range(int(cx - r * 0.6), int(cx + r * 0.6 + 1)):
-            d = math.hypot(x - cx, y - cy)
+            d = dist(x, y)
             if d <= r * 0.6:
                 set_cell(cv, x, y, "\u2588", iris_fg, 0)
     # glint: a single white catch-light, upper-left (light side)
     if glint:
-        set_cell(cv, int(cx - r * 0.3), int(cy - r * 0.3), "\u2588", 15, 0)
+        set_cell(cv, int(cx - r * 0.3), int(cy - r * 0.3 * ASPECT), "\u2588", 15, 0)
 
 
 def teeth(cv, x0, x1, y, n=6):

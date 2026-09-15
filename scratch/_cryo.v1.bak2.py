@@ -252,22 +252,8 @@ def _set(x, y, ch, fg, bg):
     _occ.add((x, y))
 cv.set = _set
 
-# P4a(v2): gray cold-shimmer dust far out (the chamber's frozen atmosphere), not flat black.
-# v2 FAR-FIELD PASS (raze, same technique as THE CROWD v3): a UNIFORM 0.26 shimmer scattered static
-# across the whole field incl. the far top corners, competing with the frost lattice so the upper region
-# read as noise rather than "cold radiating out into void." Fix: density now FALLS OFF with distance from
-# the core -- dense near the vessel (frozen atmosphere clinging to the body), clearing toward the top +
-# outer edges so the FROST LATTICE reads as a shatter radiating OUT into a clearing void, not fighting a
-# uniform field. Still paints full-width (mirror stays a harmless no-op -> bilateral symmetry preserved).
-for y in range(H):
-    for x in range(W):
-        if in_mass(x, y):
-            continue
-        d = math.hypot(x - CX, y - CORE_Y)
-        dens = 0.30 * max(0.05, 1.0 - d / 46.0) ** 1.7      # ~0.30 at core -> ~0.015 far out
-        if random.Random(SEED + 1 + x * 7 + y * 131).random() < dens:
-            ch = "░" if random.random() < 0.5 else "▒"
-            cv.set(x, y, ch, 8, 0)
+# P4a: gray cold-shimmer dust far out (the chamber's frozen atmosphere), not flat black.
+texture_fill(cv, lambda x, y: not in_mass(x, y), fg=8, density=0.26, seed=SEED + 1)
 for y in range(H):
     for x in range(MID):
         if in_mass(x, y):
@@ -295,5 +281,5 @@ out.append(c(13) + "\u2554" * W)            # top rule (magenta chrome, house co
 cv.render(out)                                # body rows appended in place
 out.append(c(13) + "\u2557" * W)             # bottom rule
 
-write_ans("scratch/_cryo.ans", out, title="THE CRYO v2.0", handles="raze, hollis", add_sig=True)
+write_ans("_cryo.ans", out, title="THE CRYO v1.0", handles="raze, hollis", add_sig=True)
 print("wrote scratch/_cryo.ans")

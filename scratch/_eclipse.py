@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# ECLIPSE v3 -- "object + object". raze, solo. AGENTSCII.
+# ECLIPSE v4 -- "object + object". raze, solo. AGENTSCII.
 # NO SHARED LIBRARY: writes ANSI directly via stdlib only. No canvas.py,
 # no figure_common.py, no procedural fill loop. Every character hand-placed.
 # Extends SOLSTICE's "sun as a constructed object" idiom into the unexplored
@@ -75,36 +75,42 @@ def pass1():
 # limb (ring_r), dark in the centre (the occulted sun / moon shadow) and sparse at
 # the fringe. This is what makes the dark moon read as an object by CONTRAST.
 def pass2():
-     # v4 FIX -- the corona now reads as a SMOOTH RADIAL FALLOFF (emissive-core model,
-     # same idiom SUBSTRATE's accepted core uses), NOT concentric color/density rings.
-     # The target/bar-chart defect was that DENSITY was chosen from raw radius d in 4 hard
-     # bands (d>0.92->u, >0.78->r, >0.60->s, else full) AND hue jumped in 6 discrete heat_fg
-     # bands -- two stacked concentric ring-structures = a painted target. The fix: drive BOTH
-     # density and color from the CONTINUOUS luminance field (heat), perturbed by strong
-     # per-cell grain so adjacent cells differ slightly and no clean ring can form. A real
-     # corona is gas, not paint -- it falls off smoothly and shimmers, never in steps.
-    R = MOON_R + 16                # corona extends well past the disc
-    ring_r = MOON_R + 2            # glow peaks just outside the moon's edge
+      # v4 FIX (round 2) -- the corona reads as a SMOOTH RADIAL FIELD with ANGULAR
+      # STRUCTURE, NOT concentric color rings. Round-1 fix made density continuous but
+      # COLOR was still a pure function of radius (heat_fg(heat), heat radial) -> every
+      # cell at one radius got the same hue = clean concentric rings = a target. The real
+      # fix: a corona is not a perfect smooth ring -- it has streamers/patchiness, so we
+      # add THETA-dependent structure to the luminance field (different angles at the SAME
+      # radius get different brightness) and strong per-cell hue jitter. That breaks the
+      # concentric color bands while keeping the radial falloff (bright limb -> dim fringe).
+    R = MOON_R + 16                 # corona extends well past the disc
+    ring_r = MOON_R + 2             # glow peaks just outside the moon's edge
     for y in range(SUN_CY-R, SUN_CY+R+1):
         for x in range(SUN_CX-R, SUN_CX+R+1):
             dx = (x-SUN_CX)/R; dy = (y-SUN_CY)/R
             d = math.hypot(dx, dy)
             if d > 1.0: continue
-             # annular luminance profile: peak at the limb, falls off both inward (toward the
-             # dark moon centre) and outward (to the dim fringe). Continuous, not banded.
+            th = math.atan2(dy, dx)                          # angle around the disc
+              # annular luminance profile: peak at the limb, falls off both inward (toward
+              # the dark moon centre) and outward (to the dim fringe). Continuous in radius.
             dd = abs(d - ring_r/R)
             heat = math.exp(-(dd*dd)/(2*0.21**2)) * 0.96 + 0.03
-            g = grain(x, y)                        # continuous per-cell shimmer in [-1,1]
-             # DENSITY tracks the continuous luminance (high heat -> densest), jittered by
-             # grain so neighbours vary +/- a step and no concentric density ring survives.
-            hi = max(0.0, min(1.0, heat + 0.13*g))
-            idx = int((1.0 - hi) * 4.0)           # 0=full .. 3=faint (RAMP order: full->faint)
-            if g > 0.55: idx -= 1                 # extra grain scatter on the bright side
+              # ANGULAR STRUCTURE: coronal streamers -- brightness shimmers around the ring
+              # so no two adjacent radii share a clean color band (kills the target read).
+            heat += 0.16*math.sin(5*th + 0.7) * math.exp(-(dd*dd)/(2*0.30**2))
+            heat += 0.10*math.sin(9*th - 1.3) * math.exp(-(dd*dd)/(2*0.22**2))
+            g = grain(x, y)                                  # continuous per-cell shimmer
+              # DENSITY tracks the (now angularly-structured) luminance: high heat -> densest,
+              # jittered by grain so neighbours vary +/- a step and no density ring survives.
+            hi = max(0.0, min(1.0, heat + 0.14*g))
+            idx = int((1.0 - hi) * 4.0)                      # 0=full .. 3=faint (RAMP full->faint)
+            if g > 0.55: idx -= 1
             elif g < -0.55: idx += 1
             ch = RAMP[max(0, min(3, idx))]
-             # COLOR tracks heat too (white-hot heart -> gold -> amber -> red -> magenta fringe),
-             # jittered by grain so hue shimmers instead of forming clean concentric color rings.
-            t = max(0.0, min(1.0, heat + 0.11*g))
+              # COLOR tracks the structured heat too (white-hot heart -> gold -> amber -> red
+              # -> magenta fringe) but with STRONG per-cell + angular jitter so hue shimmers
+              # around the ring instead of forming clean concentric color rings.
+            t = max(0.0, min(1.0, heat + 0.22*g + 0.06*math.sin(7*th+2.1)))
             fg = heat_fg(t)
             place(x, y, ch, fg)
 
@@ -214,7 +220,7 @@ def pass7():
                 if cc == '#': place(gx+cxx, y0+ry, "\u2588", fg)
      # v4 FIX -- removed the baked 'object + object' debug tagline
      # (OBSERVER_NOTES #2 item 1: a working label rendered into the visible output).
-    cred = "raze / AGENTSCII / ECLIPSE v3.0"
+    cred = "raze / AGENTSCII / ECLIPSE v4.0"
     cxp = (W - len(cred))//2
     for i, c in enumerate(cred):
         place(cxp+i, H-4, c, 9 if i%3==0 else 3)

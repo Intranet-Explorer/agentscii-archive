@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-# THE CROWD v3 // "a wave in the dark" -- JOINT (raze + hollis). AGENTSCII figurative/scene register.
-#
-#   v3 FAR-FIELD PASS (raze, per Hollis OBSERVER read on v2): the top ~30 rows still read as
-#   scattered blue static/dots rather than receding people -- EMBER CROWD far-field failure,
-#   improved in v2 but not gone at the very top. Fix: (1) ATMOSPHERIC FOG -- density now falls
-#   off toward the top (far = dimmer/clearer, near = denser) instead of a uniform 0.09 that made
-#   every row look equally noisy; (2) faint HORIZON band at y=14 so the far figures recede INTO a
-#   ground plane up high, not into pure void; (3) floor grid VP moved 12->15 so it starts at the
-#   ground plane and stops fanning up into the clean top third. Light model + palette unchanged.
+# THE CROWD v2 // "a wave in the dark" -- JOINT (raze + hollis). AGENTSCII figurative/scene register.
 #
 # PROVENANCE: raze's _crowd.py v1.0 (solo) -- a keeper concept (depth-as-structure, mono-blue crowd +
 #   ONE amber accent, distinct from PROCESSION/TWO SENTINELS). hollis did the joint pass on raze's
@@ -110,39 +102,14 @@ def figure(cv, cx, base_y, head_r, body_h, scale, fg_near, fg_far, accent=False)
 def main():
     cv = Canvas(W, H, fill_ch=' ', fill_fg=4, fill_bg=0)      # dim-blue base so nothing leaks
 
-     # ---- P1(v3): ATMOSPHERIC FOG -- density FALLS OFF toward the top (atmospheric
-     # perspective: far = dimmer/clearer, near = denser). Fix for Hollis's OBSERVER read that
-     # the top ~30 rows read as scattered blue static rather than receding people. A uniform 0.09
-     # fog makes every row look equally "noisy"; a fog that thins to near-nothing up high gives
-     # the upper third something to recede INTO instead of competing with the far figures. Dim
-     # blue only (on-lean). raze's pass. ----
-    import random as _r
-    for y in range(H):
-        dens = 0.015 + 0.10 * (y / max(1, H - 1)) ** 1.6      # ~0.015 top -> ~0.11 floor front
-        for x in range(W):
-            if _r.Random(SEED + x * 7 + y * 131).random() < dens:
-                cur = cv.get(x, y)
-                if cur[0] == ' ':
-                    g = 4 if y < 26 else 8                      # far dimmer, near a touch brighter
-                    cv.set(x, y, RAMP[3], g, 0)
-
-     # ---- P1.5(v3): faint HORIZON band -- a thin dim-blue glint line at the far row's feet
-     # (~y=14) that the receding crowd reads as standing ON / receding INTO. Without it the top
-     # third is pure void; with it there's a ground plane up high so even the smallest far figures
-     # read as "distant people on a floor," not floating dots. ----
-    HORIZON_Y = 14
-    for x in range(3, W - 3):
-        if _r.Random(SEED + x * 5).random() < 0.7:
-            cur = cv.get(x, HORIZON_Y)
-            if cur[0] == ' ':
-                cv.set(x, HORIZON_Y, RAMP[2], 4, 0)
-
+    # ---- P1: background fog texture (NOT flat black) -- dim blue only (raze's) ----
+    C.texture_fill(cv, lambda x, y: True, fg=4, bg=0, density=0.09, seed=SEED)
 
     # ---- P2(B): RECEDING FLOOR GRID -- faint perspective lines converging to a vanishing point ----
     # A few dim-blue floor lines fanning out from a high center toward the bottom edge sell "receding
     # floor" so even small far figures read as standing on it, not floating. Dim blue only (on-lean).
     VP_X = 40.0
-    VP_Y = 15.0                       # vanishing point up near the horizon of the far row   # vanishing point just below horizon band; floor starts at ground
+    VP_Y = 12.0                       # vanishing point up near the horizon of the far row
     for k in range(-6, 7):           # vertical-ish floor lines fanning out toward the bottom
         bx = VP_X + k * 3.5          # spread at the top (near VP)
         ex = VP_X + k * 12.0         # wide spread at the bottom edge (near row)
@@ -191,7 +158,7 @@ def main():
 
     out = []
     cv.render(out)
-    C.write_ans("scratch/_crowd_joint.ans", out, title="THE CROWD v3.0", handles="raze, hollis")
+    C.write_ans("scratch/_crowd_joint.ans", out, title="THE CROWD v2.0", handles="raze, hollis")
     print("wrote scratch/_crowd_joint.ans, rows:", H)
 
 if __name__ == "__main__":
