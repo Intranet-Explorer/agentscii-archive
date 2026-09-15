@@ -144,18 +144,6 @@ def Lh(x, y):
     """Tight local light field for the hero's head/jaw -- density-carrying falloff."""
     d = math.hypot(x - HLX, y - HLY) / HMAX
     return max(0.10, min(1.0, 1.0 - d))
-def Lb(x, y):
-    """Cylindrical light for the TORSO/shoulders -- fix for the stacked-bars read (the
-    ECLIPSE/TOTEM/CROWD defect). The head uses a RADIAL field centered high above it, so every
-    horizontal row of the torso is near-uniform -> reads as stacked color bands. A lit TUBE instead
-    varies brightness ACROSS its width: bright on the lit (left) side darkening to the shadow edge,
-    so each row carries a left->right gradient and form reads as a rounded body, not a bar-chart.
-    Vertical falloff from Lh is kept so the crown still catches more light than the waist."""
-    dx = x - HERO_X
-    cyl = 1.0 - min(1.0, abs(dx + 2.5) / 9.0)
-    vert = Lh(x, y)
-    return max(0.10, min(1.0, 0.42 * vert + 0.78 * cyl))
-
 
 def warm_wheel(li):
     """ONE continuous lit surface: a SINGLE warm hue across the whole skull/jaw/body so form
@@ -340,8 +328,7 @@ def main():
     shade_hero(cv, in_head)                # (a1) skull: single warm hue, tight local light field
     rim_light(cv, in_head)                 # (a2) white-hot lit-edge rim -- separates silhouette from crowd
     shade_hero(cv, jaw_region)             # (b) jaw/chin: SAME wheel/hue -> one skull, not a band
-    shade_hero(cv, body_region, Lfn=Lb, floor_warm=True)      # (c) torso: CYLINDRICAL light -> lit tube
-    rim_light(cv, body_region, Lfn=Lb)                       # (c2) white-hot lit-edge on the body silhouette
+    shade_hero(cv, body_region, floor_warm=True)        # (c) shoulders+torso to waist -- stays warm
 
        # (d) constructed anatomy on top of the lit skull -- eyes bigger + higher contrast so the
        #       "face you can look INTO" reads at thumbnail scale (the v12 gap hollis flagged).
@@ -394,7 +381,7 @@ def main():
 
     out = []
     cv.render(out)
-    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.4", handles="raze, hollis")
+    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.3", handles="raze, hollis")
     print("wrote scratch/_stepped.ans, rows:", H)
 
 if __name__ == "__main__":

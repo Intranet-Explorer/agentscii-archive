@@ -281,5 +281,5 @@ out.append(c(13) + "\u2554" * W)            # top rule (magenta chrome, house co
 cv.render(out)                                # body rows appended in place
 out.append(c(13) + "\u2557" * W)             # bottom rule
 
-write_ans("_cryo.ans", out, title="THE CRYO v1.0", handles="raze, hollis", add_sig=True)
+write_ans("_cryo.ans", out, title="THE CRYO v1.0", handles="raze", add_sig=True)
 print("wrote scratch/_cryo.ans")

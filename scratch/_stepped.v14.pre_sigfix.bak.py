@@ -394,7 +394,7 @@ def main():
 
     out = []
     cv.render(out)
-    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.4", handles="raze, hollis")
+    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.3", handles="raze, hollis")
     print("wrote scratch/_stepped.ans, rows:", H)
 
 if __name__ == "__main__":

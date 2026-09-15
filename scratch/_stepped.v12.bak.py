@@ -137,39 +137,24 @@ HEAD_RY = 9.5
 
 # Local light source for the hero's own surfaces: upper-left of the skull, tight enough that
 # density ramps across the ~16px head (this is what makes a lit surface read as 3D form).
-HLX, HLY = HERO_X - 7.5, HEAD_CY + 1.0        # hollis pass: LATERAL light at cheek height -> lit left side / warm shadow right (one continuous surface, not vertical bands)
-HMAX = 9.0                  # hollis pass: tighter field -> lit->shadow spans the head width
+HLX, HLY = HERO_X - 5.0, HEAD_CY - 6.0
+HMAX = 14.0
 
 def Lh(x, y):
     """Tight local light field for the hero's head/jaw -- density-carrying falloff."""
     d = math.hypot(x - HLX, y - HLY) / HMAX
     return max(0.10, min(1.0, 1.0 - d))
-def Lb(x, y):
-    """Cylindrical light for the TORSO/shoulders -- fix for the stacked-bars read (the
-    ECLIPSE/TOTEM/CROWD defect). The head uses a RADIAL field centered high above it, so every
-    horizontal row of the torso is near-uniform -> reads as stacked color bands. A lit TUBE instead
-    varies brightness ACROSS its width: bright on the lit (left) side darkening to the shadow edge,
-    so each row carries a left->right gradient and form reads as a rounded body, not a bar-chart.
-    Vertical falloff from Lh is kept so the crown still catches more light than the waist."""
-    dx = x - HERO_X
-    cyl = 1.0 - min(1.0, abs(dx + 2.5) / 9.0)
-    vert = Lh(x, y)
-    return max(0.10, min(1.0, 0.42 * vert + 0.78 * cyl))
-
 
 def warm_wheel(li):
-    """ONE continuous lit surface: a SINGLE warm hue across the whole skull/jaw/body so form
-    reads from DENSITY falloff, not from color boundaries between parts (the v12 'stacked bands'
-    failure). The reference (ghengis shades_of_a_shade) carries a lit figure's form by density
-    inside one hue; hard hue boundaries read as 'colored ASCII.' Bright amber across the lit
-    cheek/forehead, dimming to warm orange ONLY in deep shadow -- the shadow stays WARM so a lit
-    figure never reads blue against the cold crowd. White-hot catch-light at the very crest."""
-    if li > 0.95:
-        return WARM_HI               # 15 white-hot catch-light, tiny crest only
-    if li < 0.30:
-        return ORANGE                # 9 warm orange -- deep shadow side (stays WARM; lit figure != blue)
-    return AMBER                     # 11 bright amber -- the continuous lit surface, density carries form
-
+    """Form from DENSITY within ONE warm hue -- NOT stacked color patches (the v2 failure).
+    The reference (ghengis shades_of_a_shade) carries a lit figure's form by density inside a
+    single hue; hard hue boundaries read as 'colored ASCII.' White-hot catch-light only at the
+    very crest, then bright amber across the lit cheek/forehead, dimming to warm orange in shadow."""
+    if li > 0.92:
+        return WARM_HI            # 15 white-hot catch-light, tiny crest only
+    if li > 0.46:
+        return AMBER              # 11 bright amber -- lit side, density carries cheek/forehead
+    return ORANGE                 # 9 warm orange -- shadow side (stays WARM; a lit figure != blue)
 
 def shade_hero(cv, region_fn, Lfn=Lh, wheel=warm_wheel, floor_warm=False):
     """Paint a surface with density AND brightness both tracking the light -- form from light."""
@@ -219,7 +204,7 @@ def jaw_region(x, y):
     return dx * dx + dy * dy <= 1.0
 
 def body_region(x, y):
-    """Neck -> wide shoulders -> short torso to a waist. Starts BELOW the jaw so the warm
+     """Neck -> wide shoulders -> short torso to a waist. Starts BELOW the jaw so the warm
     body mass never overwrites the face (the v2 red-stripe bug: body drew over rows 19-23 of
     the head). A thin neck connector grows into a big shoulder flare, then tapers to a broad
     waist -- reads as a BUST rising out of the pool, not a point-to-floor spire."""
@@ -249,11 +234,7 @@ def brow_ridge(cv, cx, cy, halfw):
             cv.set(x, y, RAMP[idx], WARM_HI if li > 0.82 else AMBER, 0)
 
 def nose(cv, cx, y_top, y_bot):
-    """Nose ridge: a lit vertical crest down the face center with a soft warm shadow to its right.
-    raze pass (closing hollis's flag): follows the SAME continuous warm_wheel as the rest of the
-    skull -- form from DENSITY inside one hue, not a hard AMBER/ORANGE cutoff that read as a separate
-    red mass sitting on the face. Lit crest catches amber/white-hot; right side falls to warm orange
-    via the wheel's own falloff, so it stays ONE surface."""
+    """Nose ridge: a lit vertical crest down the face center with a dark shadow to its right."""
     for y in range(int(y_top), int(y_bot) + 1):
         t = (y - y_top) / max(1, y_bot - y_top)
         hw = 0.4 + 0.9 * t
@@ -264,9 +245,9 @@ def nose(cv, cx, y_top, y_bot):
             if cur[0] == ' ':
                 continue
             side = (x - cx) / max(0.5, hw)          # -1..+1 across the ridge
-            li = Lh(x, y) * (1.0 if side < 0 else 0.72)     # lit crest on light side, shadow on right
+            li = Lh(x, y) * (1.0 if side < 0 else 0.68)     # lit crest on light side, shadow on right
             idx = int(li * (len(RAMP) - 1) + 0.5) % len(RAMP)
-            cv.set(x, y, RAMP[idx], warm_wheel(li), 0)          # ONE hue -- density carries the ridge
+            cv.set(x, y, RAMP[idx], AMBER if li > 0.6 else ORANGE, 0)
 
 def mouth(cv, cx, y, halfw):
     y = int(y)
@@ -278,7 +259,7 @@ def mouth(cv, cx, y, halfw):
             continue
         cv.set(x, y, "\u2580", ORANGE, 0)        # thin dark cavity w/ bright teeth -- the "alive" read
 
-def eye(cv, cx, cy, r=2.0, iris_fg=CYAN):
+def eye(cv, cx, cy, r=1.5, iris_fg=CYAN):
     """CONSTRUCTED eye: dark shadowed socket ring -> light sclera -> colored iris core -> white glint.
     NOT a flat white square (the v1 failure). The socket/iris/glint gradient is what reads as 'an eye'."""
     for y in range(int(cy - r - 1), int(cy + r + 2)):
@@ -289,7 +270,7 @@ def eye(cv, cx, cy, r=2.0, iris_fg=CYAN):
             if r < d <= r + 1.0:
                 cur = cv.get(x, y)
                 if cur[0] != ' ':
-                    cv.set(x, y, "\u2591", 8, 0)                # shadowed socket wall -- dim, so the eye pops
+                    cv.set(x, y, "\u2591", COOL_SH, 0)        # shadowed socket wall (thin, dim blue)
     rr = max(1, int(round(r)))
     for y in range(int(cy) - rr, int(cy) + rr + 1):
         for x in range(int(cx) - rr, int(cx) + rr + 1):
@@ -336,18 +317,15 @@ def main():
             crowd_figure(cv, x, base_y, head_r, body_h, fn, ff)
 
     # P2/P3: the HERO -- a warm-lit bust, drawn LAST so it occludes the crowd behind it
-      # (a) skull+jaw as ONE continuous lit surface -- density carries form, NO per-part color reset
-    shade_hero(cv, in_head)                # (a1) skull: single warm hue, tight local light field
-    rim_light(cv, in_head)                 # (a2) white-hot lit-edge rim -- separates silhouette from crowd
-    shade_hero(cv, jaw_region)             # (b) jaw/chin: SAME wheel/hue -> one skull, not a band
-    shade_hero(cv, body_region, Lfn=Lb, floor_warm=True)      # (c) torso: CYLINDRICAL light -> lit tube
-    rim_light(cv, body_region, Lfn=Lb)                       # (c2) white-hot lit-edge on the body silhouette
+    shade_hero(cv, in_head)             # (a) skull, density-within-one-hue from the tight local light
+    rim_light(cv, in_head)              # (a2) white-hot lit-edge rim -- separates silhouette from crowd
+    shade_hero(cv, jaw_region)          # (b) jaw/chin as a separate shaded surface -- gives a face shape
+    shade_hero(cv, body_region, floor_warm=True)     # (c) shoulders+torso to waist -- stays warm, connects to pool
 
-       # (d) constructed anatomy on top of the lit skull -- eyes bigger + higher contrast so the
-       #       "face you can look INTO" reads at thumbnail scale (the v12 gap hollis flagged).
-    brow_ridge(cv, HERO_X, HEAD_CY - 3.0, 5.4)
-    eye(cv, HERO_X - 3.2, HEAD_CY - 0.6, r=2.0, iris_fg=CYAN)
-    eye(cv, HERO_X + 3.2, HEAD_CY - 0.6, r=2.0, iris_fg=CYAN)
+    # (d) constructed anatomy on top of the lit skull
+    brow_ridge(cv, HERO_X, HEAD_CY - 3.0, 5.0)
+    eye(cv, HERO_X - 3.0, HEAD_CY - 0.3, r=1.5, iris_fg=CYAN)
+    eye(cv, HERO_X + 3.0, HEAD_CY - 0.3, r=1.5, iris_fg=CYAN)
     nose(cv, HERO_X, HEAD_CY + 0.5, HEAD_CY + 5.0)
     mouth(cv, HERO_X, HEAD_CY + 7.0, 3.4)
 
@@ -394,7 +372,7 @@ def main():
 
     out = []
     cv.render(out)
-    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.4", handles="raze, hollis")
+    C.write_ans("scratch/_stepped.ans", out, title="THE ONE WHO STEPPED OUT v1.0", handles="raze, hollis")
     print("wrote scratch/_stepped.ans, rows:", H)
 
 if __name__ == "__main__":
