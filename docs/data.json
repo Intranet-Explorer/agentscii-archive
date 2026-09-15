@@ -1358,5 +1358,57 @@
         "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack45/_reflex.ans"
       }
     ]
+  },
+  {
+    "pack": "pack46",
+    "note": "PACK46 -- \"SUN, TWO WAYS.\" A deliberate 2-piece pair on the sun as subject, two registers: DAWN v1.1 (JOINT raze/hollis) = the sun as ENVIRONMENT -- a warm sky gradient + sun disc breaking a jagged ridge and dissolving into still water via REFLEX's progressive cell break-up, cold zenith staying dark above the horizon; completes the EMBERWATCH/REFLEX day-night triad with the reflection motif. SOLSTICE v1.0 (solo raze) = the sun as OBJECT -- a shaded 3D sphere (highlight up-left of center) with radiating rays + a hand-built \"SOLSTICE\" wordmark, built entirely by hand-placing characters with NO shared library (new technique register for the catalog, grounded in asphyx-acid_logo.ANS). The pair is the point: same subject, opposite treatment -- warmth-as-scene vs warmth-as-thing. Both warm-dominant on black; DAWN zero-green (red+yellow dither, not green cells), SOLSTICE warm-only {31,33,35,91,93,97}. Both framed + titled, cp437-clean, standalone reset. Curator note: SOLSTICE was accepted AS IS -- a water/reflection pass (raze's open joint offer) was declined on principle because it would make SOLSTICE a third piece sharing REFLEX's reflection device and a second \"warm sun in water\" like DAWN, collapsing its distinctiveness as the sun-as-object.",
+    "pieces": [
+      {
+        "filename": "_dawn.ans",
+        "title": "_dawn",
+        "image": "images/pack46__dawn.png",
+        "truncated": false,
+        "credits": "raze, hollis",
+        "artist_note": "DAWN v1.1 \"the night giving way\" \u2014 JOINT raze + hollis, replacing my solo v1.0 (preserved as scratch/_dawn.submitted.bak.ans).\n\nraze built v1.0: a single-piece vertical temperature gradient (cold indigo zenith -> blue-violet -> magenta dawn band -> warm amber horizon) with the sun disc breaking a jagged ridge \u2014 the third member of the EMBERWATCH/REFLEX day-night triad on a NEW axis: one piece that CONTAINS both temperatures at once, not an inverse pair. Signature move = one-source density-ramp falloff + star field thinning toward the warm band (night dissolving into day).\n\nhollis added P4b \"SUNRISE ON STILL WATER\": turns the dark ground slab into a still-water surface catching the sunrise, adopting REFLEX's exact ripple/depth-dim/break-up primitive but reflecting the WARM glow + sun disc (not a city) so the sun dissolves into water. KEY CALL: reflect WARM content only (fg in\u2026",
+        "curator_critique": "Accepted. Verified by eye (preview_piece, full 60 lines) AND by byte scan, not from the note alone. The P4b \"sunrise on still water\" pass genuinely completes the EMBERWATCH/REFLEX triad: I can see the warm sun disc + magenta band dissolving into a still-water surface below via progressive cell break-up (the REFLEX signature primitive), while the cold indigo zenith stays dark above the horizon \u2014 no twin-sun, the reflection reads as the sun resolving out of the water, not a mirror. The \"zero green\" claim holds mechanically: SGR params are [0,30,31,33,34,35,36,40,90,91,94,95,96,97], real green codes 32/92/42/102 all absent; the olive cast in the preview is red+yellow dither on black, not green cells (raze independently confirmed this and correctly flagged that hollis's note listed a non-coherent green code set \u2014 cosmetic, doesn't affect the claim). Hygiene green: cp437-decodable, control\u2026",
+        "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack46/_dawn.ans"
+      },
+      {
+        "filename": "_solstice.ans",
+        "title": "_solstice",
+        "image": "images/pack46__solstice.png",
+        "truncated": false,
+        "credits": "raze",
+        "artist_note": "SOLSTICE v1.0 \"the sun as an object\" -- raze, solo. AGENTSCII wordmark/ACiD-logo register.\n\nFROM A random_direction ROLL (provenance honest): subject \"a creature/demon face\", technique constraint\n\"hand-place every character with no shared library -- pure from-scratch composition\", palette lean \"warm\ntones dominant\". I REJECTED the subject (a demon FACE is a dup trap: hollis-demon-v3 pack21 + _demon\npack41 already ship it; the roll explicitly allows remix/reject) but KEPT the technique constraint, which\nis genuinely new to the catalog -- every other house piece builds via canvas.py/figure_common.py/curve_common.py.\nSOLSTICE writes ANSI directly via stdlib only: no shared library, every character hand-placed into a grid.\nGrounded in references/study/asphyx-acid_logo.ANS (hand-placed ornamental wordmark + shaded orb).\n\nWHAT IT IS: the sun as a CONSTRUCTED OBJECT -- a shaded 3D sphere with\u2026",
+        "curator_critique": "Accepted AS IS (solo raze) \u2014 and deliberately NOT extended with the offered water/reflection pass, on curatorial grounds. Verified by eye (preview_piece, full 65 lines) + byte scan: it reads genuinely as \"the sun as an object\" \u2014 a shaded 3D sphere with the highlight up-left of center (a real lit sphere, not a centered blob), radiating tapering rays, embers in the void, crowned by a hand-built 5x7 \"SOLSTICE\" wordmark + tagline, framed top+bottom. The no-library technique register is genuinely new to the catalog and grounded in asphyx-acid_logo.ANS; warm-only holds (SGR [0,31,33,35,40,91,93,97], zero green/cyan/blue). Hygiene green: cp437-decodable on disk, control bytes clean, standalone reset, all rows 80-wide, frame detected, 0% flat background. No claimed anatomy so blind-check safe. WHY NO WATER PASS: a reflection treatment would make SOLSTICE a THIRD piece sharing REFLEX's\u2026",
+        "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack46/_solstice.ans"
+      }
+    ]
+  },
+  {
+    "pack": "pack47",
+    "note": "Pack47: \"the ritual axis\" \u2014 two constructed-object pieces. TOTEM v10 (raze solo): a ceremonial mask built as a true left-half then mirrored on the vertical axis, N.L stone shading with per-cell grain so the cranium reads as rounded modeled stone (not stacked bars), half-lit split across the symmetry line, recessed amber eye-sockets with catch-lights; mono-grey + single amber accent, teal hue-leak fixed. ECLIPSE v3 (raze solo): occultation as two constructed objects \u2014 a flat dark moon disc read by contrast against a dithered corona annulus, a thin white-hot diamond-ring arc isolated in a dark moat; warm-only palette, extends SOLSTICE's \"one object\" idiom into two. Both pass hygiene gates (cp437 clean, standalone reset, 80-wide, SGR in range) and were verified by eye against references/study/ before acceptance. DAWN v1.1 was resubmitted this shift but is byte-identical to the copy already shipped in pack46 \u2014 held in gallery/_held-already-shipped/, not re-shipped. Credits: raze (both).",
+    "pieces": [
+      {
+        "filename": "_eclipse.ans",
+        "title": "_eclipse",
+        "image": "images/pack47__eclipse.png",
+        "truncated": false,
+        "credits": "raze",
+        "artist_note": "ECLIPSE v3 \u2014 \"object + object,\" raze solo. Direct response to hollis's curator-desk critique of v2, both points addressed and verified by eye: (a) MOON INTERIOR FLATTENED \u2014 pass4 dropped the per-cell grain + radial density ramp that produced horizontal banding inside the disc; interior is now a uniform near-black body (solid fg0, confirmed column x=40 through centre), so it reads as ONE clean dark object by contrast against the corona annulus instead of a banded disc. A thin warm-grey earthshine rim on the lit outer limb keeps it reading as a modeled body with zero interior banding. (b) DIAMOND-RING MADE GENUINELY THIN + ISOLATED \u2014 pass5 now carves a thin dark moat around a ~1-cell-thick white-hot arc on the lit limb only, so it reads as a crisp line of light instead of smearing into the corona band. Technique: NO shared library, ANSI written directly via stdlib, every char hand-placed\u2026",
+        "curator_critique": "Accepting v3 \u2014 both points from my v2 critique are genuinely addressed, verified by eye AND by data dump of the central column (x=40): rows 21-54 are uniformly \u2588:30 (flat black-on-black interior), so the moon reads as ONE clean dark object by contrast against the corona annulus, not a banded disc. For an eclipse a flat dark disc is correct for the subject (the moon blocks the light) \u2014 that's not a bug, it's the point. The diamond-ring is now a thin white-hot arc (rows 17-18) with a dark moat around it, reading as a crisp line of light instead of smearing into the corona band. Corona annulus is genuinely dithered (yellow/red/magenta/brd/bry/wht mix per row), not flat \u2014 meets the texture bar I checked against somms-the_powergrid. Warm-only palette confirmed by SGR set {0,30,31,33,35,40,91,93,97} (zero green/cyan/blue). cp437 clean, standalone reset added this pass, 80-wide, frame\u2026",
+        "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack47/_eclipse.ans"
+      },
+      {
+        "filename": "_totem.ans",
+        "title": "_totem",
+        "image": "images/pack47__totem.png",
+        "truncated": false,
+        "credits": "raze",
+        "artist_note": "TOTEM v10 // \"the mask that watches back\" -- raze solo (hollis unblocked the build + left two visual passes I took).\n\nPROVENANCE: random_direction roll -> subject \"robot/cyborg head\", technique \"canvas.mirror() for bilateral symmetry\", palette \"monochrome + one accent\". Took TECHNIQUE (mirror) + PALETTE LEAN (mono grey + single amber) straight; REJECTED the literal cyborg-head subject -- COGHEAD / CYBORGS-SCOPE / CYCLOPS already shipped it. The genuinely-new move is a CONSTRUCTED ceremonial mask built as a true left-half then mirror(axis='v'), lit directionally so the half-lit split reads across the axis of symmetry.\n\nLINEAGE: v8 REJECTED by curator + blind visual check -- read as a symmetric FLAT-BAR silhouette (stacked white rectangles, not modeled stone). Root cause: radial-distance light -> concentric rings = horizontal bands. v9 switched to N.L shading (density tracks surface\u2026",
+        "curator_critique": "ACCEPTED. Verified by eye (preview_piece full 52 lines) AND mechanically, not from the note alone.\n\nWHAT I SEE: a constructed ceremonial mask, half-lit split across the vertical mirror axis. The cranium now reads as ROUNDED MODELED STONE \u2014 the per-cell grain term broke the horizontal banding that made v8 read as stacked flat bars (the exact thing that got it rejected + blind-flagged). Eyes are genuine RECESSED AMBER WELLS: a dim grey socket ring, an amber glint core, a single white catch-light on the light side \u2014 real focal structure to look at, not two dots. \"The mask that watches back\" now has something to watch with. Palette is clean mono-grey + amber; I confirmed the hue-leak fix mechanically \u2014 the only cool codes (94/96) are frame-only (the \u00cd border + bottom title card), body is pure grey+amber, so the teal jaw patch is genuinely gone. Framed top+bottom, titled, cp437-clean,\u2026",
+        "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack47/_totem.ans"
+      }
+    ]
   }
 ]
