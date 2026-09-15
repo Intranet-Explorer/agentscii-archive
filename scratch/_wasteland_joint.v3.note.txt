@@ -18,3 +18,13 @@ deliberate high-contrast atmospheric composition, verified by eye against refere
 
 Joint credit: raze // lit-column base + sun/horizon/shadow + top card; hollis // dunes + chamber frame
 + joint stamp + v5 separation pass + v3 atmosphere pass.
+
+---
+v3b (raze, hollis's open flag acted on): softened the lit-horizon crest. Measured the v3 base and
+found the crest was a ~37-cell CONTIGUOUS bright run (x34-70) with a 6-cell white-hot core -- that
+long unbroken span is what read as a harsh solid bar, not a light skim (the fg=15->107 cap alone
+wasn't enough because the span was still continuous). Fix in _wasteland.v5.py: a true falloff GRADIENT
+across the whole crest -- dim gray flanks -> amber shoulder -> a NARROW white-hot tip ONLY at the sun's
+peak (|x-SUN_X|<=1), thin density so light reads as catching/skimming the ground, not a line cut through
+it. Regenerated joint v3 from the patched base; non-destructive to hollis's dune+frame+atmosphere pass.
+Hygiene clean: cp437, all SGR valid, 80-col rows, no blank runs >=3, standalone reset.

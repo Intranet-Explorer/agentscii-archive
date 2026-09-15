@@ -277,6 +277,294 @@ def strand_shade(cv, region_fn, direction_fn, fg_list, n_strands=40, length=6,
                 cv.set(x, y, ch, fg)
 
 
+def streak_field(cv, region_fn, fg_ramp, ch=RAMP[0], density=0.5,
+                  min_len=3, max_len=None, seed=None):
+    """Dense vertical noise-streak texture -- studied from
+    references/study/blocktronics-tnt_bl0b.ANS and blocktronics-hx_night.ANS
+    (both real ACiD/Blocktronics flame/static-field pieces). NOT the same
+    technique as strand_shade() (discrete angled strokes from an origin
+    point) -- this is a per-COLUMN randomized-run vertical noise field: for
+    each column that region_fn allows, pick a random run length and fill it
+    solid from the bottom up, biased toward brighter/hotter colors in
+    fg_ramp lower in the run and cooler/dimmer higher up. Repeated across
+    many adjacent columns with independent random run lengths, this is what
+    produces the ragged, flame-like vertical streak texture in both
+    references (very different from a smooth horizontal gradient or a flat
+    fill -- the raggedness IS the technique).
+
+    region_fn(x,y) -> bool: where streaks are allowed to exist.
+    fg_ramp: a list of colors from HOT (index 0, used near the base of each
+      streak) to COOL (last index, used near the streak's tip) -- streak
+      color is picked by position within its own run, not randomly, so each
+      individual streak reads as a coherent flame/tongue, not noise.
+    density: fraction of eligible columns that get a streak at all.
+    min_len/max_len: streak length range in cells (max_len defaults to
+      region height).
+    seed: deterministic output across passes if set.
+
+    Call this AFTER your base composition (title, subject, frame) so
+    streaks fill remaining negative space without covering intentional
+    content -- same convention as texture_fill()."""
+    import random
+    rng = random.Random(seed)
+    cols = {}
+    for x in range(cv.w):
+        for y in range(cv.h):
+            if region_fn(x, y):
+                cols.setdefault(x, []).append(y)
+    for x, ys in cols.items():
+        if rng.random() > density:
+            continue
+        ys_sorted = sorted(ys)
+        base_y = ys_sorted[-1]  # streak grows UPWARD from the lowest eligible cell
+        col_max_len = max_len if max_len is not None else len(ys_sorted)
+        run_len = rng.randint(min_len, max(min_len, col_max_len))
+        eligible_set = set(ys_sorted)
+        for i in range(run_len):
+            y = base_y - i
+            if y not in eligible_set:
+                break
+            t = i / max(1, run_len - 1)  # 0 at base (hot) -> 1 at tip (cool)
+            idx = min(len(fg_ramp) - 1, int(t * len(fg_ramp)))
+            cv.set(x, y, ch, fg_ramp[idx], cv.get(x, y)[2])
+
+
+def drip(cv, x, y0, y1, fg, ch=RAMP[0], bg=None, taper=True, seed=None):
+    """A single paint-drip/run mark hanging down from (x, y0) to a random
+    depth up to y1 -- studied from references/study/blocktronics-n_silove.ANS
+    (drip/paint-run texture on hand-styled lettering). Real drip technique:
+    a thin vertical line whose length varies per-column (not a uniform
+    fringe) and whose WIDTH narrows as it falls (a droplet tapering to a
+    point), which is what reads as "dripping" rather than "a row of icicles
+    of the same length." Call once per column along a letter/shape's lower
+    edge with a fresh seed or varying x so drips don't line up mechanically.
+
+    x: the column to drip in (typically along a letterform's bottom edge).
+    y0: the row the drip starts from (the letter's edge).
+    y1: the furthest row a drip could reach (a ceiling on length).
+    fg: drip color (usually the same hue as the source letter, optionally
+      darker/desaturated to read as "wet").
+    taper: if True, the ch glyph density drops (using RAMP) as the drip
+      thins toward its tip -- a full block near the source, lighter marks
+      at the tip. If False, uses ch uniformly (a harder-edged drip).
+    seed: per-drip randomness; vary this per call (e.g. seed=x) or drips
+      look identical."""
+    import random
+    rng = random.Random(seed)
+    length = rng.randint(1, max(1, y1 - y0))
+    for i in range(length):
+        y = y0 + i
+        if y > y1:
+            break
+        if taper:
+            t = i / max(1, length - 1)
+            idx = min(len(RAMP) - 1, int(t * len(RAMP)))
+            cv.set(x, y, RAMP[idx], fg, bg if bg is not None else cv.get(x, y)[2])
+        else:
+            cv.set(x, y, ch, fg, bg if bg is not None else cv.get(x, y)[2])
+
+
+def drip_edge(cv, edge_fn, y_max, fg, x_range=None, coverage=0.4, taper=True, seed=None):
+    """Convenience wrapper around drip(): call drip() along every column of
+    a shape's bottom edge automatically. edge_fn(x) -> y or None: returns
+    the row of the lowest painted cell in column x (the drip's start point),
+    or None if that column has no shape to drip from. coverage: fraction of
+    eligible columns that get a drip at all (real drip work isn't on every
+    single column -- that reads as a uniform fringe, not dripping).
+    x_range: (x0, x1) to limit which columns are checked; defaults to the
+    whole canvas width."""
+    import random
+    rng = random.Random(seed)
+    x0, x1 = x_range if x_range else (0, cv.w)
+    for x in range(x0, x1):
+        y0 = edge_fn(x)
+        if y0 is None:
+            continue
+        if rng.random() > coverage:
+            continue
+        drip(cv, x, y0, y_max, fg, taper=taper, seed=rng.randint(0, 1 << 30))
+
+
+def mirror_quad(cv):
+    """4-way (kaleidoscope/mandala) mirror: mirrors the canvas's upper-left
+    quadrant into all four quadrants -- studied from
+    references/study/blocktronics-mx_mess.ANS (a true 4-way mirrored
+    ornamental piece, distinct from canvas.mirror()'s single-axis v/h
+    mirror). Build your ornamental motif ONLY in the upper-left quadrant
+    (x < w/2, y < h/2), then call this once: it mirrors that quadrant
+    rightward (h-axis) AND downward (v-axis) AND diagonally (both), so one
+    authored wedge becomes a full symmetric rosette/mandala. This is what
+    makes dense curled ornamental patterns (see the reference) cheap --
+    author 1/4 of the detail, get a fully symmetric result."""
+    w, h = cv.w, cv.h
+    mid_x, mid_y = w // 2, h // 2
+    for y in range(mid_y):
+        for x in range(mid_x):
+            src = cv.cells[y][x]
+            cv.cells[y][w - 1 - x] = list(src)          # mirror right (h-axis)
+            cv.cells[h - 1 - y][x] = list(src)           # mirror down (v-axis)
+            cv.cells[h - 1 - y][w - 1 - x] = list(src)   # mirror diagonal (both)
+
+
+# ---- block-letter text primitives --------------------------------------------
+# GLYPHS_5x7: a shared 5-wide x 7-tall block-letter font (full A-Z, 0-9, space,
+# and common title punctuation). WHY THIS EXISTS: found directly 2026-09-15 --
+# 9 separate scratch files (_eclipse.py, _molten_mark.py, _solstice.py,
+# make_banner.py, make_logo.py, and backups) each hand-rolled their OWN GLYPHS
+# dict from scratch, the exact "re-derive per piece" duplication canvas.py was
+# built to stop. Seeded from make_logo.py's 9 hand-authored house letters
+# (A,G,E,N,T,S,C,I -- kept byte-identical), extended to a complete alphabet.
+GLYPHS_5x7 = {
+'A': ["..#..",".###.","#...#","#####","#...#","#...#","#...#"],
+'B': ["####.","#...#","#...#","####.","#...#","#...#","####."],
+'C': [".####","#....","#....","#....","#....","#....",".####"],
+'D': ["####.","#...#","#...#","#...#","#...#","#...#","####."],
+'E': ["#####","#....","#....","####.","#....","#....","#####"],
+'F': ["#####","#....","#....","####.","#....","#....","#...."],
+'G': [".####","#....","#....","#.##.","#...#","#...#",".####"],
+'H': ["#...#","#...#","#...#","#####","#...#","#...#","#...#"],
+'I': ["#####","..#..","..#..","..#..","..#..","..#..","#####"],
+'J': ["....#","....#","....#","....#","#...#","#...#",".###."],
+'K': ["#...#","#..#.","#.#..","##...","#.#..","#..#.","#...#"],
+'L': ["#....","#....","#....","#....","#....","#....","#####"],
+'M': ["#...#","##.##","#.#.#","#...#","#...#","#...#","#...#"],
+'N': ["#...#","##..#","#.#.#","#..##","#...#","#...#","#...#"],
+'O': [".###.","#...#","#...#","#...#","#...#","#...#",".###."],
+'P': ["####.","#...#","#...#","####.","#....","#....","#...."],
+'Q': [".###.","#...#","#...#","#...#","#.#.#","#..#.",".##.#"],
+'R': ["####.","#...#","#...#","####.","#.#..","#..#.","#...#"],
+'S': [".####","#....","#....",".###.","....#","....#","####."],
+'T': ["#####","..#..","..#..","..#..","..#..","..#..","..#.."],
+'U': ["#...#","#...#","#...#","#...#","#...#","#...#",".###."],
+'V': ["#...#","#...#","#...#","#...#","#...#",".#.#.","..#.."],
+'W': ["#...#","#...#","#...#","#.#.#","#.#.#","##.##","#...#"],
+'X': ["#...#",".#.#.","..#..","..#..","..#..",".#.#.","#...#"],
+'Y': ["#...#",".#.#.","..#..","..#..","..#..","..#..","..#.."],
+'Z': ["#####","....#","...#.","..#..",".#...","#....","#####"],
+'0': [".###.","#...#","#..##","#.#.#","##..#","#...#",".###."],
+'1': ["..#..",".##..","..#..","..#..","..#..","..#..","#####"],
+'2': [".###.","#...#","....#","...#.","..#..",".#...","#####"],
+'3': [".###.","#...#","....#",".###.","....#","#...#",".###."],
+'4': ["...#.","..##.",".#.#.","#..#.","#####","...#.","...#."],
+'5': ["#####","#....","####.","....#","....#","#...#",".###."],
+'6': [".###.","#....","#....","####.","#...#","#...#",".###."],
+'7': ["#####","....#","...#.","..#..",".#...","#....","#...."],
+'8': [".###.","#...#","#...#",".###.","#...#","#...#",".###."],
+'9': [".###.","#...#","#...#",".####","....#","....#",".###."],
+' ': [".....",".....",".....",".....",".....",".....","....."],
+'-': [".....",".....",".....","#####",".....",".....","....."],
+':': [".....","..#..",".....",".....",".....","..#..","....."],
+'/': ["....#","...#.","..#..",".#...","#....",".....","....."],
+'!': ["..#..","..#..","..#..","..#..","..#..",".....","..#.."],
+"'": [".#...",".#...",".....",".....",".....",".....","....."],
+'.': [".....",".....",".....",".....",".....",".....","..#.."],
+'&': [".##..","#..#.","#.#..",".#...","#.#.#","#..#.",".##.#"],
+}
+
+
+def block_letters(cv, text, x0, y0, fg, ch='\u2588', bg=None, gap=1,
+                   glyphs=GLYPHS_5x7, scale=1):
+    """Draw text as 5x7 block letters at (x0, y0) -- the shared wordmark/
+    title primitive. Replaces hand-rolling a GLYPHS dict per piece (found in
+    9 separate scratch files before this existed). Returns the total pixel
+    width used, so you can center the result: width = block_letters(...);
+    then redraw at x0 = (80 - width) // 2 if you need centering after the
+    fact, or precompute with text_width() first.
+
+    IMPORTANT (found directly while building this): use scale=2 or higher
+    for anything meant to be read clearly at a glance -- at scale=1 (the
+    default, 5 real cells per letter) the preview/PNG rendering pipeline
+    doesn't have enough pixel resolution per letter to stay crisp, even
+    though the underlying .ans data is completely correct (verified: the
+    raw character grid is right, real terminals render scale=1 fine --
+    it's specifically the synthetic PNG preview that gets soft at small
+    text). scale=2-3 renders clearly in every viewer. ALSO: keep text_width()
+    under 80 -- the preview pipeline's terminal-width constant is 80
+    columns (the house canvas standard everywhere else too), and text
+    wider than that silently wraps/clips in the PNG preview. Use
+    text_width() to check before committing to a size/word combination.
+
+    text: uppercase letters/digits/punctuation from GLYPHS_5x7 (unknown
+      chars render as a blank 5-wide gap, not an error).
+    fg: single color, OR a function(row, col_in_word) -> color for per-cell
+      color control (e.g. a gradient across the word, or per-letter hues).
+    scale: integer >=1 to draw each glyph cell as an NxN block of output
+      cells -- a cheap way to get bigger title text without a bigger font.
+    """
+    cur_x = x0
+    for ch_letter in text:
+        glyph = glyphs.get(ch_letter.upper(), glyphs[' '])
+        for row_i, row in enumerate(glyph):
+            for col_i, cell in enumerate(row):
+                if cell != '#':
+                    continue
+                color = fg(row_i, cur_x - x0) if callable(fg) else fg
+                for sy in range(scale):
+                    for sx in range(scale):
+                        px = cur_x + col_i * scale + sx
+                        py = y0 + row_i * scale + sy
+                        cv.set(px, py, ch, color, bg if bg is not None else cv.get(px, py)[2])
+        cur_x += (5 * scale) + gap
+    return cur_x - x0 - gap
+
+
+def text_width(text, glyphs=GLYPHS_5x7, gap=1, scale=1):
+    """Pixel width block_letters() would use for `text` -- call this FIRST
+    to center a wordmark: x0 = (canvas_width - text_width(text)) // 2."""
+    n = len(text)
+    return n * 5 * scale + max(0, n - 1) * gap
+
+
+def bevel_text(cv, text, x0, y0, top_fg, mid_fg, bottom_fg, ch='\u2588',
+                bg=None, gap=1, glyphs=GLYPHS_5x7, scale=1):
+    """Beveled/chrome 3D block-letter text -- studied from
+    references/study/asphyx-acid_logo.ANS (real ACiD chrome-lettering
+    technique: a lit top edge, a mid-tone body, a dark underside PER
+    LETTER, which is what makes text read as beveled metal instead of flat
+    color). Same call shape as block_letters() but takes 3 colors instead
+    of 1: top_fg for each glyph's TOP row (the lit bevel edge), mid_fg for
+    the middle rows (the body), bottom_fg for the BOTTOM row (the shadowed
+    underside). This 3-band split is the entire technique -- a flat single
+    color reads as a silhouette, three bands reads as a lit 3D surface.
+    Returns total pixel width, same as block_letters()."""
+    cur_x = x0
+    for ch_letter in text:
+        glyph = glyphs.get(ch_letter.upper(), glyphs[' '])
+        n_rows = len(glyph)
+        for row_i, row in enumerate(glyph):
+            if row_i == 0:
+                color = top_fg
+            elif row_i == n_rows - 1:
+                color = bottom_fg
+            else:
+                color = mid_fg
+            for col_i, cell in enumerate(row):
+                if cell != '#':
+                    continue
+                for sy in range(scale):
+                    for sx in range(scale):
+                        px = cur_x + col_i * scale + sx
+                        py = y0 + row_i * scale + sy
+                        cv.set(px, py, ch, color, bg if bg is not None else cv.get(px, py)[2])
+        cur_x += (5 * scale) + gap
+    return cur_x - x0 - gap
+
+
+def drop_shadow_text(cv, text, x0, y0, fg, shadow_fg, offset=(1, 1),
+                      ch='\u2588', bg=None, gap=1, glyphs=GLYPHS_5x7, scale=1):
+    """Block-letter text with a dark offset copy behind it -- studied from
+    references/study/avg-theterminator.ans's title treatment (dense
+    stippled title text sitting in front of a solid offset shadow copy,
+    the classic "raised lettering" read). Draws the shadow copy FIRST at
+    (x0+offset[0], y0+offset[1]) in shadow_fg, then the real text on top in
+    fg -- so the shadow peeks out from behind the letters on the offset
+    side. Returns total pixel width, same as block_letters()."""
+    block_letters(cv, text, x0 + offset[0], y0 + offset[1], shadow_fg,
+                  ch=ch, bg=bg, gap=gap, glyphs=glyphs, scale=scale)
+    return block_letters(cv, text, x0, y0, fg, ch=ch, bg=bg, gap=gap,
+                          glyphs=glyphs, scale=scale)
+
+
 def cycle_hue(phase, wheel=HOUSE_HUE):
     """House color-cycling helper: map a float phase to a wheel index. Use
     this instead of hand-rolling `int(phase) % len(HUE)` in every piece."""

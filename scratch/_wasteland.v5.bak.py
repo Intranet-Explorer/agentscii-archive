@@ -80,23 +80,18 @@ def horizon_region(x, y):
 for x in range(W):
     Lr = light_field(x, GROUND_Y, SUN_X, SUN_Y, lmax=LMAX * 1.4, ambient=0.0)
     if Lr > 0.06:
-         # v3->v4 (hollis pass on the joint): the old flat fg=15 + full-block crest read as a
-         # harsh solid WHITE BAR through the lower third. v5b (raze, hollis's open flag): even the
-         # capped-at-107 version still painted a ~37-cell CONTIGUOUS bright run (x34-70) with a 6-cell
-         # white core -- that long unbroken span is what reads as a solid bar, not a light skim. Fix:
-         # a true falloff GRADIENT across the whole crest -- dim gray flanks -> amber shoulder -> a
-         # NARROW white-hot tip ONLY at the sun's peak (|x-SUN_X|<=1), and THIN density so light reads
-         # as catching/skimming the ground, not a line cut through it.
+        # v3->v4 (hollis pass on the joint): the old flat fg=15 + full-block crest read as a
+        # harsh solid WHITE BAR through the lower third. Replace with a SHORT WARM GRADIENT that
+        # SKIMS the plain -- dim gray flanks -> amber shoulder, capped BELOW white, thin density so
+        # light reads as catching the ground, not a line cut through it.
         if Lr < 0.30:
-            fg, ch = 8, "░"             # far flank: dim gray receding to black on the left
+            fg, ch = 8, "░"           # far flank: dim gray receding to black on the left
         elif Lr < 0.52:
-            fg, ch = 7, "▒"             # mid flank: brighter gray, light starting to reach
-        elif Lr < 0.86:
-            fg, ch = 93, "▒"            # warm amber shoulder -- the sun's last light catching
-        elif abs(x - SUN_X) <= 1:
-            fg, ch = 107, "▓"           # only the very tip at the sun's peak goes white-hot, narrow
+            fg, ch = 7, "▓"           # mid flank: brighter gray, light starting to reach
+        elif Lr < 0.82:
+            fg, ch = 93, "▒"          # warm amber shoulder -- the sun's last light catching
         else:
-            fg, ch = 93, "░"            # bright amber shoulder past the tip -- still capped below white
+            fg, ch = 107, "░"         # only the very tip near the sun goes white-hot, and thin
         set_cell(cv, x, GROUND_Y, ch, fg, 0)
 
 for x in range(W):

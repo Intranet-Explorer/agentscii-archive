@@ -122,6 +122,82 @@ def shade_region(cv, region_fn, Lfn, base_fg=7, hot_fg=15, ramp=RAMP):
                 set_cell(cv, x, y, ch, fg, 0)
 
 
+def specular_shade(cv, region_fn, Lfn, x_hl, y_hl, hl_r,
+                    base_fg=7, hot_fg=15, spec_fg=15, ramp=RAMP):
+    """Diffuse surface shading PLUS a tight specular highlight -- studied
+    from references/study/blocktronics-ra_mindseye.ANS and
+    blocktronics-we_c22.ANS (both real ACiD/Blocktronics pieces with
+    genuine gloss/reflection reads on curved/metallic surfaces). Different
+    from shade_region()'s plain diffuse falloff: this adds a SECOND,
+    SMALL, TIGHT bright core near (x_hl, y_hl) on top of the normal
+    diffuse shading -- a specular highlight is small and sharp-edged
+    (unlike the broad soft diffuse falloff), which is exactly what reads
+    as "glossy/wet/metallic" rather than "matte." Use this for eyes,
+    metal, glass, wet surfaces -- anything with a reflective quality;
+    shade_region() alone is correct for matte skin/stone/fabric.
+
+    region_fn/Lfn: same as shade_region() -- diffuse base pass first.
+    x_hl, y_hl: the highlight's center (usually near, not on, the surface's
+      brightest diffuse point -- a real specular highlight sits slightly
+      OFF the diffuse peak, which is part of what sells the gloss read).
+    hl_r: highlight radius in cells -- keep this SMALL (1.5-3 cells) or it
+      stops reading as a tight reflection and just looks like a second
+      light source."""
+    for y in range(len(cv)):
+        for x in range(len(cv[0])):
+            if not region_fn(x, y):
+                continue
+            L = Lfn(x, y)
+            d_hl = math.hypot(x - x_hl, y - y_hl)
+            if d_hl <= hl_r:
+                # inside the specular core: fully bright, full-density glyph,
+                # regardless of the diffuse term -- a highlight overrides
+                # the surface's own shading, it doesn't blend with it.
+                falloff = max(0.0, 1.0 - (d_hl / hl_r))
+                if falloff > 0.6:
+                    set_cell(cv, x, y, ramp[0], spec_fg, 0)
+                    continue
+            ch, fg = shade(L, base_fg, hot_fg, ramp)
+            set_cell(cv, x, y, ch, fg, 0)
+
+
+def photoreal_gradient(cv, region_fn, cx, cy, hue_stops, max_dist=None):
+    """Smooth multi-hue radial gradient across a region -- studied from
+    references/study/blocktronics-avg_16c.ANS (a real ACiD piece using a
+    genuinely photorealistic multi-color transition, not the house's usual
+    single-hue density ramp). Different from canvas.gradient_fill(): that
+    interpolates DENSITY within one hue (bright-to-dim of the same color);
+    this interpolates across MULTIPLE distinct hues in sequence (e.g.
+    yellow -> orange -> red -> magenta), which is what produces a painterly
+    "photo" look instead of a flat-color-with-shading look. Use this for
+    skin tones, sunsets, painterly portrait work -- anywhere the reference
+    shows a real color SPECTRUM, not just one hue's brightness varying.
+
+    region_fn(x,y) -> bool: where the gradient applies.
+    hue_stops: an ordered list of fg color indices, e.g. [11, 9, 1, 5]
+      (bright yellow -> amber -> red -> magenta) -- the gradient walks
+      through them in order from center (index 0) to edge (last index).
+    max_dist: gradient radius; defaults to covering the whole region."""
+    if max_dist is None:
+        max_dist = max(len(cv[0]), len(cv)) / 2.0
+    n = len(hue_stops)
+    for y in range(len(cv)):
+        for x in range(len(cv[0])):
+            if not region_fn(x, y):
+                continue
+            d = math.hypot(x - cx, y - cy) / max_dist
+            d = max(0.0, min(1.0, d))
+            # which pair of adjacent hue stops does this distance fall
+            # between, and how far through that pair (for the density ramp
+            # to carry the local transition, not just a hard color swap)
+            pos = d * (n - 1)
+            idx = min(n - 2, int(pos))
+            local_t = pos - idx
+            fg = hue_stops[idx] if local_t < 0.5 else hue_stops[idx + 1]
+            ramp_idx = int(abs(local_t - 0.5) * 2 * (len(RAMP) - 1))
+            set_cell(cv, x, y, RAMP[ramp_idx], fg, 0)
+
+
 def brow_ridge(cv, cx, cy, halfw, light, base_fg=7, hot_fg=15):
     """A lit brow ridge: a thin horizontal band whose top edge catches the most light and
     falls off into the eye socket below -- the single most 'anatomical' read in a face."""

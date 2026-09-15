@@ -87,17 +87,38 @@ traditions (logo, portrait, landscape, abstract) are still valid work.
 
 - **`scratch/canvas.py`** — general-purpose drawing primitives: `line()`,
   `rect()`, `ellipse()`, `flood_fill()`, `gradient_fill()`, `dither_region()`,
-  `texture_fill()` (sparse negative-space texture) and `strand_shade()`
-  (directional stroke-based texture for fur/hair/grain — see "Reference
-  study" below for the technique gap both close), `mirror()`,
-  `copy_region()`/`paste_block()`, `rotate90_block()`, plus
-  `write_ans()` to go straight from a finished canvas to a hygiene-clean
-  `.ans` file. This exists so a new idea doesn't require re-deriving
-  ellipse/shading/symmetry math from scratch every time — compose primitives
-  the way a real ACiD-era editor's tools got combined by hand. It's the
-  general layer underneath `figure_common.py` (figurative-specific: light
-  fields, constructed eyes, anatomy shading) and `curve_common.py`
+  `texture_fill()` (sparse negative-space texture), `strand_shade()`
+  (directional stroke-based texture for fur/hair/grain), `streak_field()`
+  (dense vertical noise-streak/flame texture), `drip()`/`drip_edge()`
+  (paint-drip/run marks hanging off an edge), `mirror()` (single-axis) and
+  `mirror_quad()` (4-way kaleidoscope/mandala mirror), `block_letters()`
+  (shared 5x7 block-letter wordmark font — see below), `bevel_text()`
+  (chrome/3D beveled lettering), `drop_shadow_text()` (raised-lettering
+  drop-shadow title effect), `copy_region()`/`paste_block()`,
+  `rotate90_block()`, plus `write_ans()` to go straight from a finished
+  canvas to a hygiene-clean `.ans` file — see "Reference study" below for
+  which reference each texture/text technique came from. This exists so a
+  new idea doesn't require re-deriving ellipse/shading/symmetry/lettering
+  math from scratch every time — compose primitives the way a real
+  ACiD-era editor's tools got combined by hand. It's the general layer
+  underneath `figure_common.py` (figurative-specific: light fields,
+  constructed eyes, anatomy shading) and `curve_common.py`
   (parametric-curve-specific: phosphor trails, hue cycling).
+
+  **Wordmark/title text: use `block_letters()`/`bevel_text()`/
+  `drop_shadow_text()`, not a hand-rolled `GLYPHS` dict.** Found directly
+  2026-09-15: 9 separate scratch files each independently hand-authored
+  their own block-letter font from scratch — the same duplication problem
+  `capsule()` fixed for bodies. One shared 44-glyph font (full A-Z, 0-9,
+  space, common title punctuation) now lives in `canvas.py`, seeded from
+  the original house letters in `make_logo.py`. Practical notes found
+  while building/testing this: use `scale=2` or higher for legible text
+  (scale=1 is correct data but renders soft in the PNG preview pipeline —
+  verified the underlying .ans is fine at scale=1, it's specifically the
+  synthetic preview that needs more pixels per letter); keep
+  `text_width(...)` under 80 (the house canvas width — wider silently
+  clips in the preview). Check `text_width()` before committing to a
+  size/word combination.
 
   **REQUIRED for any body/creature/figure-shaped subject (a person, a
   face, a mask, a crowd, anything with a head/torso/limb structure):
@@ -132,7 +153,7 @@ traditions (logo, portrait, landscape, abstract) are still valid work.
 
 ## Reference study: ground technique in real work, not just each other
 
-`references/study/` has ~13 real ACiD/Blocktronics pieces (see its README
+`references/study/` has ~25 real ACiD/Blocktronics pieces (see its README
 for what each shows). This exists because self-consistency isn't the same
 as quality — the house's own tooling (`canvas.py`, `figure_common.py`,
 `curve_common.py`) makes it cheap to produce MORE work in the house's
@@ -166,6 +187,59 @@ references into reusable `canvas.py` primitives so they're cheap to apply:
   `strand_shade()` does this — pass it a direction function that follows
   your subject's actual form (radiating from a point, combed along a
   curve, etc.), not a fixed angle everywhere.
+
+Three more, added 2026-09-15 from the Blocktronics references Tyler named
+directly — none of these were being used at all (checked: `preview_piece`
+had opened only 1 of the 6 newest references, one time, across 85 shifts).
+Same pattern as above — the technique wasn't obvious from the references
+alone, so it's now a callable primitive instead of something to reverse-
+engineer by eye:
+
+- **Vertical noise-streak / flame texture** (see blocktronics-tnt_bl0b.ANS,
+  blocktronics-hx_night.ANS): dense ragged vertical streaks of varying
+  length, hot-to-cool colored bottom-to-top per streak — a genuinely
+  different technique from strand_shade()'s discrete angled strokes.
+  `streak_field()` does this in one call.
+- **Paint-drip/run marks** (see blocktronics-n_silove.ANS): letterforms
+  and shapes with individual drips of varying length hanging off their
+  lower edge, each one tapering to a point rather than a uniform icicle
+  fringe. `drip()` (single drip) / `drip_edge()` (auto-applies along a
+  shape's bottom edge) do this.
+- **4-way kaleidoscope/mandala mirroring** (see blocktronics-mx_mess.ANS):
+  dense ornamental swirl patterns built by authoring ONE wedge and
+  mirroring it both axes at once, not `canvas.py`'s existing single-axis
+  `mirror()`. `mirror_quad()` mirrors an upper-left quadrant into all
+  four, turning 1/4 authored detail into a full symmetric rosette.
+
+Two more, same date, from references that had text/title techniques not
+covered by the shared font at all until now:
+
+- **Beveled/chrome 3D lettering** (see asphyx-acid_logo.ANS): a lit top
+  edge, mid-tone body, and dark underside PER LETTER is what makes a
+  wordmark read as lit metal instead of a flat-color silhouette.
+  `bevel_text()` does the 3-band split in one call.
+- **Raised-lettering drop shadow** (see avg-theterminator.ans): a solid
+  offset dark copy behind the real text, peeking out on one side — the
+  classic "text sitting above the background" title read. `drop_shadow_text()`
+  does this.
+
+Two more, added from a second batch of Blocktronics packs (16colors 2013,
+30302020 2020) — real shading techniques the figurative work didn't have
+a primitive for yet:
+
+- **Specular/gloss highlights** (see blocktronics-ra_mindseye.ANS,
+  blocktronics-we_c22.ANS): a small, tight, sharp-edged bright spot ON TOP
+  OF normal diffuse shading is what reads as glossy/wet/metallic rather
+  than matte — different from a broad soft diffuse peak.
+  `figure_common.specular_shade()` adds this second highlight pass; use it
+  for eyes, metal, glass, or any reflective surface.
+- **Photorealistic multi-hue gradients** (see blocktronics-avg_16c.ANS):
+  a real color SPECTRUM (e.g. yellow through orange through red through
+  magenta) rather than one hue's density varying — this is what gives
+  skin tones, sunsets, and painterly work their photo-like quality instead
+  of the house's usual flat-color-plus-shading look.
+  `figure_common.photoreal_gradient()` interpolates across an ordered list
+  of hue stops.
 
 References also demonstrate a real technique the house tooling doesn't
 default to: **cursor-addressing** (jumping the cursor back to an
