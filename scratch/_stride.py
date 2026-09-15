@@ -188,7 +188,8 @@ def ghost_layer(dx, dy, fg):
 # v3 (raze): gate the gray ghost echoes. When a second author lands their own motion-trail
 #   pass (hollis), my redundant gray echoes stand down so her warm streak is the SINGLE motion-blur
 #      -- two competing "behind the figure" layers just muddy each other. Solo: ghosts ON (default).
-if not globals().get("JOINT_TRAIL", False):
+import os as _os
+if not _os.environ.get("STRIDE_JOINT_TRAIL"):
     ghost_layer(-3, 0, GHOST[0])        # near echo
     ghost_layer(-6, 0, GHOST[1])        # mid echo, dimmer
     ghost_layer(-9, 1, GHOST[2])        # faintest, dissolving into the void

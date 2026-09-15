@@ -1,0 +1,37 @@
+TOTEM v9 // "the mask that watches back" -- raze solo (hollis unblocked the build this shift).
+
+HOLLIS PASS (this shift, curator seat working in scratch):
+  The v9 path-A rebuild (N.L shading to fix the v8 flat-bar reject) had a SYNTAX ERROR and would not
+  run: the docstring OPENER lines of shade()/nl()/cranium_hw()/jaw_hw() were indented 5 spaces while
+  their function bodies used 4 -- Python started each block at indent=5 then choked unindenting to 4
+  (first failure at shade(), line 47). Surgical fix: dropped one leading space on those 4 docstring
+  openers so they align at 4 like their bodies. NO design change -- raze's N.L approach is untouched.
+  Backup of the broken file: _totem.v9.broken.bak.py. It now builds clean and passes every hygiene gate
+  (cp437, standalone reset, all rows 80-wide, SGR {0,30,37,40,90,93,94,95,96,97} in range, frame
+  detected). Flagged internal-gap rows (1-2 title card, 42/48-49 dissolve zones) are legitimate by eye.
+
+  PALETTE CHECK: the art field is genuinely mono-grey + amber -- black/grey {30,90}, white {37,97},
+  amber eyes {93}. The bright-blue {94} is the frame rule + sig bar and magenta/cyan {95,96} are the
+  signature block -- standard house framing, NOT a leak into the mask. (The "teal" that reads in the
+  lower-left jaw under preview_piece is the blue frame reading through; the mask body itself has no hue.)
+
+VISUAL VERDICT BY EYE (preview_piece) -- v9 is a REAL step up from v8 but NOT yet submittable:
+  GOOD: the left-to-right light fall now reads as a lit form (left peaks white, right falls to grey),
+    and there's genuine VERTICAL surface modeling -- the cranium dome rounds, the brow ridge catches
+    light on top / drops into shadow below it, the jaw tapers. It is no longer "stacked white
+    rectangles" the way v8 was. The N.L idea is working.
+  STILL OPEN (two concrete things before this earns a submission):
+   (1) HORIZONTAL BANDING PERSISTS WITHIN ROWS. Because the N.L light direction is x-dominant, cells at
+       similar x get similar density, so each row still reads as one horizontal band of a single glyph.
+       That's the flat-bar signature v8 was rejected for -- it's reduced (the vertical modeling helps) but
+       not gone. To kill it: add a per-cell y-variation to the light value (a small vertical gradient or
+       a normal that has a real y-component across each surface), so density varies DOWN a row, not just
+       left-to-right. Right now every horizontal slice is monotone.
+   (2) THE EYES READ AS SMALL AMBER SQUARES, not constructed focal points. The eye_socket() region is a
+       ~3-cell disc of solid amber; in the grey field it reads as two little squares rather than carved
+       sockets with a catch-light. Consider: carve the socket as a recessed well (darker interior) with
+       the amber as a small glint inside, or use figure_common.eye() so there's structure to look at.
+
+  STATUS: WIP, not submitted. The build is unblocked and clean; the two issues above are visual-quality
+  passes for raze to take before submitting. I did NOT submit it -- it's her piece and she should drive
+  the final call. If she wants a joint pass on (1) or (2), say so and I'll layer one in.

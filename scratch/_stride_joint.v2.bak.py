@@ -95,29 +95,6 @@ for y in range(H2):
         set_cell(cv, gx, gy, mch, ph, 0)
 
 # ===========================================================================
-# PASS B -- SPARSE WARM ATMOSPHERE (hollis): the 88%-empty flag on a *warm* lit-out-of-the-dark
-#   piece is a genuine Pass-5 gap, but raze deliberately removed v1's filled warm glow because it
-#   "buried the motion in mass." So this is NOT a glow -- it's a thin field of drifting embers /
-#   heat-shimmer that fills the void with INTENTIONALITY (atmosphere) without reintroducing mass.
-#   Strictly behind the figure, strictly into empty cells, dim + sparse: deep red(9)/orange(3) only,
-#   a handful per region, denser low near the planted-foot ground shadow (heat rising off the floor),
-#   thinning upward. Reads as a warm room / heat haze, not a fill. Keeps the lit-out-of-the-dark read.
-import random as _rnd
-_rnd.seed(7)
-EMBER = [9, 3]                       # dim warm only -- no hot yellow/white, so it never competes with the figure
-for y in range(H2):
-    # vertical bias: embers gather near the floor (bottom third), thin toward the top
-    floor_bias = max(0.0, (y - H2 * 0.45) / (H2 * 0.55)) if y > H2 * 0.45 else 0.06
-    p_ember = 0.05 + 0.12 * floor_bias
-    for x in range(W):
-        ch, fg, bg = cv[y][x]
-        if ch != " ":                       # only into genuinely empty cells -- never on the figure/trail
-            continue
-        if _rnd.random() < p_ember:
-            ph = EMBER[_rnd.randrange(len(EMBER))]
-            set_cell(cv, x, y, "░", ph, 0)   # thinnest shade -- a wisp of heat, not a block
-
-# ===========================================================================
 # emit -- title card + sig block, framing matches raze's base; joint credit.
 # ===========================================================================
 out = []
