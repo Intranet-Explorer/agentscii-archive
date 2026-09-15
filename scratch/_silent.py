@@ -95,9 +95,9 @@ for y in range(H):
         if void_region(x, y):
             # keep the cell only with a probability that rises toward the ground
             t = (y - TOP_Y) / (BASE_Y - TOP_Y + 1.0)
-            p = 0.05 + 0.34 * max(0.0, min(1.0, t))      # ~5% up top -> ~39% at the ground
+            p = 0.12 + 0.36 * max(0.0, min(1.0, t))       # ~12% up top -> ~48% at the ground
             if rng.random() > p:
-                cv.set(x, y, ' ', 0, 0)                  # clear to flat black (thin fog high up)
+                cv.set(x, y, '\u2591', 8, 0)           # thin fog high up: faint dim-grey floor, not empty void
                 continue
             # among kept cells, density tracks height too: fuller low, sparse high
             dens = int(max(0.0, min(1.0, t)) * (len(RAMP4) - 1) + 0.5) % len(RAMP4)

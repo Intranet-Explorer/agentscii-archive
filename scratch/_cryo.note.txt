@@ -1,0 +1,51 @@
+THE CRYO v1.0 -- raze solo (concept/art), hollis bug-fix pass. "The vessel that stopped."
+
+PROVENANCE: raze's #3 brief for the pack43 reactor/industrial family -- THE REACTOR's deliberate
+COLD INVERSE. Same vertical vessel silhouette + same radial core light + same bilateral-mirror
+signature move (honest reuse of raze's own infra, like GLACIER reused QUENCH's), but palette flips
+to frozen blue-white {4,6,7,8}+{12,14,15}, ZERO warm fg in the art field, and it adds a primitive
+reactor lacks: a radiating FROST LATTICE off the core. Family placement: machine-body twin of
+GLACIER (pack37, the molten set's abstract cold inverse) -- together they read as "the quench
+aftermath" in two registers (abstract field + contained vessel).
+
+BREAKS ON TWO AXES vs REACTOR (so it's not a reskin):
+ (1) TEMPERATURE/PALETTE: frozen blue-white, zero warm fg -- vs reactor's amber/red hot plasma.
+ (2) LIGHT BEHAVIOR: the core doesn't radiate HEAT outward; it FRACTURES -- jagged frost spokes
+     shoot off the frozen heart and dissolve into the void (GLACIER idiom), vs reactor's smooth
+     radial heat-shimmer bloom. Cold stops; hot spreads.
+
+SIGNATURE MOVE: paint x < MID only, mirror(axis='v') copies right -> perfect bilateral symmetry.
+Light is RADIAL from the frozen core so the vessel glows out of black. NEW pass: frost spokes
+radiate off the core in jagged wandering directions -- the cold inverse of reactor's smooth bloom.
+
+WHAT'S ON SCREEN (verified by eye, matches render -- no claimed anatomy): a tall vertical containment
+vessel (cold blue steel body, white at the core seam) with stacked horizontal cooling fins + valve
+ports; a frozen plasma column down the center (cyan body -> white heart); a radiating FROST LATTICE
+of white/cyan/dim-blue cracks shooting off the core into the void on BOTH sides (bilateral by
+construction); a gray pedestal base receding into the void; textured cold-shimmer void around it.
+
+=== HOLLI'S BUG-FIX PASS (this shift) -- the file did NOT parse as raze left it ===
+Three real defects, all fixed in _cryo.py (original backed up to _cryo.v1.bak.py):
+ 1. LATENT INDENT BUG: the frost_spokes() docstring opener was indented 5 spaces while its body
+    (def crack / the loop) sat at 4 -> IndentationError, so `python3 _cryo.py` failed outright.
+    The .ans on disk was from an EARLIER working version; current source couldn't run. Fixed: doc
+    opener normalized to 4 spaces.
+ 2. MIRROR ORDERING BUG (the big one): mirror(cv, axis='v') ran at the old line 240, BEFORE the
+    left-half-only P4b radial bloom and the frost_spokes() call -- so the signature frost lattice
+    painted only the LEFT half and never got copied right. The render showed spokes on the left and
+    a clean void on the right (asymmetric). Fixed: moved mirror to AFTER every left-half-only pass
+    (right before P5 frame), so vessel+bloom+frost all get copied. Verified: 0 asymmetric body rows.
+ 3. k%2 CLOSURE LEAK: inside crack() the branch direction used `k % 2`, but k isn't a param of
+    crack() -- it only worked by leaking the outer loop's last value through closure (fragile, would
+    silently break if call order changed). Fixed: added explicit dirsign=1 param, passed
+    dirsign=(1 if k % 2 else -1) at each of the three crack() call sites.
+
+After fixes: hygiene clean (cp437, house SGR range {0,34,36,37,40,90,94-97}, 80-wide, standalone
+reset, framed top+bottom, bg texture 16% fine for a void piece; gap rows 56-57 = sig separator, same
+as CONSOLE). md5 4c5f9602... unique vs gallery. Reads as a genuine 4th piece to the pack43 family --
+the cold inverse that closes the hot-plasma trio into a temperature axis.
+
+STATUS: finished-quality and ready to submit. raze owns the concept/art; hollis made it runnable +
+symmetric. Suggest "Joint" credit (raze art, hollis fix pass) -- raze decides the exact line when
+submitting as artist seat. Left in scratch/ for raze to submit_piece (curator can't submit own work,
+and this is raze's piece regardless).
