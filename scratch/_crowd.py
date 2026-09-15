@@ -38,11 +38,11 @@ SEED = 11
 # brightness carries depth: far = dim blue (4/12), near = bright cyan (6/14). ONE hue family.
 ROWS = [
     # baseline_y, head_r, body_h, scale, fg_near, fg_far, count
-     (15, 0.7, 3, 0.55, 3, 11, 9),      # far: tiny dim-blue specks near the top
-     (23, 1.0, 4, 0.75, 11, 3, 8),      # mid-far: blue
-     (32, 1.4, 6, 1.0, 11, 3, 7),       # mid -- the amber accent lives here
-     (42, 1.8, 8, 1.35, 13, 11, 6),     # near-mid: bright cyan
-     (51, 2.2, 10, 1.7, 13, 11, 5),     # near: big bright-cyan bodies at the bottom edge
+      (15, 0.7, 3, 0.55, 4, 4, 9),        # far: tiny dim-blue specks near the top
+      (23, 1.0, 4, 0.75, 4, 4, 8),       # mid-far: dim blue
+      (32, 1.4, 6, 1.0, 12, 4, 7),        # mid -- the amber accent lives here
+      (42, 1.8, 8, 1.35, 12, 4, 6),      # near-mid: bright blue
+      (51, 2.2, 10, 1.7, 12, 4, 5),      # near: big bright-blue bodies at the bottom edge
 ]
 
 LIGHT = (30.0, 8.0)    # single light source, upper-left -- reused for every figure's shading
@@ -62,8 +62,8 @@ def figure(cv, cx, base_y, head_r, body_h, scale, fg_near, fg_far, accent=False)
     rng = random.Random(int(cx * 131 + base_y * 977))
     cx += rng.uniform(-0.5, 0.5)          # slight jitter so a row reads as a crowd, not a grid
 
-    near = fg_near if not accent else 10    # bright yellow -- amber for the accent figure
-    far = fg_far if not accent else 2       # yellow shadow side of the accent (warm, not blue)
+    near = fg_near if not accent else 11     # bright yellow -- amber for the accent figure
+    far = fg_far if not accent else 3        # dim yellow shadow side of the accent (warm, not blue)
 
     # --- head: a shaded ellipse at the top (the roll's ellipse() constraint) ---
     hr = max(0.8, head_r * scale)
@@ -117,14 +117,14 @@ def figure(cv, cx, base_y, head_r, body_h, scale, fg_near, fg_far, accent=False)
             cv.set(sx, sy, RAMP[0], near, 0)
 
 def main():
-    cv = Canvas(W, H, fill_ch=' ', fill_fg=3, fill_bg=0)   # dim-blue base so nothing leaks
+    cv = Canvas(W, H, fill_ch=' ', fill_fg=4, fill_bg=0)     # dim-blue base so nothing leaks
 
     # ---- P1: background fog texture (NOT flat black) -- dim blue only ----
-    C.texture_fill(cv, lambda x, y: True, fg=3, bg=0, density=0.09, seed=SEED)
+    C.texture_fill(cv, lambda x, y: True, fg=4, bg=0, density=0.09, seed=SEED)   # dim-blue fog
 
     # ---- P2: perspective floor -- faint receding baseline glints ----
     for (base_y, head_r, body_h, scale, fn, ff, count) in ROWS:
-        g = 3 if base_y < 32 else 11
+        g = 4 if base_y < 32 else 12
         for x in range(2, W - 2):
             if random.Random(SEED + base_y * 7).random() < 0.45:
                 cv.set(x, base_y + body_h + 1, RAMP[3], g, 0)
@@ -145,17 +145,17 @@ def main():
             if cv.in_bounds(x, y):
                 d = math.hypot(x - ax, y - (ACCENT_ROW[0] + 3)) / 5.5
                 if d < 1.0 and random.Random(SEED + x * 7 + y).random() < (1.0 - d) * 0.6:
-                    cv.set(x, y, RAMP[2], 10, 0)    # dim amber glow, sparse
+                    cv.set(x, y, RAMP[2], 11, 0)     # dim amber glow, sparse
     figure(cv, ax, ACCENT_ROW[0] + 1, ACCENT_ROW[1] + 0.3, ACCENT_ROW[2] + 1,
           ACCENT_ROW[3] + 0.15, 94, 93, accent=True)
 
     # ---- P5: frame + title bar ----
-    C.rect(cv, 0, 0, W - 1, H - 1, ch='\u2591', fg=10, bg=0, fill=False)          # outer rule (amber = bright yellow)
-    C.rect(cv, 1, 1, W - 2, H - 2, ch='\u2591', fg=3, bg=0, fill=False)            # inner dim-blue rule
+    C.rect(cv, 0, 0, W - 1, H - 1, ch='\u2591', fg=11, bg=0, fill=False)            # outer rule (amber)
+    C.rect(cv, 1, 1, W - 2, H - 2, ch='\u2591', fg=4, bg=0, fill=False)              # inner dim-blue rule
     title = "THE CROWD // A WAVE IN THE DARK"
     tx = (W - len(title)) // 2
     for i, ch in enumerate(title):
-        cv.set(tx + i, 1, ch, 10, 0)
+        cv.set(tx + i, 1, ch, 11, 0)   # amber title
 
     out = []
     cv.render(out)

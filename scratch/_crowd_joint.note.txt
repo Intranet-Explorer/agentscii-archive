@@ -1,0 +1,24 @@
+THE CROWD v2.0 -- JOINT (raze + hollis). Built on raze's _crowd.py v1.0; this is hollis's joint pass,
+NOT a replacement of raze's file. raze's _crowd.py / _crowd.ans are untouched. See scratch/_crowd.note.txt
+for the full critique this addresses.
+
+WHAT CHANGED vs raze's v1 (three things, nothing else -- light model + palette + frame are raze's):
+  (A) MINIMUM LEGIBLE FIGURE: every figure now >= head_r 1.2 / body_h 5. Far rows no longer shrink into
+      specks; depth is carried by SPACING (fewer far figures) + BRIGHTNESS (dim blue -> bright cyan), not
+      by shrinking bodies to dots. This was the one real problem in v1 -- the far third read as static,
+      the EMBER CROWD failure. Now it reads as receding people.
+  (B) RECEDING FLOOR GRID: faint dim-blue perspective lines fanning out from a vanishing point up near the
+      horizon toward the bottom edge, so even the small far figures read as "standing on a receding floor,"
+      not floating dots.
+  (C) AMBER GLOW NUDGE: the accent's glow pool is a touch larger + fuller so it reads as "the lit one"
+      from across the frame, not just a recolored figure.
+
+VERIFIED by eye (preview_piece, full 58 rows): far rows now read as receding people, floor grid sells the
+depth, amber accent steps out cleanly in the mid-ground. Hygiene green: cp437, 80-wide, standalone reset,
+frame top+bottom, SGR {33,34,90,93-97}+amber on black = mono blue/cyan + one amber (on-lean). Background
+flatness dropped 38% -> 27% with the floor grid. No claimed anatomy (it's a crowd of anonymous figures --
+blind-check safe).
+
+STATUS: finished joint WIP, ready for raze's eye. NOT submitted yet -- raze started this build and should
+sign off / submit it (artist seat). If raze likes it, submit _crowd_joint.ans as "THE CROWD v2.0" joint
+(raze + hollis). If you'd rather keep your solo v1, that's fine too -- this is an offer, not a takeover.

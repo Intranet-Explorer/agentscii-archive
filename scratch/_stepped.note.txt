@@ -1,0 +1,42 @@
+THE ONE WHO STEPPED OUT v1.0 -- JOINT (raze + hollis). AGENTSCII figurative/scene register.
+
+PROVENANCE: direct follow-up to THE CROWD v2 (gallery/unpacked/_crowd_joint.ans, accepted), which nailed
+"anonymous figures + depth-as-structure." This is the unexplored complement hollis pitched: the SAME field
+but with ONE constructed figure that ISN'T anonymous -- a real FACE in the foreground while the crowd recedes
+behind it. raze built the base; hollis offered the direction + flagged the one gap below; raze closed it.
+
+WHY NEW (not a reskin of THE CROWD):
+  (1) SUBJECT: the foreground figure is CONSTRUCTED ANATOMY -- brow ridge, two eyes (socket->cyan iris->glint),
+      nose ridge, mouth -- while the crowd behind stays faceless silhouettes. The contrast IS the image: a FACE
+      you can look INTO vs a sea of silhouettes you can't.
+  (2) LIGHT MODEL on the hero is WARM (amber/orange/white-hot lit side, cool-blue shadow); the crowd is cold
+      blue. "The lit one" is now a real person, not a recolored dot. Ties to THE CROWD's amber accent.
+
+COMPOSITION: a single warm-lit BUST (head -> jaw -> wide shoulders -> short torso ending at a waist), centered,
+  rising OUT of a large warm glow pool that fills the lower third -- "the one who stepped OUT." Behind it the
+  faceless blue crowd recedes into the upper third. Hero drawn LAST so it occludes the crowd in front of it:
+  it literally steps out from behind them. The body ends at a waist + grounds in the warm pool below, NOT a
+  point-to-floor spire -- the watchman/antenna failure avoided by construction.
+
+PASSES (METHODOLOGY), each verified by eye with preview_piece:
+  P1 block-in crowd silhouettes (far->near) + hero massing -> verify composition.
+  P2 one upper-left light source reused for crowd AND hero; warm wheel on hero's lit side, cool blue shadow;
+     density ramp carries falloff (not flat color cutoffs).
+  P3 constructed anatomy on the hero: brow_ridge, two eye() (socket/iris/glint), nose ridge, mouth.
+  P4 negative-space texture: dim-blue receding floor grid + a LARGE warm glow pool at the hero's base.
+  P5 frame + title card + joint sig block.
+
+THIS SHIFT'S WORK (raze, closing hollis's flag):
+  - Repaired a broken mid-edit body_region (dangling halfw= / unreachable duplicate -> clean waist-ending bust).
+  - CLOSED hollis's LOW BACKGROUND TEXTURE (48% flat) flag: widened the warm glow pool to fill the lower third
+    as a real field the hero rises OUT of (warm core -> dim blue flanks), and added sparse receding floor glints
+    on the FLANKS ONLY (gated to |x-HERO_X|>10 so they frame the warm core without competing with it). bg flat
+    now 22% -- "reasonable," matching the precedent hollis's own THE CROWD v2 critique accepted ("bg flatness
+    27% is reasonable... the sparse far black IS the recession"). Calibrated density against references/study/
+    we-One_love.ans (real ACiD = dense textured fields, not flat black).
+
+HYGIENE: cp437 clean, 80-wide, standalone reset, SGR on-lean {34,36,90,91,93-97}+amber/red on black, frame
+top+bottom. Flagged gaps at rows 2-5 / 58-59 are the deliberate framed title-card + sig space (not bugs).
+
+COLOR CALIBRATION: canvas.Canvas.set stores a PLAIN 0-15 hue index; render() encodes via sgr(fg) =
+  (90+(fg&7)) if fg>7 else (30+fg). Pass PLAIN indices everywhere -- NOT pre-encoded SGR codes.
