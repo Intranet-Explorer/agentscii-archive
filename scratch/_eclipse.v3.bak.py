@@ -75,40 +75,27 @@ def pass1():
 # limb (ring_r), dark in the centre (the occulted sun / moon shadow) and sparse at
 # the fringe. This is what makes the dark moon read as an object by CONTRAST.
 def pass2():
-     # v4 FIX -- the corona now reads as a SMOOTH RADIAL FALLOFF (emissive-core model,
-     # same idiom SUBSTRATE's accepted core uses), NOT concentric color/density rings.
-     # The target/bar-chart defect was that DENSITY was chosen from raw radius d in 4 hard
-     # bands (d>0.92->u, >0.78->r, >0.60->s, else full) AND hue jumped in 6 discrete heat_fg
-     # bands -- two stacked concentric ring-structures = a painted target. The fix: drive BOTH
-     # density and color from the CONTINUOUS luminance field (heat), perturbed by strong
-     # per-cell grain so adjacent cells differ slightly and no clean ring can form. A real
-     # corona is gas, not paint -- it falls off smoothly and shimmers, never in steps.
-    R = MOON_R + 16                # corona extends well past the disc
-    ring_r = MOON_R + 2            # glow peaks just outside the moon's edge
+    R = MOON_R + 15               # corona extends well past the disc
+    ring_r = MOON_R + 2           # glow peaks just outside the moon's edge
     for y in range(SUN_CY-R, SUN_CY+R+1):
         for x in range(SUN_CX-R, SUN_CX+R+1):
             dx = (x-SUN_CX)/R; dy = (y-SUN_CY)/R
             d = math.hypot(dx, dy)
             if d > 1.0: continue
-             # annular luminance profile: peak at the limb, falls off both inward (toward the
-             # dark moon centre) and outward (to the dim fringe). Continuous, not banded.
+            # annular profile: peak at ring_r, falls off both inward and outward
             dd = abs(d - ring_r/R)
-            heat = math.exp(-(dd*dd)/(2*0.21**2)) * 0.96 + 0.03
-            g = grain(x, y)                        # continuous per-cell shimmer in [-1,1]
-             # DENSITY tracks the continuous luminance (high heat -> densest), jittered by
-             # grain so neighbours vary +/- a step and no concentric density ring survives.
-            hi = max(0.0, min(1.0, heat + 0.13*g))
-            idx = int((1.0 - hi) * 4.0)           # 0=full .. 3=faint (RAMP order: full->faint)
-            if g > 0.55: idx -= 1                 # extra grain scatter on the bright side
-            elif g < -0.55: idx += 1
-            ch = RAMP[max(0, min(3, idx))]
-             # COLOR tracks heat too (white-hot heart -> gold -> amber -> red -> magenta fringe),
-             # jittered by grain so hue shimmers instead of forming clean concentric color rings.
-            t = max(0.0, min(1.0, heat + 0.11*g))
+            heat = math.exp(-(dd*dd)/(2*0.16**2)) * 0.95 + 0.04
+            heat += 0.05*grain(x,y)                 # per-cell grain, no banding
+            t = max(0.0, min(1.0, heat))
             fg = heat_fg(t)
+            if d > 0.92:      ch = RAMP[3]          # faint outer fringe
+            elif d > 0.78:    ch = RAMP[2]
+            elif d > 0.60:    ch = RAMP[1]
+            else:             ch = "\u2588"         # dense inner field
             place(x, y, ch, fg)
 
-
+# ---- PASS 3: radiating CORONA RAYS -- long light streaks that read as an eclipse.
+# They start at the moon's limb and are OCCLUDED by the moon disc behind them.
 def pass3():
     n_rays = 56
     for i in range(n_rays):
@@ -212,8 +199,10 @@ def pass7():
             fg = heat_fg(1.0 - (ry/6.0)*0.7)      # lit from top
             for cxx, cc in enumerate(row):
                 if cc == '#': place(gx+cxx, y0+ry, "\u2588", fg)
-     # v4 FIX -- removed the baked 'object + object' debug tagline
-     # (OBSERVER_NOTES #2 item 1: a working label rendered into the visible output).
+    tag = "object + object"
+    tx = (W - len(tag))//2
+    for i, c in enumerate(tag):
+        place(tx+i, 12, c, 3 if i%2==0 else 9)
     cred = "raze / AGENTSCII / ECLIPSE v3.0"
     cxp = (W - len(cred))//2
     for i, c in enumerate(cred):

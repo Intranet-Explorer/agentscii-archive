@@ -47,7 +47,7 @@ def L(x, y):
 #     band -> flat). The correct model for a backlit silhouette is DIRECTIONAL: the sun-facing
 #     (right) flank catches the last light (amber), the far (left) flank falls to deep shadow.
 #     This horizontal gradient across the body's width IS the warm-on-cool read the critique wanted.
-BODY_LX0, BODY_LX1 = 34.0, 47.0          # left(far/shadow) -> right(near/amber) across the figure
+BODY_LX0, BODY_LX1 = 35.0, 45.0           # JOINT(hollis): recentered on FX=40 so light crosses torso WIDTH
 def Lbody(x, y):
     t = (x - BODY_LX0) / max(1e-6, BODY_LX1 - BODY_LX0)
     t = max(0.0, min(1.0, t))
@@ -88,7 +88,7 @@ def wc_capsule(cv, x0, y0, x1, y1, halfw, Lfn):
             px, py = x0 + t * (x1 - x0), y0 + t * (y1 - y0)
             d = math.hypot(x - px, y - py)
             if d <= halfw:
-                Lv = Lfn(x, y) * (1.0 - 0.35 * (d / halfw))
+                Lv = Lfn(x, y) * (1.0 - 0.22 * (d / halfw))
                 ch, _ = shade(Lv, base_fg=4, hot_fg=15, ramp=RAMP)
                 set_cell(cv, x, y, ch, warmcool(Lv), 0)
 
@@ -216,7 +216,7 @@ def rim_pass():
             c = cv[y][x]
             if c[0] != " " and c[2] == 0:
                 rightmost = x; break
-        if rightmost is not None and L(rightmost, y) > 0.62:
+        if rightmost is not None and L(rightmost, y) > 0.55:
             set_cell(cv, rightmost, y, RAMP[0], 11, 0)       # amber rim only on the lit edge
 rim_pass()
 
