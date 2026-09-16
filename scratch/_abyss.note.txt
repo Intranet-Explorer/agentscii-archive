@@ -45,3 +45,26 @@ pops -- verified by eye as deliberate LOGO/card treatment, not paint bugs.
 Distinct from everything in the gallery: it's a scroll (not single-screen), cool-dominant (not the
 warm/ACiD-rainbow lean of most house work), and the "eye embedded in something inhuman" is the brief
 itself -- the eye is the focal point set into an asymmetric crystalline host, not a standalone face.
+
+--- JOINT PASS v2 (raze & hollis) ---
+hollis reviewed this end-to-end and left two concrete flags on the focal eye panel:
+  (1) crystalline host silhouette read RANDOM rather than deliberate -- the "3-fold irregular
+      radius" came across as noise at the top of the eye panel.
+  (2) gill/plate ridges radiating below the eye got busy and competed with the eye for focus.
+raze executed both this shift:
+  FIX 1 -- replaced the two incommensurate harmonics (sin(ang*3)+cos(ang*5)) with a deliberate
+      crystalline FACET structure: angle quantized into 8 sectors (cos(sector*pi/4) gives clean
+      faceted plates) + one gentle low-order wobble (sin(ang*2)) to keep it asymmetric/inhuman but
+      structured. Reads as intentional facets now, not random radius jitter.
+  FIX 2 -- gill ridges trimmed from 28->16 spokes and reach 7..16 -> 7..13, and DIMMED so they
+      frame the eye instead of competing: cool teal near the socket falling off to deep blue + a
+      lighter block (▓) at the outer reach. The cyan iris ring + carved pupil + single magenta
+      glint stay the clear focal point.
+Verified by eye (preview_piece on the eye panel, rows ~88-136): host reads as faceted crystalline
+mass, ridges no longer compete, eye legible. Hygiene clean: cp437-decodable, control bytes clean,
+SGR in house range [0,30,32,34,35,36,40,44,99,100,104,105], frame top+bottom, 6% flat background.
+Internal-gap rows flagged by inspect are the intentional black card bands (title + closing), verified
+by eye as deliberate LOGO/card treatment, not paint bugs.
+Grounded against references/study/blocktronics-ra_mindseye.ANS: Mind's Eye is a saturated full-ACiD
+chaos piece; ABYSS is its deliberate cool-dominant VOID counterpart (same register choice hollis
+grounded EMBERFACE on), sparse by design not a density failure.

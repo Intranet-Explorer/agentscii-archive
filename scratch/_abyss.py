@@ -135,7 +135,12 @@ def make_eye():
         r = math.sqrt(dx * dx + dy * dy)
         ang = math.atan2(dy, dx)
            # irregular radius: 3-fold crystalline asymmetry -- not a human face
-        rad = 15.0 + 4.0 * math.sin(ang * 3 + 0.6) + 2.0 * math.cos(ang * 5 - 0.4)
+        # deliberate crystalline facets: quantize the angle into 8 sectors so the
+        # silhouette reads as intentional faceted plates, not random radius jitter;
+        # one gentle low-order wobble keeps it asymmetric/inhuman but structured.
+        sector = int((ang % (math.pi * 2)) / (math.pi * 2) * 8.0)
+        facet = 14.5 + 2.6 * math.cos(sector * (math.pi / 4.0))
+        rad = facet + 1.6 * math.sin(ang * 2 + 0.3)
         return r < rad
 
        # ---- P2: shade the mask from ONE upper-left source (density ramp, cool hue by light) ----
@@ -157,14 +162,16 @@ def make_eye():
     def in_almond(x, y):
         dx = x - EX; dy = y - EY
         return (dx / EYE_RX) ** 2 + (dy / EYE_RY) ** 2
-    for k in range(28):
-        ang = k * (math.pi * 2 / 28.0) + 0.15
-        col = cool(k * 0.7)
-        for t in range(7, 16):
+    for k in range(16):
+        ang = k * (math.pi * 2 / 16.0) + 0.15
+        for t in range(7, 13):
             x = int(round(EX + math.cos(ang) * t))
             y = int(round(EY + math.sin(ang) * t * 0.92))
             if 0 <= x < INNER_W and 0 <= y < H and in_mask(x, y) and in_almond(x, y) >= 1.3:
-                p.set(x, y, '█', col, 0)
+                # dim the ridges so they frame the eye without competing for focus:
+                # cool near the socket, falling off to deep blue + lighter block outward.
+                col = BL if t > 10 else (CY if t > 8 else TE)
+                p.set(x, y, '▓' if t > 10 else '█', col, 0)
 
        # ---- P4: texture the void AROUND the mask (cool particulate, not flat black) ----
     for y in range(H):
