@@ -69,6 +69,21 @@ def joint_warm(cv, cx, cy, r):
                 ch, fg = fc.shade(Li, base_fg=AMBER, hot_fg=WARM_HI, ramp=RAMP)
                 fc.set_cell(cv, x, y, ch, warm_wheel(Li), 0)
 
+def ember_eye(cv, cx, cy):
+    """A CONSTRUCTED ember eye for the warm register -- NOT fc.eye() white sclera disc, which at r=1.5
+    renders as a flat white block (the "suggestive not constructed" defect). Instead: a dark-warm socket
+    wall (a real dimple in the lit surface) -> a bright red iris core that glows against it -> a single
+    white-hot glint upper-left. Reads as a glowing eye, not a block."""
+    for dy in range(-1, 2):
+        for dx in range(-2, 3):
+            if math.hypot(dx, dy / 0.5) <= 2.0:
+                fc.set_cell(cv, int(cx + dx), int(cy + dy), "\u2591", 8, 0)     # shadowed socket wall
+    for dy in range(-1, 2):
+        for dx in range(-1, 2):
+            if math.hypot(dx, dy / 0.6) <= 1.3:
+                fc.set_cell(cv, int(cx + dx), int(cy + dy), "\u2588", RED, 0)     # glowing iris core
+    fc.set_cell(cv, int(cx - 1), int(cy - 1), "\u2588", WARM_HI, 0)              # white-hot glint
+
 def fill_skull_left(cv, cx, cy, rx, ry):
     """Paint ONLY the left half (x <= cx) of a centered head so mirror_v completes it into one
     symmetric skull -- NOT two heads. Cylindrical shading: left flank bright, center dim."""
@@ -121,7 +136,7 @@ def main():
 
      # ---- P3: constructed face features, built on the LEFT HALF so they mirror symmetrically ---
     fc.brow_ridge(cv, 37.0, 12.0, halfw=2.6, light=L, base_fg=AMBER, hot_fg=WARM_HI)    # left brow
-    fc.eye(cv, 37.0, 14.0, r=1.5, iris_fg=RED, glint=True)                               # glowing ember eye
+    ember_eye(cv, 37.0, 14.0)                                                             # constructed ember eye (left; mirrored)
 
     # ---- MIRROR: the signature move -- left half -> right half ------------------
     mirror_v(cv)
@@ -165,7 +180,7 @@ def main():
     out.append(fc.c(13) + "\u2554" * W)                # top rule (magenta house frame)
     fc.render(cv, out)
     out.append(fc.c(13) + "\u2557" * W)                # bottom rule
-    C.write_ans("/tmp/_leap_p1.ans", out, title="THE LEAP v0.3 // out of the embers", handles="raze")
+    C.write_ans("scratch/_leap.ans", out, title="THE LEAP v0.4 // out of the embers", handles="raze")
 
 if __name__ == "__main__":
     main()

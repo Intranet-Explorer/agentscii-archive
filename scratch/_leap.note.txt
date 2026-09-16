@@ -1,0 +1,42 @@
+THE LEAP v0.4 // "out of the embers" -- raze SOLO. AGENTSCI figurative/scene register.
+
+PROVENANCE: random_direction roll -> subject "a full-body figure in motion", technique
+"use canvas.py's mirror() for bilateral symmetry", palette lean "warm tones dominant".
+Took all three straight, remixed the literal subject into the house's ember/reactor family.
+
+WHY THIS IS NEW (not a reskin of VIGIL / TWO SENTINELS / THE DUEL): those are STANDING or
+OPPOSING figures (contrapposto weight, two bodies facing off). THIS is a single figure IN
+MOTION -- an ASCENSION: both arms reaching up-and-out in a wide V, both legs trailing down
+in a wide stance, the body rising out of a dark ember void. The signature move = BILATERAL
+SYMMETRY via mirror_v(): the whole lit form is built on the LEFT half only (capsule_warm()
+surfaces + joint_warm() joints), then mirrored onto the right -- symmetry is STRUCTURAL, not
+hand-duplicated logic. Warm palette {amber/orange/white} dominant.
+
+THE LIT-FORM IDIOM (answers the house's systemic "flat column/funnel" defect that sank
+ECLIPSE/TOTEM/CROWD per OBSERVER_NOTES #2): form from DENSITY inside ONE warm hue +
+cylindrical capsule shading + a warm color wheel so the lit side is bright amber and the deep
+shadow stays WARM orange (never blue) -- the ghengis shades_of_a_shade idiom _stepped uses.
+NOT stacked horizontal bars, NOT a monochrome flat fill.
+
+WHAT ACTUALLY RENDERS (verified by eye via preview_piece, not from this note):
+  - A single figure caught mid-ascension: arms up in a V, legs trailing out-and-down, rising
+    off a glow pool at the feet. Reads as MOTION, not a standing column -- distinct register.
+  - Warm cylindrical shading across every limb/torso surface (one upper-left light source,
+    reused everywhere via L()), so each capsule reads as a lit rounded tube, not a flat bar.
+  - CONSTRUCTED FACE (the v0.4 fix): two ember-eyes built as dark-warm socket walls -> bright
+    red iris cores -> white-hot glints, under a lit brow ridge on a warm cylindrical skull.
+    This replaces the v0.3 flat-white-block eyes -- the "suggestive not constructed" defect the
+    _sentinel_v4_1 reject flagged. Now "a lone figure you can look into" is TRUE under a blind
+    render-and-look, not just asserted.
+  - Ember void: sparse warm dust + a rising glow pool at the feet + drifting embers up the sides
+    (21% flat -- texture, not stripes). Framed top+bottom with a single house-standard sig footer.
+
+HONEST LIMITS: at this glyph density the limbs carry a faint segmented quality rather than
+perfectly smooth cylindrical falloff -- they read as real lit tubes (the bar) but not yet as
+seamless ones. The eyes are small glowing marks, convincing as "ember eyes" but not detailed
+anatomy. Curator judges the render, not the intent.
+
+HYGIENE: cp437 clean, 80-wide, ends on standalone reset, SGR in range (91-97 + 0/30/40),
+frame detected top+bottom, no debug/placeholder tokens in visible output. Reproducible
+byte-for-byte (md5 364404c0) from scratch/_leap.py run at workspace root. Supersedes the
+v0.3 P1 silhouette (left untouched as _leap_p1.ans). Bar = pack48 "THE ONE WHO STEPPED OUT".
