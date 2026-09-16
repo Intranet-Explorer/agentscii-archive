@@ -31,6 +31,7 @@
 
 import math
 import re
+import random
 
 W = 80
 H = 46
@@ -161,7 +162,8 @@ def specular_shade(cv, region_fn, Lfn, x_hl, y_hl, hl_r,
             set_cell(cv, x, y, ch, fg, 0)
 
 
-def photoreal_gradient(cv, region_fn, cx, cy, hue_stops, max_dist=None):
+def photoreal_gradient(cv, region_fn, cx, cy, hue_stops, max_dist=None,
+                        aspect=0.5):
     """Smooth multi-hue radial gradient across a region -- studied from
     references/study/blocktronics-avg_16c.ANS (a real ACiD piece using a
     genuinely photorealistic multi-color transition, not the house's usual
@@ -173,28 +175,53 @@ def photoreal_gradient(cv, region_fn, cx, cy, hue_stops, max_dist=None):
     skin tones, sunsets, painterly portrait work -- anywhere the reference
     shows a real color SPECTRUM, not just one hue's brightness varying.
 
+    BUG FIXED 2026-09-16 (found building a real piece, not a synthetic
+    test): two real defects. (1) distance had no aspect correction -- on a
+    canvas much wider than tall, x dominates the distance calc entirely
+    and rows near cy read as nearly identical, producing horizontal
+    banding instead of a radial look (the same aspect lesson eye() taught
+    earlier -- terminal cells are ~2x taller than wide). (2) hue selection
+    hard-switched at the interval midpoint (local_t<0.5 picks one stop,
+    else the next) instead of interpolating -- that alone guarantees
+    stepped solid-color blocks, not a gradient, at ANY aspect ratio. Fixed
+    both: aspect-corrected distance (matches eye()'s convention), and a
+    real per-cell probabilistic dither between adjacent stops so the
+    transition is visually smooth instead of a hard color swap.
+
     region_fn(x,y) -> bool: where the gradient applies.
     hue_stops: an ordered list of fg color indices, e.g. [11, 9, 1, 5]
       (bright yellow -> amber -> red -> magenta) -- the gradient walks
       through them in order from center (index 0) to edge (last index).
-    max_dist: gradient radius; defaults to covering the whole region."""
+    max_dist: gradient radius; defaults to covering the whole region.
+    aspect: cell aspect ratio correction (default 0.5, matching eye()) --
+      pass 1.0 if calling on a region you've already aspect-corrected
+      yourself, or if you specifically want a non-circular gradient."""
     if max_dist is None:
         max_dist = max(len(cv[0]), len(cv)) / 2.0
     n = len(hue_stops)
+    rng = random.Random(0)
     for y in range(len(cv)):
         for x in range(len(cv[0])):
             if not region_fn(x, y):
                 continue
-            d = math.hypot(x - cx, y - cy) / max_dist
+            d = math.hypot(x - cx, (y - cy) / aspect) / max_dist
             d = max(0.0, min(1.0, d))
             # which pair of adjacent hue stops does this distance fall
-            # between, and how far through that pair (for the density ramp
-            # to carry the local transition, not just a hard color swap)
+            # between, and how far through that pair. Real dither instead
+            # of a hard midpoint switch (the second bug found 2026-09-16):
+            # probabilistically pick the near or far stop weighted by
+            # local_t, so the transition is a scattered blend of both
+            # colors rather than a hard-edged seam at local_t==0.5.
             pos = d * (n - 1)
             idx = min(n - 2, int(pos))
             local_t = pos - idx
-            fg = hue_stops[idx] if local_t < 0.5 else hue_stops[idx + 1]
-            ramp_idx = int(abs(local_t - 0.5) * 2 * (len(RAMP) - 1))
+            fg = hue_stops[idx + 1] if rng.random() < local_t else hue_stops[idx]
+            # density ramp carries brightness WITHIN whichever stop got
+            # picked -- peaks mid-transition (visual texture), settles to
+            # a solid full-block glyph at each stop's own center so the
+            # named hue actually reads clearly there, not just noise.
+            dist_from_stop_center = min(local_t, 1.0 - local_t) * 2.0
+            ramp_idx = int(dist_from_stop_center * (len(RAMP) - 1))
             set_cell(cv, x, y, RAMP[ramp_idx], fg, 0)
 
 
@@ -211,20 +238,56 @@ def brow_ridge(cv, cx, cy, halfw, light, base_fg=7, hot_fg=15):
 
 
 def eye(cv, cx, cy, r=1.4, iris_fg=96, glint=True):
-    """A CONSTRUCTED eye: dark socket ring -> colored iris -> white glint. Not a dot.
-    This is the difference between 'a face with eyes' and 'a face with dots for eyes'.
+    """A CONSTRUCTED eye: not a flat dot, not a single color.
 
-    BUG FOUND + FIXED 2026-09-15: distance was measured as plain Euclidean
-    (x,y) cell-distance, but terminal character cells are roughly TWICE as
-    tall as they are wide -- so a "circle" in cell-coordinates rendered as
-    a tall vertical oval on screen, collapsing socket/sclera/iris into an
-    unrecognizable vertical stripe (confirmed: broken at every radius
-    tested, r=1.4 through r=3.5, not just small ones). Fix: scale the Y
-    delta by ASPECT before computing distance, so the shape is actually
-    round on screen, not just round in the cell grid."""
+    REDESIGNED 2026-09-15 after finding it was fundamentally broken at
+    every radius tested (r=1.4 through r=6). Two separate bugs, both real:
+    (1) distance was measured as plain Euclidean (x,y) cell-distance, but
+    terminal cells are ~2x taller than wide, so a "circle" rendered as a
+    squashed vertical stripe -- fixed with an aspect-corrected distance.
+    (2) even fixed, concentric RINGS (socket -> sclera -> iris) fundamentally
+    alias into flat horizontal color bands on a low-resolution block grid
+    at the radii actually used in real pieces (r=1.4-3) -- a thin 1-cell
+    ring just doesn't have enough pixels to read as a curve at that scale,
+    aspect-correct or not. Confirmed by direct rendered-image inspection,
+    not assumed.
+
+    Fix: two different constructions depending on scale, not one ring
+    model stretched across all sizes.
+      - r < 2.2 (the common case: a face-scale eye): a SMALL CLUSTER, not
+        concentric rings -- a solid iris disc, an off-center glint, and a
+        few individual dark accent marks (not a full ring) suggesting a
+        socket without needing enough resolution to render a real circle.
+        This is closer to how real small-scale ANSI eyes are actually
+        built (see references/study/somms-neo_tokyo.ANS) -- a handful of
+        deliberate marks, not a scaled-down version of a big shape.
+      - r >= 2.2 (a large/ambition-tier eye with real pixel budget):
+        the aspect-corrected ring construction, which DOES read correctly
+        at this scale (verified via rendered test at r=4-6)."""
     ASPECT = 0.5   # cells are ~2x taller than wide; shrink y-delta to compensate
     def dist(x, y):
         return math.hypot(x - cx, (y - cy) / ASPECT)
+
+    if r < 2.2:
+        # --- small-scale cluster construction -----------------------------
+        icx, icy = int(round(cx)), int(round(cy))
+        # iris: a small solid disc, 1-2 cells depending on r
+        iris_r = max(1, r * 0.7)
+        for y in range(icy - 2, icy + 3):
+            for x in range(icx - 2, icx + 3):
+                if dist(x, y) <= iris_r:
+                    set_cell(cv, x, y, "\u2588", iris_fg, 0)
+        # dark accent marks flanking the iris (suggest a socket without a
+        # full ring) -- left/right only, not top/bottom, since the aspect
+        # squash means top/bottom marks sit too close to read as separate
+        set_cell(cv, icx - 2, icy, "\u2591", 8, 0)
+        set_cell(cv, icx + 2, icy, "\u2591", 8, 0)
+        # glint: single bright cell, offset upper-left of the iris center
+        if glint:
+            set_cell(cv, icx - 1, icy - 1, "\u2588", 15, 0)
+        return
+
+    # --- large-scale ring construction (r >= 2.2) -------------------------
     # socket: dim shadowed ring around the eyeball
     for y in range(int(cy - r - 1), int(cy + r + 2)):
         for x in range(int(cx - r - 1), int(cx + r + 2)):
