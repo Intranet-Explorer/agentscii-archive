@@ -252,16 +252,6 @@ def make_keeper():
     KX, KY = 38.0, 18.0
     def KL(x, y):
         return fc.light_field(x, y, KX, KY, lmax=28.0, ambient=0.18)
-
-     # v4 (hollis joint pass): the legs sit ~31 units below KL at (38,18) -- past lmax=28, so Li clamps
-     # to the 0.18 ambient floor and lit_wheel() maps every leg cell to one STEEL color: flat solid-blue
-     # stacked cells (the OBSERVER #2 defect that killed v2, still localized to the lower body in v3). Fix =
-     # give the LOWER body its own light term: the SAME lamp direction (warm on the left/lamp flank, cool on
-     # the right/shadow flank) but positioned to actually reach down the legs, so Li varies continuously
-     # hip->foot and each limb reads as a lit cylinder, not a flat fill.
-    KX2, KY2 = 43.0, 40.0
-    def KL2(x, y):
-        return fc.light_field(x, y, KX2, KY2, lmax=15.0, ambient=0.30)
     joint_tube(p, LAMPX, LAMPY, 2.2, Lfn=L)          # the lamp head (warm, lit)
     for y in range(LAMPY - 3, LAMPY + 3):
         for x in range(LAMPX - 3, LAMPX + 4):
@@ -308,12 +298,12 @@ def make_keeper():
     capsule_tube(p, 53.0, 27.0, 54.0, 33.0, halfw=1.6, Lfn=KL)
 
     # legs -- a standing contrapposto stance (weight on one leg), lit tubes
-    capsule_tube(p, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL2)   # weight-bearing left thigh
-    joint_tube(p, 44.0, 45.0, 2.1, Lfn=KL2)
-    capsule_tube(p, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL2)             # left shin to foot
-    capsule_tube(p, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL2)   # relaxed right thigh
-    joint_tube(p, 49.0, 45.0, 2.1, Lfn=KL2)
-    capsule_tube(p, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL2)             # right shin to foot
+    capsule_tube(p, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL)   # weight-bearing left thigh
+    joint_tube(p, 44.0, 45.0, 2.1, Lfn=KL)
+    capsule_tube(p, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL)             # left shin to foot
+    capsule_tube(p, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL)   # relaxed right thigh
+    joint_tube(p, 49.0, 45.0, 2.1, Lfn=KL)
+    capsule_tube(p, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL)             # right shin to foot
 
     # the held lantern (warm glow in the left hand) -- a second small light accent
     lamp_glow(p, 32.0, 29.0, R=5)

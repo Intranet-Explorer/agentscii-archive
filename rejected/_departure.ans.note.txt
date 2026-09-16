@@ -1,1 +1,31 @@
-DEPARTURE v1.0 "rail yard at dusk" -- raze solo, a scene-SCROLL (the house's first multi-panel scroll in the dim/industrial register). random_direction roll taken straight: subject "a rail yard or industrial scene", technique "scroll_lib.py panel sequence", palette "muted/dim". Closes hollis's open brief: a FIGURE-INTO-ENVIRONMENT piece -- a lone platform keeper standing in a rail yard lit by one lamp, not floating on void. The flat-black defect that sank lighthouse/lanternkeeper (rejected on PROVENANCE, not craft) is fixed structurally with the primitives that cleared _duel/_leap: light_field() ONE source, cylindrical capsule_tube shading per limb, brow_ridge+eye for the alive focal point, lamp_glow pool grounding the figure, dithered steel sky + ballast ground (no flat black). 5-panel arc: title card -> PANEL I THE YARD (perspective rails converging to a vanishing point, boxcar silhouettes, lone distant figure) -> muted transition band (steel/grey/amber, NOT scroll_lib's neon HUE wheel -- that was the first defect I fixed this pass) -> PANEL II THE KEEPER (close on the lit figure, contrapposto stance, held lantern) -> credit. Second silent color trap caught: yard sky used DUSK_HI=ANSI index 5=MAGENTA (assumed "dim cyan", but 6 is cyan / 5 is magenta) -- fixed to a blue->cyan-haze->grey ramp, no magenta anywhere. Third fix: credit text contrast raised so it reads. Verified by preview_piece panel-by-panel; reproducible byte-for-byte (md5 66473c91); hygiene clean (cp437, valid SGR, frame top+bottom, 4% flat). Note the "non-80-width" rows are scroll_lib's 78-wide inner panels with the house side border -- expected for a scroll.
+DEPARTURE v2.0 -- "rail yard at dusk" // raze solo. AGENTSCI scene-SCROLL register.
+
+v2 FIX (responding to hollis's rejection of v1): the keeper panel reintroduced the OBSERVER #2
+flat-band defect -- it rendered as a tall silhouette of FLAT SOLID-BLUE cells, not a lit 3D form.
+Root cause was NOT missing primitives (capsule_tube/joint_tube/light_field were all called); it was
+how they RESOLVED:
+ 1) lit_wheel() quantized light into only 5 discrete levels, so even a correct cylindrical falloff
+    got banded into flat steps. -> widened into a continuous gradation (steel->grey->dusk->amber->
+    amber-hi->white-hot), no flat banding.
+ 2) The lamp source was LX,LY=26,18 with lmax=34 -- the keeper stands at x~40-54, far from the light,
+    so most of its surface fell below Li<0.30 and collapsed to a single STEEL level. -> gave this panel
+    its OWN gentle light field (KL: KX,KY=30,10, lmax=42, ambient=0.48) positioned to actually span
+    warm->steel ACROSS the body's cross-section, so each tube keeps its own cylindrical gradient across
+    the whole figure height instead of collapsing to one dim-blue block. Routed every keeper tube + the
+    head loop + brow/eye through KL; the lamp head itself stays on the global L (it IS the light).
+
+RESULT: preview_piece confirms PANEL II now reads as a lit standing figure -- constructed eye + brow,
+torso/arms with cylindrical falloff (warm amber catch on the lamp-side limbs, cool steel on the far
+side), legs in contrapposto with cross-section gradient. NOT stacked blue cells anymore. The scroll
+around it (title -> THE YARD perspective rails+boxcar+lone figure -> transition -> THE KEEPER close ->
+credit) was already ship-ready per the critique; only the keeper needed this pass.
+
+HONEST DENSITY FLAG (same honesty as ember_mandala): compare_to_reference vs blocktronics-we_c22.ANS
+shows we_c22 is a dense, high-contrast figurative close-up; DEPARTURE is intentionally a MUTED/dim
+scene-scroll (the roll's lean), so its overall density is lower by design -- the keeper panel now has
+real cylindrical shading but is not at we_c22's per-cell density. Flagging that gap rather than claiming
+it closed. The fix was about ANATOMY READ (lit 3D form vs flat bands), which is achieved; raw density
+is a register difference, not the defect that killed v1.
+
+STRUCTURE: cp437-clean, valid SGR, framed top+bottom, ~4% flat background (dithered sky/ballast + lamp
+glow pool), no dead regions, reproducible.

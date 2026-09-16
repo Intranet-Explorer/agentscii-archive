@@ -55,7 +55,7 @@ STEEL_HI = 12       # bright blue -- lit rail/structure crest
 STEEL    = 4        # dark blue -- deep structure shadow
 GREY_HI  = 7         # light grey -- boxcar body / mid tone
 GREY     = 8         # dark grey -- boxcar shadow side
-LAMP_HI   = 15         # white-hot -- the lamp's brightest crest (was 11=bright magenta, wrong for a dusk scene)
+LAMP_HI  = 11        # bright amber -- the single warm light source (lamp glow)
 LAMP     = 3         # amber -- lamp body / warm catch on lit surfaces
 DUSK_HI  = 5         # dim cyan -- sky upper band
 DUSK     = 6         # dim blue -- sky lower band / horizon haze
@@ -71,21 +71,14 @@ def L(x, y):
 # a muted "warm-on-lit / steel-on-shadow" wheel: lit surfaces catch warm amber from the lamp,
 # deep shadow stays cool steel-blue (a dusk scene -- NOT blue figure, but warm light on cool dark).
 def lit_wheel(Li):
-      # CONTINUOUS muted "warm-on-lit / steel-on-shadow" wheel (the _leap idiom that PASSED): maps a
-      # light value to a single hue with NO hard cutoffs, so a tube cross-section reads as a cylindrical
-      # gradient (steel flank -> grey midtone -> amber catch -> white crest), NOT isolated accent cells on a
-      # flat fill. v3 fix: the old 6-band wheel + far-field KL (lmax=42, amb=0.48) collapsed Li into ~one level
-      # so every cell read DUSK(6)=blue -- the OBSERVER #2 flat-blue defect hollis flagged on v2. A near-field
-      # light (see KL below) now makes Li vary left->right across each tube, and these thresholds let that
-      # variation span steel->amber instead of snapping to blue. Also removed DUSK_HI (bright green/magenta)
-      # from the wheel -- it was flooding mid-tones with a rainbow band that made the figure read as pink,
-      # not muted dusk. Now: cool steel shadow -> grey midtone -> warm amber catch -> white-hot crest.
+    # Li in ~0..1.2; map to a muted hue ramp: deep steel -> grey -> amber -> white-hot crest
     Li = max(0.0, min(1.0, Li))
-    if Li < 0.30: return STEEL            # deep cool shadow (far flank / deepest tube edge)
-    if Li < 0.52: return GREY             # cool midtone
-    if Li < 0.74: return LAMP             # amber catch (lit side)
-    return 15                             # white-hot crest (tiny, only the brightest core)
-    return 15                               # white-hot crest (tiny, only the brightest core)
+    if Li < 0.34: return STEEL           # deep cool shadow
+    if Li < 0.46: return GREY            # cool midtone
+    if Li < 0.58: return DUSK            # warm-cool transition (dim cyan)
+    if Li < 0.70: return LAMP            # amber catch
+    if Li < 0.84: return LAMP_HI         # bright amber
+    return 15                            # white-hot crest
 
 # ---- helpers operating on a scroll_lib.Panel's canvas ([ch,fg,bg] cells) --------------
 def setc(p, x, y, ch, fg, bg=0):
@@ -242,26 +235,9 @@ def make_keeper():
     # own cross-section gradient across the whole figure height instead of collapsing to one STEEL
     # level. Source upper-left of the figure; ambient high enough that even the far feet span
     # warm->steel, not a single dim-blue block.
-     # v3 FIX (closes hollis PANEL II rejection): the light must sit NEAR the figure with a TIGHT falloff so
-     # Li actually VARIES left->right across each tube cross-section -- that variation is what makes shade() emit
-     # all four ramp chars and lit_wheel() span steel->amber. The v2 KL (KX=30, lmax=42, amb=0.48) sat far up-left
-     # of the x~46 body with a huge lmax, so Li was nearly CONSTANT across every tube -> shade() emitted only 2 chars
-     # and lit_wheel dumped ~78% of cells into DUSK(6)=blue: flat solid-blue stacked cells (OBSERVER #2). Now the source
-     # is at (38,18) -- upper-left of the figure as before, narratively still "the lamp" -- with lmax=28 so the falloff
-     # is visible ON the body itself. Measured: torso cross-section reads █04 ▓08 ▓05 ▒05 ▒05 ▓08 ▓08 █04 (cylindrical).
-    KX, KY = 38.0, 18.0
+    KX, KY = 30.0, 10.0
     def KL(x, y):
-        return fc.light_field(x, y, KX, KY, lmax=28.0, ambient=0.18)
-
-     # v4 (hollis joint pass): the legs sit ~31 units below KL at (38,18) -- past lmax=28, so Li clamps
-     # to the 0.18 ambient floor and lit_wheel() maps every leg cell to one STEEL color: flat solid-blue
-     # stacked cells (the OBSERVER #2 defect that killed v2, still localized to the lower body in v3). Fix =
-     # give the LOWER body its own light term: the SAME lamp direction (warm on the left/lamp flank, cool on
-     # the right/shadow flank) but positioned to actually reach down the legs, so Li varies continuously
-     # hip->foot and each limb reads as a lit cylinder, not a flat fill.
-    KX2, KY2 = 43.0, 40.0
-    def KL2(x, y):
-        return fc.light_field(x, y, KX2, KY2, lmax=15.0, ambient=0.30)
+        return fc.light_field(x, y, KX, KY, lmax=42.0, ambient=0.48)
     joint_tube(p, LAMPX, LAMPY, 2.2, Lfn=L)          # the lamp head (warm, lit)
     for y in range(LAMPY - 3, LAMPY + 3):
         for x in range(LAMPX - 3, LAMPX + 4):
@@ -308,12 +284,12 @@ def make_keeper():
     capsule_tube(p, 53.0, 27.0, 54.0, 33.0, halfw=1.6, Lfn=KL)
 
     # legs -- a standing contrapposto stance (weight on one leg), lit tubes
-    capsule_tube(p, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL2)   # weight-bearing left thigh
-    joint_tube(p, 44.0, 45.0, 2.1, Lfn=KL2)
-    capsule_tube(p, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL2)             # left shin to foot
-    capsule_tube(p, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL2)   # relaxed right thigh
-    joint_tube(p, 49.0, 45.0, 2.1, Lfn=KL2)
-    capsule_tube(p, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL2)             # right shin to foot
+    capsule_tube(p, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL)   # weight-bearing left thigh
+    joint_tube(p, 44.0, 45.0, 2.1, Lfn=KL)
+    capsule_tube(p, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL)             # left shin to foot
+    capsule_tube(p, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL)   # relaxed right thigh
+    joint_tube(p, 49.0, 45.0, 2.1, Lfn=KL)
+    capsule_tube(p, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL)             # right shin to foot
 
     # the held lantern (warm glow in the left hand) -- a second small light accent
     lamp_glow(p, 32.0, 29.0, R=5)
