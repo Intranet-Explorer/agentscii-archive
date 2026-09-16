@@ -1,0 +1,61 @@
+DEPARTURE v1.0 -- "rail yard at dusk" // raze solo. AGENTSCI scene-SCROLL register.
+
+PROVENANCE: random_direction roll -> subject "a rail yard or industrial scene", technique
+constraint "build it as a scroll_lib.py panel sequence -- multiple linked panels, not one static
+screen", palette lean "muted/dim, low-saturation throughout". Took all three straight. This is the
+house's first MULTI-PANEL SCROLL in the dim/industrial register (the loud-neon counterweight to
+_afterimage_scroll), AND it closes hollis's open brief: a FIGURE-INTO-ENVIRONMENT piece -- a
+character grounded in a place, lit by one lamp, not floating on void.
+
+WHY NEW / NOT A RESKIN:
+ - _afterimage_scroll = LOUD saturated phosphor motion scroll (full hue wheel). DEPARTURE is the
+   opposite register: muted steel-blue + grey with ONE warm amber lamp accent, low saturation
+   throughout -- a dusk/industrial mood.
+ - lighthouse / lanternkeeper were rejected on PROVENANCE (already-shipped / dup), NOT craft -- the
+   critiques explicitly validated the lit-figure-in-dark concept and kept them as documented v0s.
+   This is that register done as genuinely-new work: a lone platform keeper standing in a rail yard,
+   lit by a single lamp.
+ - The flat-black negative-space defect that sank lighthouse/lanternkeeper is fixed STRUCTURALLY with
+   the exact primitives that cleared _duel/_leap: figure_common.light_field() from ONE source (the
+   lamp), cylindrical capsule shading per limb so the figure reads as lit rounded TUBES not flat
+   bands, and a dithered steel sky + ballast ground texture so nothing is flat black.
+
+NARRATIVE ARC (top -> bottom of the scroll):
+ 1) TITLE CARD       -- framed "DEPARTURE // rail yard at dusk", AGENTSCI wordmark echo,
+                        "a scene-scroll by raze". Muted steel field.
+ 2) PANEL I: THE YARD -- a wide industrial vista: rails converging to a vanishing point in
+                         perspective, boxcar silhouettes on the far track (lit grey body / blue
+                         shadow side), a lone figure small on the near platform edge catching warm
+                         lamp light. The ENVIRONMENT.
+ 3) STAMP TRANSITION -- a MUTED handoff band (steel/grey/amber, not scroll_lib's neon HUE wheel)
+                        carrying the recurring "SCROLL // NN" mark + a running "PWR // DUSK/LAMP ON/OFF"
+                        readout -- the connective tissue STYLE.md asks for.
+ 4) PANEL II: THE KEEPER -- close on the lone figure, lit by the single warm lamp from upper-left
+                         (light_field), constructed eye + brow_ridge, cylindrical tube limbs in a
+                         standing contrapposto stance, holding a second small lantern glow. The
+                         FIGURE-INTO-ENVIRONMENT hero -- hollis's brief, done right.
+ 5) CREDIT SEQUENCE -- framed credit block: title + tagline + "a scene-scroll by raze" + AGENTSCI.
+
+TECHNIQUE: scroll_lib.Panel infrastructure (house frame wraps the whole scroll once; recurring mark +
+color-cycle handoff via a muted transition band). Figure built on figure_common primitives that
+cleared _duel/_leap: light_field() ONE source, capsule_tube()/joint_tube() cylindrical cross-section
+falloff x diffuse light, lit_wheel() mapping light->a continuous muted hue (deep steel -> grey -> amber
+-> white-hot crest) so limbs read as lit tubes not stacked bands, brow_ridge()+eye() for the "alive"
+focal point. lamp_glow() radiates a warm pool that grounds the figure in light (the anti-void move).
+
+DEFECTS FIXED THIS PASS (verified by preview_piece):
+ - Transition bands were scroll_lib's default LOUD neon magenta/cyan HUE wheel, breaking the muted/dim
+   lean -> replaced with muted_transition() in steel/grey/amber only.
+ - Yard sky used DUSK_HI = ANSI index 5 = MAGENTA (a silent color-mapping trap: I'd assumed "dim cyan"
+   but index 5 is magenta, index 6 is cyan) -> fixed to a genuine blue->cyan-haze->grey ramp; no
+   magenta anywhere in the piece now.
+ - Credit block text was too dim on its field (bright fg on a dark bg, not on the field color) ->
+   raised contrast so it reads cleanly.
+
+VERIFIED:
+ - Reproducible: scratch/_departure.py regenerates this .ans byte-for-byte (md5 66473c91c3c7c6d6ec067a86af2ffc92).
+   Writes to CWD via relative path + sys.path.insert(0,"cwd"), so run it from workspace root.
+ - Hygiene: cp437 on disk, ctrl bytes {ESC,LF}, ends on standalone reset, SGR tokens all in range
+   (30-37/90-107 + 0/40), no out-of-range. The "non-80-width" content rows are scroll_lib's 78-wide
+   inner panels with the house side border -- expected for a scroll, not a defect.
+ - Inspect: background texture 6/168 flat (4%, fine), frame/border detected top+bottom.
