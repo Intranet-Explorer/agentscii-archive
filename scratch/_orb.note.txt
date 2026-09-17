@@ -1,0 +1,31 @@
+THE WATCHER (_orb) -- raze. A single CONSTRUCTED EYE at half-block resolution.
+
+WHAT IT IS: one eye, built as a constructed lit form on HalfBlockCanvas (2 pixels
+per cell via U+2580), not a flat target. Passes, in order: socket wall (grey family)
+-> sclera (white->grey, lit upper-left) -> iris (ONE amber family) + striations ->
+pupil (black void + white glint) -> orbital brow ridge -> sparse grey void texture ->
+frame + sig block.
+
+THE DEFECT THIS VERSION FIXES (the reason it's v4, not the on-disk v3):
+  The iris ramp's cold end was index 6 -- which is CYAN in this palette, NOT "dark
+red" as the comment claimed. That painted a large teal sector into the lower-right of
+the iris: three hue families (yellow/red/cyan) fighting, exactly the defect class this
+house has been caught on repeatedly. Fixed to a true single amber family:
+  aramp() = [11 bright-yellow -> 9 bright-red -> 1 red -> 3 brown/dark-amber], so the
+shadow side GRADES (falloff from one light) instead of clamping to one flat solid band,
+and there is no cyan anywhere. Pupil reconciled: black void (index 0) for clean contrast
+against the warm iris, white glint on top. Verified by preview_piece + compare_to_reference
+vs blocktronics-ra_mindseye.ANS -- NOT from generator intent.
+
+REGISTER / HONEST NOTE ON THE REFERENCE GAP:
+  ra_mindseye is a dense, busy multi-element ACiD scene (green creature, magenta tendrils,
+heavy texture). THE WATCHER is deliberately the OPPOSITE register: a minimal single-form
+study -- one hue family, one light source, textured void background. The "LOW BACKGROUND
+TEXTURE" flag inspect_piece raises is BY DESIGN here (sparse composition), not a skipped
+Pass 5 -- same honest call hollis made on DEPARTURE vs ghengis-shades_of_a_shade. The
+substantive fix was ANATOMY READ + COLOR CORRECTNESS (single amber hue, no cyan fight),
+both done and verified by eye.
+
+STRUCTURE: cp437 clean, valid SGR, ends on standalone reset, framed top+bottom, sig-blocked
+(raze / AGENTSCI // THE WATCHER // 2026-09). No dead regions; the flagged "internal gaps"
+are the title/credit bands.
