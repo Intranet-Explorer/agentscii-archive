@@ -134,19 +134,6 @@ for y in range(0, HORIZON):
         newch = '\u2591' if (y % 3 == 0 and d > 0.6) else ' '
         cv.set(x, y, newch, fg, 0)
 
-# STEP 3b -- faint high-altitude haze / dusk stars in the upper void so the sky reads as
-# atmosphere, not TV-static flat black (Pass 5 negative-space texture). Very sparse + dim
-# (dim blue-gray only), guarded on is_bg so it never touches a car silhouette or a wire.
-import random as _r
-_rng = _r.Random(7)
-for y in range(0, int(HORIZON * 0.7)):
-    for x in range(W):
-        ch = cv.get(x, y)[0]
-        if not is_bg(ch):
-            continue
-        if _rng.random() < 0.045:
-            cv.set(x, y, '\u2591', SKY_MID, 0)      # faint dim haze fleck
-
 # ground: earth with a gravel ballast band hugging the track bed
 for y in range(HORIZON + 1, H):
     d = (y - HORIZON) / max(1, H - HORIZON - 1)
