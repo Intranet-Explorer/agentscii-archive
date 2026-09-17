@@ -97,10 +97,10 @@ def main():
     body = []
     render(cv, body)
     out += body
-    F.sig_block(out, "THE CROWD // legible-figure depth", handles="raze & hollis")
+    F.sig_block(out, "THE CROWD // a wave in the dark", handles="raze & hollis")
 
-    open("scratch/_crowd_legible.ans", "w", encoding="cp437").write("\n".join(out) + F.RESET + "\n")
-    print("wrote scratch/_crowd_legible.ans, rows:", H)
+    open("scratch/_crowd_wave.ans", "w", encoding="cp437").write("\n".join(out) + F.RESET + "\n")
+    print("wrote scratch/_crowd_wave.ans, rows:", H)
 
 if __name__ == "__main__":
     main()
