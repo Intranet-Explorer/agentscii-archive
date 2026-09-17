@@ -137,18 +137,23 @@ shade_boxcar(62, 13, 7)
 # "dusk" -- a real warm/cool split, not pure saturated blue-on-black (which reads as night). Applied
 # AFTER the bodies are shaded so it recolors car cells only (is_bg guard keeps it off the field).
 # ---------------------------------------------------------------------------
-CAR_XR = [(6,21),(24,39),(42,59),(62,75)]   # x-ranges of the four placed cars
+CAR_XR = [(6,21),(24,39),(42,59),(62,75)]    # x-ranges of the four placed cars
+# The low dusk sun (low-right) catches each car's TOP-RIGHT edge in a bright warm rim/crest,
+# grading down to dim orange toward the base; the LEFT shadow side stays cool blue. A real
+# warm/cool split -- this is what EARNs 'dusk' instead of pure saturated blue-on-black (night).
 for x0,x1 in CAR_XR:
     midx = (x0 + x1) // 2
-    for y in range(TRACK_Y - 8, TRACK_Y + 1):
+    topy = TRACK_Y - 8
+    for y in range(topy, TRACK_Y + 1):
         for x in range(x0, x1):
             c = cv.get(x, y)
             if not is_bg(c[0]):                 # only recolor actual car cells
                 warm = x >= midx               # right face catches the low sun
                 if warm:
-                    fg = 3 if c[1] in (4,8,7) else 11   # amber/orange on lit faces; keep hot crest bright
+                    near_top = (y - topy) <= 1   # bright warm rim/crest where the sun hits hardest
+                    fg = 11 if near_top else 9        # BRIGHT amber lit face -- reads as dusk warmth
                 else:
-                    fg = 4 if c[1] in (7,8) else c[1]    # cool blue shadow side
+                    fg = 4 if c[1] in (7,8) else c[1]     # cool blue shadow side
                 cv.set(x, y, None, fg, 0)
 
 # ---------------------------------------------------------------------------
@@ -184,6 +189,20 @@ for y in range(0, HORIZON):
             continue
         if _rng.random() < 0.03 + 0.05 * d:       # faint high-altitude haze flecks (cool up top)
             cv.set(x, y, '\u2591', SKY_MID if d < 0.8 else SKY_HAZE, 0)
+
+# WARM HORIZON GLOW: a low amber/orange haze band in the clear sky just above the horizon -- the
+# dusk sun's last light. Dim + varied (not a solid bar), brighter toward the sun (low-right). This is
+# what makes the field read as DUSK (warm/cool split) instead of pure blue-on-black night.
+for y in range(HORIZON - 4, HORIZON):
+    for x in range(W):
+        c = cv.get(x, y)
+        if not is_bg(c[0]):
+            continue
+        # brightness falls off with height above the horizon; warmer/brighter toward the sun (low-right)
+        h = HORIZON - 1 - y                          # 0 at horizon -> 3 just above it
+        if _rng.random() < 0.55 - 0.12 * h:          # denser right at the horizon, sparser higher up
+            fg = 11 if (x > 58 and h <= 1) else (9 if x > 40 else 3)
+            cv.set(x, y, '\u2591', fg, 0)
 
 # Ground: receding gravel -- scattered and DENSER toward the viewer, fading to near-void at the
 # horizon. No full-width stripes; density falls off with distance so it recedes. Warm-tinted near
@@ -225,23 +244,24 @@ for y in range(TRACK_Y + 1, H):
     t = (y - TRACK_Y) / max(1, H - TRACK_Y - 1)           # 0 at track bed -> 1 at bottom (viewer)
     spread = int(t * 34)                                   # rails fan out toward the viewer (downward)
     lx = int(VP_X - spread); rx = int(VP_X + spread)       # near ends of the two rails
-    if 0 <= lx < W: cv.set(lx, y, '\u2588', 7, 0)
-    if 0 <= rx < W and rx != lx: cv.set(rx, y, '\u2588', 7, 0)
+    if 0 <= lx < W: cv.set(lx, y, '\u2588', 8, 0)
+    if 0 <= rx < W and rx != lx: cv.set(rx, y, '\u2588', 8, 0)
 
 # perpendicular sleepers between the two rails -- spaced DENSER toward the viewer (recede upward).
-for i in range(16):
-    t = i / 15.0
-    y = int(TRACK_Y + 1 + t * (H - TRACK_Y - 2))           # stay within canvas (last row reserved for sig)
+for i in range(11):
+    t = i / 10.0
+    y = int(TRACK_Y + 1 + t * (H - TRACK_Y - 2))             # stay within canvas (last row reserved for sig)
     if not cv.in_bounds(0, y):
         continue
     spread = int(t * 34)
     lx, rx = int(VP_X - spread), int(VP_X + spread)
-    fg = 7 if t > 0.5 else (8 if t > 0.25 else STEEL_DK)   # dimmer far sleepers recede to near-void
+     # a RECEDING bed: far sleepers fall to near-void (black); only the nearest few are dim gray.
+     # dark-gray glyph so it reads as ballast texture, not solid white bars.
+    fg = 8 if t > 0.72 else STEEL_DK
     for x in range(max(0, lx), min(W, rx + 1)):
         c = cv.get(x, y)
         if is_bg(c[0]):
-            cv.set(x, y, '\u2593', fg, 0)
-
+            cv.set(x, y, '\u2592', fg, 0)
 # ---------------------------------------------------------------------------
 # STEP 4c -- receding ballast: gravel scattered DENSER toward the viewer and fading to near-void at
 # the horizon (already done in STEP 3's ground pass). Here we add a faint warm catch on the near-right
