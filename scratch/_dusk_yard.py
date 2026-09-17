@@ -24,7 +24,7 @@
 import sys, math
 sys.path.insert(0, "scratch")
 from figure_common import light_field, shade
-from canvas import Canvas, sgr, RAMP, write_ans, line
+from canvas import Canvas, sgr, RAMP, write_ans, line, flood_fill
 
 W = 80
 H = 46
@@ -43,7 +43,7 @@ WIRE      = 4       # catenary, dim steel-blue
 SIGNAL    = 11      # the single saturated accent -- amber signal lamp (the only life)
 # warm dusk light: low on the right horizon. Car bodies catch it on their RIGHT faces + roofs;
 # shadowed LEFT faces fall to near-black but stay legible via ambient.
-LX, LY = 76.0, HORIZON_Y if False else 24.0
+LX, LY = 76.0, 24.0
 LMAX      = 38.0
 AMBIENT   = 0.18
 
@@ -132,6 +132,26 @@ shade_tankcar(42, 17, 6)
 shade_boxcar(62, 13, 7)
 
 # ---------------------------------------------------------------------------
+# STEP 1b -- DUSK WARM/COOL SPLIT on the car bodies: the low sun (low-right) catches each car's
+# RIGHT face + roof in warm amber/orange; the LEFT shadow side stays cool blue. This is what earns
+# "dusk" -- a real warm/cool split, not pure saturated blue-on-black (which reads as night). Applied
+# AFTER the bodies are shaded so it recolors car cells only (is_bg guard keeps it off the field).
+# ---------------------------------------------------------------------------
+CAR_XR = [(6,21),(24,39),(42,59),(62,75)]   # x-ranges of the four placed cars
+for x0,x1 in CAR_XR:
+    midx = (x0 + x1) // 2
+    for y in range(TRACK_Y - 8, TRACK_Y + 1):
+        for x in range(x0, x1):
+            c = cv.get(x, y)
+            if not is_bg(c[0]):                 # only recolor actual car cells
+                warm = x >= midx               # right face catches the low sun
+                if warm:
+                    fg = 3 if c[1] in (4,8,7) else 11   # amber/orange on lit faces; keep hot crest bright
+                else:
+                    fg = 4 if c[1] in (7,8) else c[1]    # cool blue shadow side
+                cv.set(x, y, None, fg, 0)
+
+# ---------------------------------------------------------------------------
 # STEP 2 -- flood_fill defines the two large negative-space regions (SKY, GROUND),
 # stopping at the car silhouettes already placed. This is the roll's technique:
 # define large regions by flood, not hand-paint a per-cell field.
@@ -194,65 +214,45 @@ for x in range(12, 74, 9):                                       # droppers (wir
 # ---------------------------------------------------------------------------
 # STEP 4b -- the foreground track: TWO continuous single-glyph rails converging to a REAL vanishing
 # point ON THE HORIZON LINE (y=HORIZON, x=VP_X), ABOVE the car bases. The rails recede UPWARD toward
-# it; the near field (bottom third) is a clean track bed + a distinct platform/shed structure -- NOT a
-# white mass. This fixes DEFECTS 1 & 2: the camera now reads as a viewer on the near field looking
-# down the yard, and the bottom third is legible structure, not a blob.
+# it; the near field is a clean RECEDING TRACK BED -- gravel that fades toward the horizon and denser
+# toward the viewer -- NOT an undefined white mass. This fixes DEFECTS 1 & 2: the camera reads as a
+# viewer on the near field looking down the yard, and the bottom third is legible receding structure.
 # ---------------------------------------------------------------------------
 VP_X = 40.0
-VP_Y = HORIZON - 1.0        # vanishing point ON the horizon line, above the cars
+VP_Y = HORIZON - 1.0         # vanishing point ON the horizon line, above the cars
 
 for y in range(TRACK_Y + 1, H):
-    t = (y - TRACK_Y) / max(1, H - TRACK_Y - 1)          # 0 at track bed -> 1 at bottom (viewer)
-    spread = int(t * 30)                                  # rails fan out toward the viewer (downward)
-    lx = int(VP_X - spread); rx = int(VP_X + spread)      # near ends of the two rails
+    t = (y - TRACK_Y) / max(1, H - TRACK_Y - 1)           # 0 at track bed -> 1 at bottom (viewer)
+    spread = int(t * 34)                                   # rails fan out toward the viewer (downward)
+    lx = int(VP_X - spread); rx = int(VP_X + spread)       # near ends of the two rails
     if 0 <= lx < W: cv.set(lx, y, '\u2588', 7, 0)
     if 0 <= rx < W and rx != lx: cv.set(rx, y, '\u2588', 7, 0)
 
 # perpendicular sleepers between the two rails -- spaced DENSER toward the viewer (recede upward).
-for i in range(14):
-    t = i / 13.0
-    y = int(TRACK_Y + 1 + t * (H - TRACK_Y - 1))
-    spread = int(t * 30)
+for i in range(16):
+    t = i / 15.0
+    y = int(TRACK_Y + 1 + t * (H - TRACK_Y - 2))           # stay within canvas (last row reserved for sig)
+    if not cv.in_bounds(0, y):
+        continue
+    spread = int(t * 34)
     lx, rx = int(VP_X - spread), int(VP_X + spread)
-    fg = 7 if t > 0.4 else STEEL_DK                        # dimmer far sleepers recede to near-void
+    fg = 7 if t > 0.5 else (8 if t > 0.25 else STEEL_DK)   # dimmer far sleepers recede to near-void
     for x in range(max(0, lx), min(W, rx + 1)):
         c = cv.get(x, y)
         if is_bg(c[0]):
             cv.set(x, y, '\u2593', fg, 0)
 
 # ---------------------------------------------------------------------------
-# STEP 4c -- NEAR-FIELD STRUCTURE (bottom third): a distinct platform + a low shed roof so the
-# foreground reads as legible near-field architecture, not an undefined white mass. The platform is a
-# horizontal deck edge; the shed is a simple gabled roof over it on the left. Both catch the warm sun.
+# STEP 4c -- receding ballast: gravel scattered DENSER toward the viewer and fading to near-void at
+# the horizon (already done in STEP 3's ground pass). Here we add a faint warm catch on the near-right
+# of the bed so the low dusk sun reads across the foreground too, without piling white structure on.
 # ---------------------------------------------------------------------------
-PLAT_Y = H - 8            # platform deck top row
-# platform deck: a solid near-field band, lit warm on its right (toward the sun), cool on the left.
-for y in range(PLAT_Y, H):
-    for x in range(W):
+for y in range(H - 6, H - 1):
+    for x in range(48, W):
         c = cv.get(x, y)
-        if not is_bg(c[0]):
-            continue
-        warm = x > 44
-        fg = SKY_HAZE if (warm and _rng.random() < 0.5) else (7 if y >= PLAT_Y + 2 else 8)
-        cv.set(x, y, '\u2591', fg, 0)
-# platform deck edge -- one bright row so the top of the near field reads as a hard surface.
-for x in range(W):
-    cv.set(x, PLAT_Y, '\u2588', SKY_HAZE if x > 44 else 7, 0)
+        if is_bg(c[0]) and _rng.random() < 0.12:
+            cv.set(x, y, '\u2592', SKY_HAZE, 0)
 
-# low gabled shed roof over the left end of the platform (a near-field structure).
-SHED_X0, SHED_X1 = 2, 30
-for x in range(SHED_X0, SHED_X1):
-    t = abs(x - (SHED_X0 + SHED_X1) / 2.0) / ((SHED_X1 - SHED_X0) / 2.0)   # 0 at ridge -> 1 at eaves
-    ry = int(PLAT_Y - 3 + t * 3)
-    if cv.in_bounds(x, ry):
-        warm = x > (SHED_X0 + SHED_X1) / 2.0
-        cv.set(x, ry, '\u2588', SKY_HAZE if warm else 7, 0)
-# shed posts holding the eaves down to the platform deck.
-for px in (SHED_X0 + 1, SHED_X1 - 1):
-    for y in range(PLAT_Y - 2, PLAT_Y):
-        cv.set(px, y, '\u2502', STEEL_DK, 0)
-
-# ---------------------------------------------------------------------------
 # STEP 5 -- the single warm accent: an amber signal light on a post at the far right gap (x=76),
 # clear of every car body. The only saturated cell in the whole field.
 # ---------------------------------------------------------------------------
