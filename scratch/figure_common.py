@@ -467,7 +467,8 @@ def joint_dot(cv, cx, cy, r, Lfn, base_fg=7, hot_fg=15):
 
 def standing_figure(cv, hipx, hipy, Lfn, *,
                     height=18.0, stance="contrapposto",
-                    base_fg=7, hot_fg=15, iris_fg=96, one_eye=True):
+                    base_fg=7, hot_fg=15, iris_fg=96, one_eye=True,
+                    head_scale=1.0):
     """Build a full STANDING figure from shaded capsule surfaces + the head primitives.
     This is the joint-VIGIL unit: call it and you get a posed full-body figure lit by
     Lfn -- the gradient-anatomy idiom extended from a bust to a whole body.
@@ -481,7 +482,15 @@ def standing_figure(cv, hipx, hipy, Lfn, *,
     # --- proportions from hip point upward/downward ---------------------------
     torso_h = height * 0.34
     leg_h   = height * 0.46
-    head_r  = max(2.0, height * 0.11)
+    # head_scale enlarges the head beyond real proportions -- block-char anatomy
+
+    # needs bigger heads than a real human; at full-body scale a 0.11 ratio reads as
+
+    # a tiny head on a column. Default 1.0 keeps old behavior; pass ~1.6-2.0 for
+
+    # legible full-body figures (raze, crowd legibility fix).
+
+    head_r    = max(2.0, height * 0.11) * head_scale
     shoulder_y = hipy - torso_h
     neck_y     = shoulder_y - head_r * 0.4
     head_cy    = neck_y - head_r
