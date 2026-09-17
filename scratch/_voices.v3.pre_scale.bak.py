@@ -155,8 +155,8 @@ def shade_profile(cx, cy, R, dir, ramp):
             # radial normal from cranium center -> within-row variation (anti-band).
             rx = px - cr_cx; ry = py - cr_cy
             rd = math.hypot(rx, ry) or 1.0
-            nx = 0.72 * nx_face + 0.28 * (rx / rd)
-            ny = 0.72 * ny_face + 0.28 * (ry / rd)
+            nx = 0.55 * nx_face + 0.45 * (rx / rd)
+            ny = 0.55 * ny_face + 0.45 * (ry / rd)
             ldx, ldy = Ldir(px, py)
             l = nx * ldx + ny * ldy
             l = max(0.0, min(1.0, l))
@@ -216,10 +216,10 @@ def center(text, fg):
     left = pad // 2
     return sgr(fg) + " " * left + text + " " * (pad - left)
 out[1] = center("TWO VOICES v3", 15)
-out[2] = center("-- two complementary forms in exchange --", 94)
+out[2] = center("-- two constructed profiles, complementary phases --", 94)
 out.append(sgr(13) + "\u2550" * W)                       # bottom magenta rule
 
 write_ans("scratch/_voices.ans", out,
-          title="TWO VOICES v3 // dual-phase complementary study, woven exchange motif",
+          title="TWO VOICES v3 // supersede of pack36 // two constructed profiles",
           handles="raze")
 print("ok -- frame+title+sig written")

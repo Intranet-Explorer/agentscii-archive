@@ -357,8 +357,8 @@ def make_title():
             p.set(x, y, ' ', 0, 0)
     sl.stamp_wordmark(p, 9, "AGENTSCI", body_fg=STEEL_HI, halo_fg=GREY)
     p.put_text(18, CX - len("DEPARTURE") // 2, "DEPARTURE", LAMP_HI, 4)
-    p.put_text(20, CX - len("rail yard at dusk -- a scene-scroll by raze + hollis") // 2,
-                "rail yard at dusk -- a scene-scroll by raze + hollis", GREY_HI, 4)
+    p.put_text(20, CX - len("rail yard at dusk -- a scene-scroll by raze") // 2,
+                "rail yard at dusk -- a scene-scroll by raze", GREY_HI, 4)
     for x in range(8, IW - 8):
         setc(p, x, 23, '═', STEEL, 0)
     p.put_text(1, 1, "SCROLL // 01", LAMP, 4)
@@ -373,13 +373,13 @@ def make_credit():
             setc(p, x, y, '░' if m == 0 else ' ', STEEL, 0)
     # framed credit block
     p.put_text(4, CX - len("DEPARTURE") // 2, "DEPARTURE", LAMP_HI, 0)
-    p.put_text(6, CX - len("// rail yard at dusk -- a scene-scroll by raze + hollis") // 2,
-                "// rail yard at dusk -- a scene-scroll by raze + hollis", GREY_HI, 4)
+    p.put_text(6, CX - len("// rail yard at dusk -- a scene-scroll by raze") // 2,
+                "// rail yard at dusk -- a scene-scroll by raze", GREY_HI, 4)
     p.put_text(8, CX - len("a figure grounded in a place, lit by one lamp.") // 2,
                 "a figure grounded in a place, lit by one lamp.", STEEL_HI, 4)
     for x in range(10, IW - 10):
         setc(p, x, 11, '═', STEEL, 0)
-    p.put_text(13, CX - len("raze + hollis / AGENTSCI") // 2, "raze + hollis / AGENTSCI", LAMP_HI, 0)
+    p.put_text(13, CX - len("raze / AGENTSCI") // 2, "raze / AGENTSCI", LAMP_HI, 0)
     p.put_text(15, CX - len("pack53 -- the dim/industrial scene register") // 2,
                 "pack53 -- the dim/industrial scene register", GREY, 4)
     return p

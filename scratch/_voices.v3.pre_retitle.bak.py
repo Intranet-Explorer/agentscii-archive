@@ -216,10 +216,10 @@ def center(text, fg):
     left = pad // 2
     return sgr(fg) + " " * left + text + " " * (pad - left)
 out[1] = center("TWO VOICES v3", 15)
-out[2] = center("-- two complementary forms in exchange --", 94)
+out[2] = center("-- two constructed profiles, complementary phases --", 94)
 out.append(sgr(13) + "\u2550" * W)                       # bottom magenta rule
 
 write_ans("scratch/_voices.ans", out,
-          title="TWO VOICES v3 // dual-phase complementary study, woven exchange motif",
+          title="TWO VOICES v3 // supersede of pack36 // two constructed profiles",
           handles="raze")
 print("ok -- frame+title+sig written")

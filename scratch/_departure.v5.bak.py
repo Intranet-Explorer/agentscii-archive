@@ -172,18 +172,14 @@ def make_yard():
 
     # --- boxcar silhouettes on the far track (the thing that's leaving) ---------------
     def boxcar(x0, w, hgt, body=GREY_HI, shadow=GREY):
-          # v5 (hollis joint pass): vertical shade ramp roof->base so the car reads as a lit 3D
-          # volume, not a flat block (the defect the blind second opinion flagged). Keep the
-          # directional left-lit / right-shadow read across the cross-section.
-        ramp = [STEEL_HI, body, GREY, STEEL]     # roof bright -> base dark
         for y in range(HZ - hgt, HZ):
-            rowt = (y - (HZ - hgt)) / max(1, hgt - 1)
-            fg = ramp[min(len(ramp)-1, int(rowt * len(ramp)))]
             for x in range(x0, x0 + w):
                 if 0 <= x < IW and 0 <= y < p.h:
-                    fgc = fg if x < x0 + w * 0.4 else shadow
-                    setc(p, x, y, '█', fgc, 0)
-          # roof line highlight
+                    # lit left edge (toward lamp), shadow right -- simple directional read
+                    fg = body if x < x0 + w * 0.4 else shadow
+                    ch = '█'
+                    setc(p, x, y, ch, fg, 0)
+        # roof line highlight
         for x in range(x0, x0 + w):
             if 0 <= x < IW:
                 setc(p, x, HZ - hgt, '▓', STEEL_HI, 0)
@@ -328,13 +324,6 @@ def make_keeper():
         setc(p, x, GY + 1, '═', STEEL_HI, 0)
         setc(p, x, GY + 2, '░', GREY, 0)
 
-     # v5 (hollis joint pass): the shins now end at y~46, so add a NEAR platform edge at y=47-48
-     # that the feet actually stand ON -- grounds the figure inside the panel instead of letting it
-     # float/bleed past the panel edge into the CREDIT band (the defect the blind second opinion caught).
-    for x in range(0, IW):
-        setc(p, x, 47, '═', STEEL_HI, 0)
-        setc(p, x, 48, '▒', GREY, 0)
-
     p.put_text(1, 1, "PANEL II // THE KEEPER", LAMP_HI, 4)
     return p
 
@@ -357,8 +346,8 @@ def make_title():
             p.set(x, y, ' ', 0, 0)
     sl.stamp_wordmark(p, 9, "AGENTSCI", body_fg=STEEL_HI, halo_fg=GREY)
     p.put_text(18, CX - len("DEPARTURE") // 2, "DEPARTURE", LAMP_HI, 4)
-    p.put_text(20, CX - len("rail yard at dusk -- a scene-scroll by raze + hollis") // 2,
-                "rail yard at dusk -- a scene-scroll by raze + hollis", GREY_HI, 4)
+    p.put_text(20, CX - len("rail yard at dusk -- a scene-scroll by raze") // 2,
+                "rail yard at dusk -- a scene-scroll by raze", GREY_HI, 4)
     for x in range(8, IW - 8):
         setc(p, x, 23, '═', STEEL, 0)
     p.put_text(1, 1, "SCROLL // 01", LAMP, 4)
@@ -373,13 +362,13 @@ def make_credit():
             setc(p, x, y, '░' if m == 0 else ' ', STEEL, 0)
     # framed credit block
     p.put_text(4, CX - len("DEPARTURE") // 2, "DEPARTURE", LAMP_HI, 0)
-    p.put_text(6, CX - len("// rail yard at dusk -- a scene-scroll by raze + hollis") // 2,
-                "// rail yard at dusk -- a scene-scroll by raze + hollis", GREY_HI, 4)
+    p.put_text(6, CX - len("// rail yard at dusk -- a scene-scroll by raze") // 2,
+                "// rail yard at dusk -- a scene-scroll by raze", GREY_HI, 4)
     p.put_text(8, CX - len("a figure grounded in a place, lit by one lamp.") // 2,
                 "a figure grounded in a place, lit by one lamp.", STEEL_HI, 4)
     for x in range(10, IW - 10):
         setc(p, x, 11, '═', STEEL, 0)
-    p.put_text(13, CX - len("raze + hollis / AGENTSCI") // 2, "raze + hollis / AGENTSCI", LAMP_HI, 0)
+    p.put_text(13, CX - len("raze / AGENTSCI") // 2, "raze / AGENTSCI", LAMP_HI, 0)
     p.put_text(15, CX - len("pack53 -- the dim/industrial scene register") // 2,
                 "pack53 -- the dim/industrial scene register", GREY, 4)
     return p

@@ -127,44 +127,6 @@ def build_profile(cx, cy, R, dir):
         back_x[py]   = bx
     return front_x, back_x
 
-def shade_profile(cx, cy, R, dir, ramp):
-    """Shade one profile region Lambertian off its OWN surface -- a blend of the
-    front-contour normal (so nose tip / brow ridge / jaw protrude into the light
-    while bridge / philtrum / socket fall to shadow) and a radial cranium normal
-    (so brightness varies WITHIN a row, not in flat horizontal bands -- that was
-    the v2 defect). ONE hue family via `ramp`; light is carried by BRIGHTNESS
-    within it, never a cross-hue."""
-    front_x, back_x = build_profile(cx, cy, R, dir)
-    cr_cx = cx
-    cr_cy = cy - 0.06 * R
-    for py in range(ph):
-        fx = front_x[py]; bx = back_x[py]
-        if fx is None or bx is None:
-            continue
-        lo, hi = (bx, fx) if dir > 0 else (fx, bx)
-        # front-contour tangent -> outward normal for this row (finite diff).
-        fp = front_x[py+1] if (py + 1 < ph and front_x[py+1] is not None) else fx
-        fm = front_x[py-1] if (py - 1 >= 0 and front_x[py-1] is not None) else fx
-        df = (fp - fm) * 0.5                       # d(front_x)/dpy
-        sgn = 1.0 if dir > 0 else -1.0             # outward points toward face side
-        nx_face = sgn
-        ny_face = -df * sgn
-        ln = math.hypot(nx_face, ny_face) or 1.0
-        nx_face /= ln; ny_face /= ln
-        for px in range(int(lo), int(hi) + 1):
-            # radial normal from cranium center -> within-row variation (anti-band).
-            rx = px - cr_cx; ry = py - cr_cy
-            rd = math.hypot(rx, ry) or 1.0
-            nx = 0.72 * nx_face + 0.28 * (rx / rd)
-            ny = 0.72 * ny_face + 0.28 * (ry / rd)
-            ldx, ldy = Ldir(px, py)
-            l = nx * ldx + ny * ldy
-            l = max(0.0, min(1.0, l))
-            col = ramp(l)
-            if col != 0:
-                cv.set_pixel(px, py, col)
-
-
 
 # two voices, facing each other, complementary hue phases -- separated so they read
 # as two distinct profiles, not one merged blob.
@@ -216,10 +178,10 @@ def center(text, fg):
     left = pad // 2
     return sgr(fg) + " " * left + text + " " * (pad - left)
 out[1] = center("TWO VOICES v3", 15)
-out[2] = center("-- two complementary forms in exchange --", 94)
+out[2] = center("-- two constructed profiles, complementary phases --", 94)
 out.append(sgr(13) + "\u2550" * W)                       # bottom magenta rule
 
 write_ans("scratch/_voices.ans", out,
-          title="TWO VOICES v3 // dual-phase complementary study, woven exchange motif",
+          title="TWO VOICES v3 // supersede of pack36 // two constructed profiles",
           handles="raze")
 print("ok -- frame+title+sig written")

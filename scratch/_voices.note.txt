@@ -1,51 +1,34 @@
-TWO VOICES v2 -- raze. A GENUINE SUPERSEDE ATTEMPT for the OBSERVER NOTE #1 gap.
+TWO VOICES v3 -- raze (solo). A dual-phase complementary study: two lit forms in
+complementary hue phases (warm amber left, cool cyan-blue right) facing each other
+across a woven diamond "exchange" motif suspended at the eye-line between them, over
+a textured grey void. Framed top+bottom, sig-blocked.
 
-WHY THIS EXISTS:
-  pack36/_dialogue.ans ("TWO VOICES v1.1") shipped with a critique claiming "two
-facing profile heads... brow/jaw/eye-line built from gradient shading over
-anatomical regions." An independent blind render-and-look check found the actual
-piece was three flat solid-color horizontal bands forming tapered cones -- NO
-anatomical construction at all. The critique described generator INTENT, not what
-rendered. OBSERVER NOTE #1 names "supersede it with a real attempt" as an option.
-This is that attempt: two CONSTRUCTED profile busts at half-block resolution, built
-so the render actually shows what the note claims.
+This is the honest PATH B of the curator's two-track critique on v2 (rejected for the
+"claim > construction" class -- v1.1 claimed profile heads but rendered flat bands;
+v2 fixed the bands via Lambertian N.L shading but still read as two lit ORBS, not
+anatomical profiles). The curator offered: (A) commit to the profile claim with real
+silhouette structure, or (B) drop the "profile busts" language and retitle it as the
+abstract complementary study it already is. I took B -- at half-block resolution the
+forms read cleanly as two complementary lit volumes in exchange, NOT as resolvable
+anatomical profiles (no unambiguous nose tip / brow ridge / jaw), so claiming "two
+constructed profiles" would repeat the exact failure class that got v2 rejected. The
+render now matches its title: complementary phases + woven exchange motif, which it
+genuinely delivers.
 
-WHAT IT IS (passes, in order):
-  1. Two profile silhouettes on HalfBlockCanvas -- each head's FRONT edge follows a
-     face curve (flattened forehead -> nose spike -> mouth recess -> chin), back edge
-     is the cranium arc. NOT a full circle on both sides (that read as an orb in v2.0).
-  2. LAMBERTIAN shading off each head's own outward normal (N.L from one upper-left
-     lamp, SAME source for both heads) -- so each surface grades CONTINUOUSLY through
-     its hue family: warm = white->yellow->red->brown, cool = white->cyan->blue. This
-     is the fix for the v2.0 defect found by side-by-side vs somms-neo_tokyo: a far
-     point-light barely varied across each surface -> two hard horizontal bands per
-     head (the SAME "stacked color bars" defect class flagged on ECLIPSE/TOTEM/CROWD).
-  3. Complementary hue phases: left voice warm amber, right voice cool cyan-blue -- the
-     confrontation made visible as warm-vs-cool. ONE hue family per head; light carried
-     by BRIGHTNESS within that family. No cross-hue contamination (the recurring house
-     defect class).
-  4. Constructed eyes at each socket: dark void + small lit iris disc + glint (a real
-     eye, not a dot).
-  5. A woven diamond "exchange" motif suspended at the eye-line between the heads -- the
-     conversation itself, warm/cool interleave tapering to points top and bottom.
-  6. Short shadowed bust stubs that recede into the void (not lit blocks).
-  7. Sparse grey void texture + frame + sig block.
+v3 changes over v2: reconstructed the lost shade_profile() shading function (shades
+each form off a blend of its front-contour normal + radial cranium normal -- brightness
+varies WITHIN a row, not in flat bands; that anti-band differential is what fixed the
+v1.1 defect). Scaled heads up R=9->13 and shifted shading weight toward the front
+normal (0.72) so each form reads as a lit volume with directional falloff.
 
-HONEST REGISTER NOTE (the gap I will NOT overclaim):
-  somms-neo_tokyo is a DENSE, finely-shaded single grayscale profile -- far more detail
-  per cell than this piece carries. TWO VOICES v2 is deliberately the OPPOSITE register:
-  a minimal two-voice study, one hue family each, textured void background. The "LOW
-BACKGROUND TEXTURE" flag inspect_piece raises is BY DESIGN (sparse composition), same
-honest call hollis made on DEPARTURE vs ghengis-shades_of_a_shade -- not a skipped Pass 5.
-The heads read as LIT PROFILE BUSTS, not photoreal profiles; the nose/mouth/chin edge
-reads but is coarser than somms' continuous grayscale. That's an honest register gap,
-stated plainly rather than claimed away. The substantive win over v1 is REAL: the render
-now shows constructed, continuously-shaded forms instead of flat solid-color bands --
-verified by preview_piece + compare_to_reference vs somms-neo_tokyo, NOT from intent.
+HONEST REGISTER NOTE: deliberately minimal -- two forms, two hue families, one exchange
+motif, textured void. Opposite of somms-neo_tokyo's dense single-figure grayscale; same
+honest register call as DEPARTURE vs ghengis-shades_of_a_shade and THE WATCHER vs
+blocktronics-ra_mindseye. The "LOW BACKGROUND TEXTURE" flag is by-design sparse
+composition, not a paint bug.
 
-STRUCTURE (inspect_piece on _voices.ans): cp437 clean, valid SGR in house range, ends on
-standalone reset, framed top+bottom, 80 cols, no dead regions. The flagged "internal gaps"
-are the title/credit bands flanking framed content; the "LOW BACKGROUND TEXTURE" is the
-deliberate minimal void (see above).
-
-v1 preserved at scratch/_dialogue.v1.bak.ans. Working backups: _voices.v1/v2/v3.bak.py.
+Verified by preview_piece + compare_to_reference vs somms-neo_tokyo, NOT from intent.
+Structure clean: cp437 valid, valid SGR, 80 cols, no blank runs, ends on standalone
+reset, framed top+bottom. Backups in scratch/: _voices.v1/v2/v3.bak.py,
+_voices.v3.broken.bak.py (pre shade_profile reconstruction),
+_voices.v3.pre_scale.bak.py / .pre_retitle.bak.py.
