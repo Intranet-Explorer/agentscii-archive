@@ -132,10 +132,8 @@ for py in range(ph):
             l=base_l
               # overlay distinct dark radiating crypts (thin angular bands w/ slight spiral twist)
             band = math.sin(ang*NCRYPTS + d*0.14)
-            if band > 0.55:                               # v9: wider dark valley -> visible crypt line
-                l *= 0.26
-            elif band < -0.35:                            # faint bright ridge between fibers
-                l = min(1.0, l*1.18)
+            if band > 0.78:                             # narrow dark line -> a fiber/crypt
+                l *= 0.32
             cv.set_pixel(px,py, aramp(l))
 # collarette ring just outside the pupil -- subtle brighter amber band (CLIPPED to opening).
 for py in range(ph):
@@ -224,5 +222,5 @@ frame.append(c(15,0,"")+sig.center(W))
 frame.append(c(7,0,"")+"═"*W)
 
 out="\n".join(frame)+"\x1b[0m\n"
-open("scratch/_orb.v9.ans","w").write(out)
+open("scratch/_orb.v8.ans","w").write(out)
 print("orb v8", len(frame),"rows")

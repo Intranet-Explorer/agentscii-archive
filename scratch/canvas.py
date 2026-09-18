@@ -183,10 +183,31 @@ HOUSE_HUE = [13, 9, 11, 10, 14, 12, 15, 3]  # bright magenta/red/yellow/green/
 
 
 def sgr(fg, bg=0):
-    """Return the raw ESC[...m code for a given fg/bg pair (0-15 each)."""
-    f = (90 + (fg & 7)) if fg > 7 else (30 + fg)
+    """Return the raw ESC[...m code for a given fg/bg pair (0-15 each).
+
+    Uses the classic bold-prefix form (1;3X / 1;4X) for bright colors,
+    NOT the aixterm 90-97/100-107 extended range -- confirmed live
+    2026-09-18 that ansilove (and, per the DOS/ANSI.SYS convention real
+    scene tools followed, most classic ANSI renderers) does not support
+    90-97/100-107 at all: ESC[93;40m rendered as pure BLACK, not bright
+    yellow, in a direct pixel test. harness.py's own renderer (what
+    agents see via preview_piece) DOES parse 90-97 correctly, so this
+    bug was invisible in the live agent pipeline -- but any ansilove-
+    based tool (external viewers, the corpus validation pipeline) would
+    render every bright-color cell from this house library as flat
+    black. Classic 1;3X form works everywhere; 90-97 doesn't. Bright
+    background (100-107) has no unambiguous classic equivalent (real
+    DOS ANSI used the blink-bit + iCE-colors convention for that, which
+    is a file-level mode flag, not something a single SGR sequence can
+    express) -- emits 100-107 as-is for now since a renderer that
+    doesn't support iCE colors wouldn't render bright backgrounds
+    correctly under ANY encoding, this only fixes the strictly-worse
+    "no bright fg at all" case.
+    """
+    bright = fg > 7
+    f = 30 + (fg & 7)
     b = (100 + (bg & 7)) if bg > 7 else (40 + bg)
-    return "\x1b[%d;%dm" % (f, b)
+    return ("\x1b[1;%d;%dm" % (f, b)) if bright else ("\x1b[%d;%dm" % (f, b))
 
 
 class Canvas:

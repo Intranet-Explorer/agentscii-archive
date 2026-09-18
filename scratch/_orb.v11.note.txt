@@ -1,0 +1,41 @@
+THE WATCHER (_orb v11) -- hollis, on raze's v10 base. Tyler house direction 2026-09-18, step 4:
+three edits to the watcher, ONE PER PREVIEW CYCLE, verify each before moving to the next.
+Built on raze's _orb_v10.py (the newest live state; _orb.py is stale at v8). Output to own files
+so raze's _orb.v10.ans / _orb_v10.py are untouched -- joint WIP, no clobber.
+
+METRICS FLOOR = v7 (rejected/_orb.v7.ans), per Tyler: half-block %, shade-char %, distinct subject
+colors, subject bbox. Any revision that regresses on ANY of those three vs v7 is blocked at submit.
+NOTE: v7/v10 use 0.0% RAMP density chars (the measured root cause of every Opus reject). Edit (c)
+below is the one that actually adds dithering; until it lands, shade-char % stays 0 and the
+flat-region gate will still fire.
+
+--- EDIT (a): DROP STRAY OUTER GREY RING -- DONE, verified by eye.
+File: _orb.v11.a.py -> _orb.v11.a.ans. Removed PASS 7 (the 31<d<37 grey glow ring at radius ~34,
+visible as a faint circle around the eye in v10). Result: clean black void, "watcher in the dark"
+register. Eye/sclera/iris/pupil/lids/frame/credit all unchanged vs v10. Isolated, safe.
+
+--- EDIT (b): RESTORE V5 IRIS STRIATIONS ON V7 GEOMETRY -- ATTEMPTED, honest tension flagged.
+File: _orb.v11.b.py -> _orb.v11.b.ans. NCRYPTS 8->14, spiral term d*0.14 -> d*0.05 (fibers run
+radially, less circular banding), dark valley l*=0.26 -> 0.18 for line contrast.
+HONEST READ: at half-block resolution NCRYPTS=14 aliases into FINE MOTTLE, not crisp discrete
+fibers -- the same resolution limit raze flagged in v9 ("reads as texture, not fiber-counts").
+It reads as MORE radiating structure than v10's flat disc, but I will NOT claim discrete lines.
+DECISION NEEDED FROM RAZE: is this mottled-radiating look acceptable as "striations," or do we dial
+NCRYPTS back down (e.g. 8-10) for coarser-but-more-legible fibers? v6's 16-spoke version read as
+the most striated but was heavily red/mottled too. This is a taste call on the iris lineage you own.
+
+--- EDIT (c): shade_ramp() across sclera white->grey + between iris bands -- NOT YET DONE.
+This is the load-bearing one Tyler flagged: "most likely to actually clear the flat-region gate."
+The integration problem: canvas.shade_ramp(from,to,steps) returns FULL-CELL density tuples
+(char in █▓▒░ space, fg=from, bg=to) -- a per-cell dither model. HalfBlockCanvas addresses 2 pixels
+per cell via U+2580 (fg=top pixel, bg=bottom pixel). Different addressing models.
+PLAN: add a post-render CELL-LEVEL pass that walks the rendered rows and, at each boundary between
+two flat color regions (white sclera<->grey; amber iris bands), replaces the hard edge with a
+1-2 cell shade_ramp transition (█ -> ▓ -> ▒ -> ░) so the falloff is genuine dithering, not two flat
+blocks meeting. This raises shade-char % off 0.0% and should clear "flat unshaded region / hard
+seam / no gradient within each color zone." Needs care to not break the half-block packing -- verify
+with preview + inspect_piece after.
+
+NEXT: raze, your call on (b) before I push (c). If you're happy with v11.b's iris as-is, I'll build
+(c) on _orb.v11.b.py -> _orb.v11.c.py and report back. Don't want to batch edits or over-claim on
+the iris.
