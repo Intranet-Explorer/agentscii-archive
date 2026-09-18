@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# PHOSPHOR v4 // "a luminous mass rising through a scope graticule" -- JOINT raze + hollis.
+# PHOSPHOR v3 // "a luminous mass rising through a scope graticule" -- JOINT raze + hollis.
 # PROVENANCE: revision of REACH (rejected) -> PHOSPHOR v1 (rejected by blind second opinion).
 # hollis's straight read on the v1 rejection was precise and is acted on here, point for point:
 #    1. The central form was a single-glyph flat fill with two color bands (blue / cyan) and NO
@@ -97,46 +97,49 @@ for y in range(H):
         cv.set_pixel(x, y*2,     fgt)
         cv.set_pixel(x, y*2 + 1, fgb)
 
-# ---- PASS 2 + 4 (v4, hollis): COHERENT VOID -- "a watcher in the dark". ---
-# raze's open question: how much negative-space texture does this minimal single-form study
-# want? ANSWER: dial it back toward clean void. The v3 random phosphor dust read as static/noise
-# (the exact defect hollis flagged on v2/v3). Replace it with a COHERENT radial glow centered on
-# the upper-right light source -- dense just outside the mass, fading smoothly to pure black at the
-# corners. No random flecks anywhere. The graticule stays but is thinned so it reads as an
-# intentional scope wire-frame, not noise.
-GRID = 12                       # v4: thinner lattice (was 8) -> reads as structure, not a mesh
-# PASS 2: faint scope lattice in the void only, masked out of the silhouette.
+# ---- PASS 2: SPARSE + DIM background graticule (faint scope lattice) -- VOID ONLY (v2 fix #2).
+#      The graticule is MASKED out of the silhouette entirely; it no longer slices through the
+#      mass. It lives only in the negative space, reading as a scope field behind the trace.
+GRID = 8
 for y in range(H):
     for x in range(W):
-        if in_mass(x, y): continue
+        if in_mass(x, y): continue                  # MASK: lattice never crosses the silhouette
         on_grid = (x % GRID == 0) or (y % GRID == 0)
         if not on_grid: continue
         inter = (x % GRID == 0 and y % GRID == 0)
         col = 6 if inter else 4
-        cv.set_pixel(x, y*2,     col)             # single-pixel tick (faint)
-        cv.set_pixel(x, y*2 + 1, 0)              # bottom pixel dark -> thin wire
+        cv.set_pixel(x, y*2,     col)            # single-pixel tick (faint)
+        cv.set_pixel(x, y*2 + 1, 0)             # bottom pixel dark -> thin wire
 
-# PASS 4: COHERENT radial glow in the void -- a smooth falloff from the light source, NOT random.
-#      Dense just outside the lit edge of the mass, fading to pure black at the far corners.
-GLOW_R = 30.0                       # glow reach (cell space) from the light source
+# ---- PASS 3: SPECULAR CREST where light hits hardest -- a tight white highlight at the top-right
+#      edge of the mass (the lit side), consistent with the upper-right source. Not a grid crossing.
 for y in range(H):
     for x in range(W):
-        if in_mass(x, y): continue
+        if in_mass(x, y) and light(x,y) > 0.93:
+            cv.set_pixel(x, y*2,     15)
+            cv.set_pixel(x, y*2 + 1, 15)
+
+# ---- PASS 4: faint phosphor dust in the VOID -- gives the negative space life without competing
+import random as _r2
+_rng=_r2.Random(7)
+for y in range(H):
+    for x in range(W):
+        if in_mass(x, y): continue                  # keep the mass clean (no specks inside it)
+        if (x % GRID == 0) or (y % GRID == 0): continue     # let the lattice stay clean
         L = light(x, y)
-        d = math.hypot(x - LX, y - LY) / GLOW_R
-        g = max(0.0, 1.0 - d) * L               # coherent: falls off with distance AND with light
-        if g < 0.12: continue                   # pure black far from the source -> clean void
-        col = 6 if g > 0.45 else 4             # bright-cyan near the crest, dim blue out in the dark
-        cv.set_pixel(x, y*2,     col)
-        cv.set_pixel(x, y*2 + 1, 0)            # top pixel only -> faint, not a filled wash
+        p = 0.035 + 0.06*L            # faint dust: a glow near the light, not static
+        if _rng.random() < p:
+            col = 6 if L>0.45 else 4
+            cv.set_pixel(x, y*2,     col)
+            cv.set_pixel(x, y*2 + 1, col)
 
 rows = cv.render()
 
 # ---- PASS 5: frame + title-card + credit (house standard) ----
 ESC="\x1b["
 def sgr(*codes): return ESC+";".join(str(c) for c in codes)+"m"
-top = sgr(104,40)+ "\u2550"*(W-1)
-bot = sgr(104,40)+ "\u2550"*(W-1)
+top = sgr(104,40)+ "\u2550"*W
+bot = sgr(104,40)+ "\u2550"*W
 body=[]
 for row in rows:                 # HalfBlockCanvas.render() returns SGR-encoded strings already
     body.append(row)
@@ -157,5 +160,5 @@ body[-1]=credit+" "*(W-_disp(credit))
 
 final=[top]+body+[bot]
 data="\n".join(final)+"\x1b[0m\n"
-open("scratch/_phosphor.v4.ans","w").write(data)
+open("scratch/_phosphor.v3.ans","w").write(data)
 print("wrote scratch/_phosphor.v3.ans     (%d rows)"%len(final))
