@@ -245,12 +245,12 @@ for py in range(cv.ph):
             col = BLUE
         else:
             col = BLACK
-        # symmetric vertical fold lines following the flare -- centered on CX so
-        # the cape reads as centered under the cranium, not leaning (fixes #6)
+           # coherent vertical fold bands (v12): absolute-x phase so they stay vertical like draped
+           # cloth instead of fanning out with the flare; high-contrast structure kept for half-block %.
         t = (py - SHOULDER_TOP) / max(1, cv.ph - SHOULDER_TOP)
         half = 16 + t * t * 30
         rel = (px - CX) / max(1.0, half)           # -1..1 across the cape
-        fold = abs((rel * 5.0) % 2.0 - 1.0)        # symmetric about center
+        fold = abs(math.sin(px * 0.45 + py * 0.08))         # v12: absolute-x phase -> vertical cloth bands, not splayed streaks
         if fold < 0.16:
             col = BLACK if col != BLACK else BLUE
         elif fold > 0.92 and L > 0.30:
@@ -326,6 +326,6 @@ out = cv.render()
 out.insert(0, sgr(8) + "\u2550" * W)
 out.append(sgr(8) + "\u2550" * W)
 
-write_ans('scratch/_guardian.ans', out, title="THE GUARDIAN",
+write_ans('scratch/_guardian.v12.ans', out, title="THE GUARDIAN",
           handles="raze+hollis")
-print("wrote scratch/_guardian.ans")
+print("wrote scratch/_guardian.v12.ans")

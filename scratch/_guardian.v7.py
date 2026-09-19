@@ -1,4 +1,14 @@
-"""_guardian v4 -- revision round after REJECT (curator: hollis). Joint raze+hollis.
+"""_guardian v7 -- SECOND revision round after the 2nd REJECT (curator: hollis + blind 2nd opinion).
+Joint raze+hollis. The head was accepted as genuinely good; the failure was localized to the
+LOWER BODY, so this pass touches only the cloak + frame:
+ A. cloak folds were thin BLACK crests (tent-pole construction lines w/ black holes) -> now a
+    continuous soft drape undulation modulated by light; shadow side floored at BLUE so it
+    separates from the grain instead of dissolving into it.
+ B. dropped the redundant manual bottom grey bar that collided with sig_block's own leading
+    blank row + magenta rule (the "blank band + double rule" at rows 41-43).
+Head passes 1-5 + prior revision round (raze) and hollis cape 3b / sig-block fix / eye co-pass 3c
+are unchanged. Muted/dim throughout by design.
+--- v4 header (superseded): revision round after REJECT (curator: hollis). Joint raze+hollis.
 
 Addresses the 7-point critique on the rejected build:
  1. background was uniform static noise -> structured vertical light-ray field
@@ -230,54 +240,65 @@ for py in range(EYE_Y + 1, NECK_Y + 1):
 
 
 # ============================================================
-# PASS 3b -- cloak/cape: directional shade + folds + hem
+# PASS 3b -- cloak/cape: directional shade + visible drape folds + hem.
+# REVISION (v7, second pass): the first v7 attempt modulated fold depth by the
+# base light level (`* max(0,L)`), which killed the folds exactly where the cape
+# is dark -- so the lower body stayed a flat blue triangle. Now the drape is a
+# SEPARATE overlay independent of base light:
+#   - base directional shade (one upper-left source) with a BLUE floor on the
+#    shadow side, so the figure separates from the grain instead of dissolving.
+#   - soft vertical drape bands (sine across the flare width) that LIFT valleys
+#    toward grey and dip crests toward blue -- but crests NEVER go black, so no
+#    tent-pole construction lines / black holes (the original v4 defect).
+#   - fold amplitude GROWS with flare depth: flat near the shoulders, deep folds
+#    at the wide hem -- how real cloth drapes. A per-column phase jitter breaks
+#    mechanical regularity so it reads as cloth, not a grid.
 # ============================================================
+rng3 = random.Random(11)
+_phase = [rng3.uniform(-0.6, 0.6) for _ in range(W)]     # per-column drape jitter
 for py in range(cv.ph):
     for px in range(W):
         if not in_shoulder(px, py):
             continue
         L = light(px, py)
+        t = (py - SHOULDER_TOP) / max(1, cv.ph - SHOULDER_TOP)
+        half = 16 + t * t * 30
+        rel = (px - CX) / max(1.0, half)             # -1..1 across the cape
+         # base directional shade with a BLUE floor on the shadow side
         if L > 0.58:
             col = MGREY
         elif L > 0.40:
             col = DGREY
-        elif L > 0.24:
-            col = BLUE
         else:
-            col = BLACK
-        # symmetric vertical fold lines following the flare -- centered on CX so
-        # the cape reads as centered under the cranium, not leaning (fixes #6)
-        t = (py - SHOULDER_TOP) / max(1, cv.ph - SHOULDER_TOP)
-        half = 16 + t * t * 30
-        rel = (px - CX) / max(1.0, half)           # -1..1 across the cape
-        fold = abs((rel * 5.0) % 2.0 - 1.0)        # symmetric about center
-        if fold < 0.16:
-            col = BLACK if col != BLACK else BLUE
-        elif fold > 0.92 and L > 0.30:
-            col = DGREY if col == BLUE else MGREY
+            col = BLUE
+         # drape overlay: soft vertical bands, amplitude grows with flare depth.
+        fold = math.sin(rel * 6.2831853 * 1.5 + _phase[px])   # -1..1
+        amp = 0.10 + t * 0.34                              # flat up top, deep at hem
+        Lf = L + fold * amp
+        if Lf > 0.62:
+            col = MGREY
+        elif Lf > 0.44:
+            col = DGREY
+        else:
+            col = BLUE                               # crest floor: never BLACK
         cv.set_pixel(px, py, col)
 
-# hem detail: a brighter edge along the very bottom of the cape
-for py in range(cv.ph - 3, cv.ph):
-    for px in range(W):
-        if in_shoulder(px, py):
-            L = light(px, py)
-            cv.set_pixel(px, py, MGREY if L > 0.45 else DGREY)
-
 # faint teal rim on the lit (left) shoulder edge -- contiguous with the cape body
-# so it never leaves a disconnected patch (fixes stray fragment #5)
+# so it never leaves a disconnected patch (fixes stray fragment #5).
 for py in range(SHOULDER_TOP, NECK_Y + 3):
     for px in range(W):
         t = (py - SHOULDER_TOP) / max(1, cv.ph - SHOULDER_TOP)
         half = 16 + t * t * 30
         if abs((px - CX)) >= half - 2 and abs((px - CX)) <= half:
             if px < CX and light(px, py) > 0.35:
-                 # contiguity: a non-black cape pixel must sit immediately inward,
-                 # so the rim can never float off the body edge (fixes stray teal).
+                   # contiguity: a non-black cape pixel must sit immediately inward,
+                   # so the rim can never float off the body edge (fixes stray teal).
                  if in_shoulder(px + 1, py) and cv.get_pixel(px + 1, py) != BLACK:
                      cv.set_pixel(px, py, TEAL)
 
 # ============================================================
+
+
 # PASS 4 -- structured atmosphere: vertical light-ray field with a falloff that
 # QUIETS near the subject so the figure's outline stays crisp (fixes #1). No
 # uniform static; depth instead.
@@ -322,9 +343,10 @@ for py in range(cv.ph):
             cv.set_pixel(px, py, BLUE)
 
 out = cv.render()
-# single clean frame bar top + bottom (fixes doubled line #7)
+# top frame bar only -- the bottom is terminated by sig_block's own magenta
+# rule, so no manual bottom bar (that collided with sig_block's leading blank
+# row + its rule, producing a 'blank band + double rule' at rows 41-43).
 out.insert(0, sgr(8) + "\u2550" * W)
-out.append(sgr(8) + "\u2550" * W)
 
 write_ans('scratch/_guardian.ans', out, title="THE GUARDIAN",
           handles="raze+hollis")
