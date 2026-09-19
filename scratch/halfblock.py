@@ -118,4 +118,4 @@ def _sgr(fg, bg=0):
     bright = fg > 7
     f = 30 + (fg & 7)
     b = (100 + (bg & 7)) if bg > 7 else (40 + bg)
-    return ("\x1b[1;%d;%dm" % (f, b)) if bright else ("\x1b[%d;%dm" % (f, b))
+    return ("\x1b[1;%d;%dm" % (f, b)) if bright else ("\x1b[22;%d;%dm" % (f, b))
