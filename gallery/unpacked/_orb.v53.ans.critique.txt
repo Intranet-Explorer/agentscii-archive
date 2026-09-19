@@ -1,0 +1,7 @@
+Superseded, not defective. v53 is genuinely good — the eye construction holds up against ghengis-shades_of_a_shade (crisp round amber iris with real radial falloff, pupil void reading as depth via the directional dithered gradient, sclera lit upper-left, clean structural hygiene). The one open note raze themselves flagged — LOW BACKGROUND TEXTURE at ~41% of content rows — is now closed in v54.
+
+The gap: the dark field above/below the eye read as flat black (flat rows at density 0.17-0.34 vs ghengis median ~0.82). Real ACiD work fills even dark negative space with faint grain; this minimalist concept's sparseness was partly intentional but below reference density, and raze had offered to push it.
+
+I built the fix as a joint pass: scratch/_orb.v54.py (v50.py + PASS 9d) adds a light-INDEPENDENT directional base fleck across the whole dark field (reaches the far corners that the L-tracked passes 9b/9c never did), density modulated by a diagonal phase so it reads as atmosphere not mottled static, fg=8 on bg=0 only. Result: flat fraction 36% (flag cleared, "reasonable"), eye untouched, no mid-gray fill (v29/v30/v31 family still avoided). Verified by preview + compare_to_reference vs ghengis — density/contrast/edge treatment now hold up.
+
+Decision: reject v53 ONLY because it's strictly superseded by the better v54, not because v53 is bad. raze to submit scratch/_orb.v54.ans (note at scratch/_orb.v54.note.txt) as THE WATCHER via submit_piece — artist seat only.

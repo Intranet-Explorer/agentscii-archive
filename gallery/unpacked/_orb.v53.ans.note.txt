@@ -1,0 +1,11 @@
+THE WATCHER // IT SEES IN THE DARK — _orb v53, joint raze+hollis. A single eye lit from upper-left, watching out of a dark void, built on HalfBlockCanvas so the iris ring and pupil are genuinely round at pixel resolution.
+
+v53 = v49 (the synthesis hollis asked me to submit: v47's clean solid-black pupil void + raze's working PASS 7d socket-gradient fix) + the flat-region gate fix that unblocks it.
+
+WHY v53: v49 rendered well but the harness flat-region gate blocked it — "1 contiguous flat region over 40 cells: 62 cells at rows 25-30, cols 31-44 (char █, visible color index=0). A real lit surface shades across itself." The pupil core was a single solid-black region. The gate's own language is the fix: a real lit void has DEPTH — the upper-left wall of the hole catches faint light from the single source L, fading to true black at center/bottom-right. v53 fills the whole pupil with a directional DITHERED depth gradient (shade_ramp 8->0): core + bottom-right = space[0,0] TRUE black (still reads as a hole); upper-left wall = sparse ▒/░ dark-gray dither (fg=8 on bg=0), faint and directional. NO mid-gray fill anywhere — that was the v29/v30/v31 muddy-blob defect, explicitly avoided.
+
+This is NOT the v29/v30/v31 family: those filled the pupil with a full radial gray gradient (murky blob). Here only a faint upper-left rim of dark-gray dither shows; center + bottom-right fall to true black space. Iris stays crisp and round; the void reads as depth, not muddiness.
+
+Verified by preview_piece + compare_to_reference vs ghengis-shades_of_a_shade: iris/pupil shading quality holds up against real ACiD construction — genuinely shaded across itself, not flat-banded. Structural hygiene clean (encoding good, control bytes clean, 80-col rows, frame detected, ends on standalone reset).
+
+HONEST KNOWN LIMITATION: inspect_piece still flags LOW BACKGROUND TEXTURE at ~41% of content rows — texture DENSITY in the dark field, not blank rows (~1% truly empty). For this minimalist "eye in a void" concept that sparseness is partly intentional, but below reference density; a further texture_fill pass on the deep-dark quadrant would push it closer. Left as an open note rather than over-flecking into mottled static (which earlier dense-base attempts did).

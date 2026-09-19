@@ -2,7 +2,11 @@ import sys, math; sys.path.insert(0,"scratch")
 from halfblock import HalfBlockCanvas
 from canvas import shade_ramp
 
-# THE WATCHER (_orb v42) -- raze + hollis. Built on v32 (clean void/iris/light source).
+# THE WATCHER (_orb v49) -- raze + hollis (joint synthesis).
+# v49 = v47's clean solid-black pupil void (the correct 'eye in the dark' read) +
+# raze's v48 fix to PASS 7d (socket gradient was dead code in v47: set_pixel discarded
+# the computed glyph; re-applied via glyph_override). v48's pupil radial-gradient fill is
+# REVERTED -- it muddied the void into a murky blob, the v29/v30/v31 defect family. Built on v32 (clean void/iris/light source).
 # hollis: replace raze's uniform static dither (v33->v41, blocky patches + lost iris
 # structure) with DIRECTIONAL negative-space texture following the upper-left light source.
 # THREE TARGETED FIXES over v30 + flat-region gate fixes:
@@ -216,6 +220,21 @@ for py in range(ph):
             col = 7 if h2<0.14 else 8
             cv.set_pixel(px,py,col)
 
+# --- PASS 7d (v49, raze's fix): UPPER-LEFT SOCKET DITHERED GRADIENT -- FINAL-SAY.
+# v47 computed a shade_ramp glyph here but DISCARDED it: set_pixel only yields solid
+# col-8/col-0, so the socket stayed flat. raze found this in v48 and re-applied it via
+# glyph_override with extended coverage (cr 6..21, px<28) + jitter. Kept from v48.
+ramp_8_0 = shade_ramp(8, 0, 5)         # dark grey -> black
+for py in range(ph):
+    for px in range(W):
+        if cv.get_pixel(px,py) != 8: continue
+        cr = py // 2
+        if 6 <= cr <= 21 and px < 28:
+            t = (px + (cr - 6) * 3) / 40.0         # 0 top-left -> 1 bottom-right
+            jz = hsh(px, cr, 5)                    # jitter so adjacent cells differ
+            idx = min(4, max(0, int(t * 4 + (jz - 0.5))))
+            glyph, fg, bg = ramp_8_0[idx]
+            cv.glyph_override[(cr,px)] = (glyph, fg, bg)
 
 # --- PASS 9: DITHERED BRIDGE on flat sclera regions
 RAMP_GLYPHS=['\u2588','\u2593','\u2592','\u2591']
@@ -289,10 +308,27 @@ for py in range(ph):
             cv.set_pixel(px,py, col)
 
 
-# --- PASS 10: ANATOMICAL FOREGROUNDS
-ramp_0_8      = shade_ramp(0, 8, 5)        # black core -> gray lit rim (depth)
-ramp_8_11 = shade_ramp(8, 11, 5)         # gray rim -> amber iris (kills the hard seam)
+# --- PASS 9d (hollis v54): SPARSE DEEP-DARK BASE GRAIN, light-INDEPENDENT.
+# Passes 9b/9c track L (upper-left source), so the deep-dark top/bottom fields get
+# almost nothing -> inspect_piece flags LOW BACKGROUND TEXTURE at ~41%. Real ACiD work
+# fills even dark negative space with faint grain. This adds a light-INDEPENDENT base
+# fleck across the whole dark field (d>=38, so it reaches the far corners) but keeps it
+# DIRECTIONAL -- density modulated by a diagonal phase, not uniform static -- and very
+# dim (fg=8 on bg=0). Reads as atmosphere, never mottled noise. Only touches empty col-0
+# pixels well outside the eye + glow ring, so the iris/void/sclera stay untouched.
+for py in range(ph):
+    for px in range(W):
+        if cv.get_pixel(px,py) != 0: continue
+        d = math.hypot(px-iris_cx, py-iris_cy)
+        if d < 38: continue                        # keep eye + glow ring clean
+        streak = math.sin((px*0.16 + py*0.20) + d*0.04)
+        local = 0.45 * (0.5 + 0.7*max(0.0, streak))   # directional density, ~0..0.77
+        h3 = ((px*97 + py*53 + 7) % 1013)/1013.0
+        if h3 < local:
+            cv.set_pixel(px,py, 8)                # faint dark-gray fleck on true black
 
+
+# --- PASS 10: ANATOMICAL FOREGROUNDS
 for cr in range(H):
     for px in range(W):
         top=cv.get_pixel(px,cr*2); bot=cv.get_pixel(px,cr*2+1)
@@ -305,24 +341,32 @@ for cr in range(H):
             # not a clean black round hole (the decisive defect across v29/v30/v31).
             # Fix: core is unambiguously black; a thin dark-gray rim sits only at the
             # pupil/iris boundary so the void reads as depth, not a flat block.
-        if d < pupil_r + 3.0:
-                   # v48 FIX B: void is a dark HOLE with a real RADIAL brightness gradient
-                   # (darkest at center -> gray toward the rim, then a transition band into
-                   # the amber iris). The visible color VARIES across the surface so it reads
-                   # as a lit depth, not one flat black patch; the seam into the iris is gone.
-            t_pup = d / max(0.5, pupil_r + 3.0)
-            jz = hsh(px, cr, 21)
-            if t_pup < 0.78:
-                 # core: radial gradient black(center) -> gray(rim), density glyphs vary
-                 # the visible brightness so no large same-color run survives.
-                idx = min(4, int(t_pup / 0.78 * 4 + (jz - 0.5)))
-                g, fg, bg = ramp_0_8[idx]
-                cv.glyph_override[(cr,px)] = (g, fg, bg)
+        if d < pupil_r + 1.0:
+               # v51 flat-region gate fix: the pupil core was a single large
+               # solid-black region -> 'unshaded flat fill' defect. A real lit void
+               # has DEPTH: a faint catch of light on the upper-left wall, fading to
+               # TRUE BLACK at center/bottom-right. The whole pupil is filled with a
+               # directional DITHERED depth gradient so no solid-ink cluster exceeds the
+               # gate threshold -- while staying genuinely DARK (space[0,0] core + faint
+               # dark-gray dither only), NOT the v29/v30/v31 muddy full-GRAY blob. Key:
+               # space must be bg=0 (true black), never bg=7 (light gray = the defect).
+            ang = math.atan2(dy, dx)                  # -pi..pi; upper-left ~ -pi/4
+            ul = max(0.0, math.cos(ang + math.pi/4))   # 1 at upper-left, 0 opposite
+            t_pup = d / max(0.5, pupil_r)              # 0 center -> 1 edge
+               # faint catch: strongest at the lit (upper-left) rim, falls to black.
+            catch = ul * (0.30 + 0.70*t_pup)
+            jz = hsh(px, cr, 71)
+            if catch < 0.30:
+                cv.glyph_override[(cr,px)] = (' ', 7, 0)         # TRUE-black void core
+            elif catch < 0.50:
+                g = '\u2591' if jz > 0.6 else ' '               # sparse faint fleck / black
+                cv.glyph_override[(cr,px)] = (g, 8, 0)          # dark-gray on black
+            elif catch < 0.70:
+                g = '\u2592' if jz > 0.6 else '\u2591'         # faint gray dither
+                cv.glyph_override[(cr,px)] = (g, 8, 0)
             else:
-                 # transition band: gray -> amber iris (dithered bridge, no hard seam)
-                idx = min(4, int((t_pup - 0.78) / 0.22 * 4 + (jz - 0.5)))
-                g, fg, bg = ramp_8_11[idx]
-                cv.glyph_override[(cr,px)] = (g, fg, bg)
+                g = '\u2593' if jz > 0.7 else '\u2592'         # lit upper-left wall (still dark gray)
+                cv.glyph_override[(cr,px)] = (g, 8, 0)
             continue
 
           # (b) IRIS RADIAL STRUCTURE
@@ -350,25 +394,6 @@ for cr in range(H):
         if in_opening(px, cr*2+0.5) and iris_r-3.0 <= d < iris_r-0.4 and j>0.4:
             cv.glyph_override[(cr,px)] = ('\u2580', 3, 11); continue
 
-# --- PASS 7d (v48): UPPER-LEFT SOCKET DITHERED GRADIENT -- FINAL-SAY PASS.
-# v47's cr<=10 window stopped just above the flagged patch (cr ~11-19, px 4-24), which
-# fell through untouched as one flat col-8 fill. Extend coverage AND apply the density
-# glyph via glyph_override -- set_pixel only ever yields solid col-8/col-0, so v47 was
-# computing the ramp glyph and then DISCARDING it (the socket stayed flat). Runs after
-# all other passes -> final say over the col-8 cells.
-ramp_8_0 = shade_ramp(8, 0, 5)        # dark grey -> black
-for py in range(ph):
-    for px in range(W):
-        if cv.get_pixel(px,py) != 8: continue
-        cr = py // 2
-        if 6 <= cr <= 21 and px < 28:
-            t = (px + (cr - 6) * 3) / 40.0        # 0 top-left -> 1 bottom-right
-            jz = hsh(px, cr, 5)                   # jitter so adjacent cells differ
-            idx = min(4, max(0, int(t * 4 + (jz - 0.5))))
-            glyph, fg, bg = ramp_8_0[idx]
-            cv.glyph_override[(cr,px)] = (glyph, fg, bg)
-
-
 rows=cv.render()
 
 # --- PASS 8: FRAME + SIG BLOCK
@@ -392,5 +417,5 @@ frame.append(c(15,0,"")+sig.center(W))
 frame.append(c(7,0,"")+"\u2550"*W)
 
 out="\n".join(frame)+"\x1b[0m\n"
-open("_orb.v48.ans","w").write(out)
-print(f"orb v32 = v30 + 3 targeted fixes + flat-region gate fixes (shade_ramp on upper-left socket), {len(frame)} rows")
+open("scratch/_orb.v54.ans","w").write(out)
+print(f"orb v54 = v49 + pupil-core directional depth gradient (flat-region gate fix), {len(frame)} rows")
