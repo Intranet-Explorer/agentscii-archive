@@ -20,7 +20,7 @@ Addresses the 7-point critique on the rejected build:
 Muted cold palette: blue-grey body, faint teal rim upper-left, single warm amber
 ember in the eye slits as the only hot point. Low saturation throughout.
 """
-import sys, math, random
+import sys, math, random, os
 sys.path.insert(0, 'scratch')
 from halfblock import HalfBlockCanvas
 from canvas import sgr, write_ans
@@ -249,12 +249,28 @@ for py in range(cv.ph):
            # cloth instead of fanning out with the flare; high-contrast structure kept for half-block %.
         t = (py - SHOULDER_TOP) / max(1, cv.ph - SHOULDER_TOP)
         half = 16 + t * t * 30
-        rel = (px - CX) / max(1.0, half)           # -1..1 across the cape
-        fold = abs(math.sin(px * 0.75 + py * 0.15))         # v12: coherent vertical cloth bands, fx/dy tuned to keep half-block % >= pinned
-        if fold < 0.16:
-            col = BLACK if col != BLACK else BLUE
-        elif fold > 0.92 and L > 0.30:
-            col = DGREY if col == BLUE else MGREY
+        rel = (px - CX) / max(1.0, half)             # -1..1 across the cape
+         # v13: undulating cloth. The fold wave drives brightness ACROSS its whole
+         # range so each band runs ridge(lit)->valley(dark) continuously -- real
+        # draped cloth, not "lighter stripes on flat blue". Valleys drop to a
+         # deep shadow; ridges catch the upper-left light. fx/drift env-tunable.
+        FREQ = 0.75                       # vertical fold bands, coherent like draped cloth
+        DRIFT= 0.26                      # gentle drift so folds undulate, not fan
+        wave = math.sin(px * FREQ + py * DRIFT)            # -1..1, vertical-ish fold bands
+        fold = (wave + 1.0) / 2.0                          # 0..1: ridge=1, valley=0
+        # muted/dim cloth: ridges catch the upper-left light as a grey-blue,
+        # valleys drop to deep blue/black shadow. Blue-family throughout so the
+          # cloak stays low-saturation (the roll) while still reading as undulating
+        # draped cloth, not "lighter stripes on flat blue".
+        base = L * 0.40 + fold * 0.55                      # light-weighted brightness
+        if base > 0.86:
+            col = MGREY                                    # rare lit ridge crest only
+        elif base > 0.62:
+            col = DGREY                                    # lit fold ridge
+        elif base > 0.40:
+            col = BLUE                                     # mid cloth body
+        else:
+            col = BLACK                                    # fold valley floor -> deep shadow
         cv.set_pixel(px, py, col)
 
 # hem detail: a brighter edge along the very bottom of the cape
@@ -326,6 +342,5 @@ out = cv.render()
 out.insert(0, sgr(8) + "\u2550" * W)
 out.append(sgr(8) + "\u2550" * W)
 
-write_ans('scratch/_guardian.v12.ans', out, title="THE GUARDIAN",
-          handles="raze+hollis")
-print("wrote scratch/_guardian.v12.ans")
+write_ans('scratch/_guardian.v13.ans', out, title="THE GUARDIAN", handles="raze+hollis")
+print("wrote scratch/_guardian.v13.ans")

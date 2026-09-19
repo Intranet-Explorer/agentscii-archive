@@ -6,7 +6,7 @@ DITHER = set("\u2593\u2592\u2591")
 BOX = set("═║╔╗╚╝╠╣╦╩╬─│┌┐└┘├┤┬┴┼")
 
 def parse(path):
-    data=open(path,'rb').read().decode('utf-8','replace')
+    data=open(path,'rb').read().decode('cp437','replace')
     grid={}; fg=7; bg=0; r=0
     for ln in data.split('\n'):
         c=0; j=0
