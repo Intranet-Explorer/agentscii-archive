@@ -45,7 +45,6 @@ import sys, os, math, random
 sys.path.insert(0, os.getcwd())
 import scroll_lib as sl
 import figure_common as fc
-from halfblock import HalfBlockCanvas
 
 W = sl.W            # 80
 IW = sl.INNER_W     # 78
@@ -173,26 +172,18 @@ def make_yard():
 
     # --- boxcar silhouettes on the far track (the thing that's leaving) ---------------
     def boxcar(x0, w, hgt, body=GREY_HI, shadow=GREY):
-             # v9 (raze): shade the car as a lit 3D volume with NO large contiguous '█' block.
-             # Two moves: (a) a continuous vertical COLOR falloff roof->base so it reads lit;
-             # (b) a per-cell DENSITY ramp across the surface (full block near the crest, fading
-             # to ░ toward the base + a lamp-side catch), so no same-glyph region stays >40 cells.
-        dens = ['█', '▓', '▒', '░']                  # full -> faint, by depth into the car
-        ramp = [STEEL_HI, body, GREY, STEEL]            # roof bright -> base deep shadow
+          # v5 (hollis joint pass): vertical shade ramp roof->base so the car reads as a lit 3D
+          # volume, not a flat block (the defect the blind second opinion flagged). Keep the
+          # directional left-lit / right-shadow read across the cross-section.
+        ramp = [STEEL_HI, body, GREY, STEEL]     # roof bright -> base dark
         for y in range(HZ - hgt, HZ):
-            rowt = (y - (HZ - hgt)) / max(1, hgt - 1)   # 0 roof -> 1 base
-             # density: bright full block at the crest, fading to faint toward the base
-            dlevel = min(3, int(rowt * 4))
+            rowt = (y - (HZ - hgt)) / max(1, hgt - 1)
+            fg = ramp[min(len(ramp)-1, int(rowt * len(ramp)))]
             for x in range(x0, x0 + w):
-                if not (0 <= x < IW and 0 <= y < p.h):
-                    continue
-                lit = x < x0 + w * 0.45                  # directional: lamp-side brighter
-                 # per-cell density variation so no contiguous full-block region survives the gate
-                dl = dlevel if lit else min(3, dlevel + 1)
-                ch = dens[dl]
-                fg = ramp[min(3, int(rowt * 4))] if lit else ramp[min(3, int(rowt * 4) + 1)]
-                setc(p, x, y, ch, fg, 0)
-             # roof line highlight (bright crest)
+                if 0 <= x < IW and 0 <= y < p.h:
+                    fgc = fg if x < x0 + w * 0.4 else shadow
+                    setc(p, x, y, '█', fgc, 0)
+          # roof line highlight
         for x in range(x0, x0 + w):
             if 0 <= x < IW:
                 setc(p, x, HZ - hgt, '▓', STEEL_HI, 0)
@@ -223,174 +214,133 @@ def make_yard():
     return p
 
 # =====================================================================
-# ---- HALF-BLOCK hero anatomy (house direction, 2026-09-17): the keeper's body is built
-#      on a HalfBlockCanvas so its curved/shaded edges carry REAL half-block resolution
-#        (▀ cells) instead of whole-cell stacked blocks. Light from upper-left makes each
-#      tube's TOP pixel warmer/brighter than its BASE -> genuine ▀, not flat bands. ----
-def _hb_tube(hb, x0, y0, x1, y1, halfw, Lfn):
-    """One limb as a lit rounded tube on the half-block canvas. For every cell the TOP
-    pixel is shaded one step brighter than the BASE (light comes from above), so the packed
-    cell reads ▀ with fg=hot / bg=cool -- real half-block shading across the whole body."""
-    for py in range(int(min(y0, y1)) * 2 - int(halfw) * 2 - 2,
-                    int(max(y0, y1)) * 2 + int(halfw) * 2 + 3):
-        for px in range(int(min(x0, x1)) * 2 - int(halfw) * 2 - 2,
-                        int(max(x0, x1)) * 2 + int(halfw) * 2 + 3):
-            t = 0.0 if (x1 == x0 and y1 == y0) else max(0.0, min(1.0,
-                  ((px / 2 - x0) * (x1 - x0) + (py / 2 - y0) * (y1 - y0)) /
-                  ((x1 - x0) ** 2 + (y1 - y0) ** 2)))
-            ax, ay = x0 + t * (x1 - x0), y0 + t * (y1 - y0)
-            d = math.hypot(px / 2 - ax, py / 2 - ay)
-            if d <= halfw:
-                cyl = 1.0 - 0.72 * (d / halfw) ** 1.25
-                Li = Lfn(px / 2, py / 2) * cyl
-                top = lit_wheel(min(1.0, Li + 0.16))
-                bot = lit_wheel(max(0.0, Li - 0.14))
-                if top == bot:
-                    top = min(15, bot + 1)       # guarantee a visible ▀ step at the edge
-                hb.set_pixel(px, py, top if (py % 2 == 0) else bot)
+# PANEL II: THE KEEPER -- close on the lone figure lit by the lamp
+# =====================================================================
+def make_keeper():
+    p = sl.Panel(50)
+    # --- P4a: dim steel ground/sky texture (the environment the figure stands IN) ------
+    for y in range(p.h):
+        for x in range(IW):
+            t = y / p.h
+            fg = DUSK if t < 0.5 else STEEL
+            m = (x * 5 + y * 3) % 6
+            ch = ' ' if m != 0 else ('░' if t < 0.5 else '▒')
+            setc(p, x, y, ch, fg, 0)
+    # ground ballast texture below the horizon (texture_fill idiom: scattered, low density)
+    GY = 38
+    for y in range(GY, p.h):
+        for x in range(IW):
+            m = (x * 7 + y * 11) % 5
+            if m == 0:
+                setc(p, x, y, '▒', BALLAST, 0)
+            elif m == 2:
+                setc(p, x, y, '░', GREY, 0)
 
-def _hb_joint(hb, cx, cy, r, Lfn):
-    for py in range(int((cy - r) * 2), int((cy + r) * 2) + 1):
-        for px in range(int((cx - r) * 2), int((cx + r) * 2) + 1):
-            d = math.hypot(px / 2 - cx, py / 2 - cy)
-            if d <= r:
-                cyl = 1.0 - 0.72 * (d / r) ** 1.25
-                Li = Lfn(px / 2, py / 2) * cyl
-                top = lit_wheel(min(1.0, Li + 0.16))
-                bot = lit_wheel(max(0.0, Li - 0.14))
-                if top == bot:
-                    top = min(15, bot + 1)
-                hb.set_pixel(px, py, top if (py % 2 == 0) else bot)
+    # --- the lamp itself (the single light source), upper-left -------------------------
+    LAMPX, LAMPY = 24, 16
+    # a post + lamp head
+    for y in range(LAMPY, GY):
+        setc(p, LAMPX, y, '│', GREY, 0)
+        setc(p, LAMPX - 1, y, '░', STEEL, 0)
+    # A GENTLE field (large lmax) so the per-limb cylindrical term dominates: each tube keeps its
+    # own cross-section gradient across the whole figure height instead of collapsing to one STEEL
+    # level. Source upper-left of the figure; ambient high enough that even the far feet span
+    # warm->steel, not a single dim-blue block.
+     # v3 FIX (closes hollis PANEL II rejection): the light must sit NEAR the figure with a TIGHT falloff so
+     # Li actually VARIES left->right across each tube cross-section -- that variation is what makes shade() emit
+     # all four ramp chars and lit_wheel() span steel->amber. The v2 KL (KX=30, lmax=42, amb=0.48) sat far up-left
+     # of the x~46 body with a huge lmax, so Li was nearly CONSTANT across every tube -> shade() emitted only 2 chars
+     # and lit_wheel dumped ~78% of cells into DUSK(6)=blue: flat solid-blue stacked cells (OBSERVER #2). Now the source
+     # is at (38,18) -- upper-left of the figure as before, narratively still "the lamp" -- with lmax=28 so the falloff
+     # is visible ON the body itself. Measured: torso cross-section reads █04 ▓08 ▓05 ▒05 ▒05 ▓08 ▓08 █04 (cylindrical).
+    KX, KY = 38.0, 18.0
+    def KL(x, y):
+        return fc.light_field(x, y, KX, KY, lmax=28.0, ambient=0.18)
 
-def keeper_halfblock_figure(p, KL, KL2):
-    """Build the keeper torso/arms/legs on a half-block canvas and overlay onto the panel.
-    Returns the number of ▀ cells actually written (for the note)."""
-    H = p.h
-    hb = HalfBlockCanvas(IW, H, bg=0)
+     # v4 (hollis joint pass): the legs sit ~31 units below KL at (38,18) -- past lmax=28, so Li clamps
+     # to the 0.18 ambient floor and lit_wheel() maps every leg cell to one STEEL color: flat solid-blue
+     # stacked cells (the OBSERVER #2 defect that killed v2, still localized to the lower body in v3). Fix =
+     # give the LOWER body its own light term: the SAME lamp direction (warm on the left/lamp flank, cool on
+     # the right/shadow flank) but positioned to actually reach down the legs, so Li varies continuously
+     # hip->foot and each limb reads as a lit cylinder, not a flat fill.
+    KX2, KY2 = 43.0, 40.0
+    def KL2(x, y):
+        return fc.light_field(x, y, KX2, KY2, lmax=15.0, ambient=0.30)
+    joint_tube(p, LAMPX, LAMPY, 2.2, Lfn=L)          # the lamp head (warm, lit)
+    for y in range(LAMPY - 3, LAMPY + 3):
+        for x in range(LAMPX - 3, LAMPX + 4):
+            if math.hypot(x - LAMPX, y - LAMPY) <= 2.6:
+                setc(p, x, y, '█', LAMP_HI, 0)
+    lamp_glow(p, LAMPX, LAMPY, R=13)
+      # The lamp is far up-left (24,16); with the global lmax=34 the keeper's whole surface would
+     # sit near Li~0.26 and collapse to a single STEEL level (the flat-blue defect). Give this panel
+     # its OWN light source positioned to actually span warm->steel ACROSS the body's cross-section,
+     # so each tube reads as a lit cylinder, not stacked cells. Still upper-left -- narratively the
+     # same lamp, just resolved close enough that the falloff is visible on the figure itself.
+          # the warm glow pool that grounds everything
+
+    # --- P2/P3: the KEEPER figure, standing at the platform edge, lit from upper-left ---
     HIPX, HIPY = 46.0, 33.0
     CHESTX, CHESTY = 47.0, 21.0
-    _hb_tube(hb, HIPX, HIPY, CHESTX, CHESTY, halfw=3.6, Lfn=KL)        # torso
-    _hb_joint(hb, HIPX, HIPY, 3.0, KL)                                  # pelvis
-    _hb_joint(hb, CHESTX, CHESTY, 4.4, KL)                              # chest/shoulders
-    _hb_tube(hb, CHESTX - 1.5, CHESTY + 1, 38.0, 24.0, halfw=2.2, Lfn=KL)   # left arm up
-    _hb_joint(hb, 38.0, 24.0, 2.4, KL)
-    _hb_tube(hb, 38.0, 24.0, 33.0, 28.0, halfw=1.6, Lfn=KL)           # left forearm->lantern
-    _hb_tube(hb, CHESTX + 1.5, CHESTY + 1, 53.0, 27.0, halfw=2.2, Lfn=KL)   # right arm
-    _hb_joint(hb, 53.0, 27.0, 2.4, KL)
-    _hb_tube(hb, 53.0, 27.0, 54.0, 33.0, halfw=1.6, Lfn=KL)           # right forearm
-    _hb_tube(hb, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL2)      # left thigh
-    _hb_joint(hb, 44.0, 45.0, 2.1, KL2)
-    _hb_tube(hb, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL2)          # left shin->foot
-    _hb_tube(hb, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL2)      # right thigh
-    _hb_joint(hb, 49.0, 45.0, 2.1, KL2)
-    _hb_tube(hb, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL2)          # right shin->foot
-    n_half = 0
-    for y in range(H):
-        top = hb.pixels[y * 2]
-        bot = hb.pixels[y * 2 + 1]
-        for x in range(IW):
-            t, b = top[x], bot[x]
-            if t == 0 and b == 0:
-                continue    # background pixel, leave the panel's texture underneath
-            if t != b:
-                p.set(x, y, '\u2580', t, b)      # ▀ : fg=top(lit), bg=bottom(shadow)
-                n_half += 1
-            else:
-                p.set(x, y, ' ', 7, t)           # solid block of one color
-    return n_half
-
-def make_keeper_lines():
-    """PANEL II: THE KEEPER -- built on ONE HalfBlockCanvas (house direction). A continuous
-    vertical dusk gradient makes every environment cell's top pixel brighter than its base ->
-    genuine half-block resolution across the whole panel, not sparse texture. The lamp glow
-    pool + lit figure tubes sit on top; the constructed eye is the 'alive' focal point."""
-    H = 50
-    hb = HalfBlockCanvas(IW, H, bg=0)
-    GY = 38                          # horizon row (cell space)
-    LAMPX, LAMPY = 24, 16
-    KX, KY = 38.0, 18.0              # lamp light source, upper-left of the figure
-    def KL(x, y): return fc.light_field(x, y, KX, KY, lmax=28.0, ambient=0.18)
-    KX2, KY2 = 43.0, 40.0
-    def KL2(x, y): return fc.light_field(x, y, KX2, KY2, lmax=15.0, ambient=0.30)
-
-    # ---- P4a: continuous dusk gradient across the whole panel (top lit -> base dark) ----
-    SKY = [DUSK_HI, DUSK, STEEL]           # upper sky bands (dim cyan -> dim blue -> steel)
-    GND = [STEEL, GREY, BALLAST]           # ground bands below horizon
-    for px in range(IW):
-        for py in range(hb.ph):
-            cy = py // 2
-            is_top = (py % 2 == 0)
-            t = cy / H
-            if cy < GY:
-                band = SKY[min(len(SKY)-1, int(t * GY / len(SKY)))]
-            else:
-                band = GND[min(len(GND)-1, int((cy - GY) / (H - GY) * len(GND)))]
-            col = band if not is_top else min(15, band + 1)     # top pixel one step brighter -> real ▀
-                # sparse ballast texture on the ground (scattered, low density -- anti-void)
-            if cy >= GY and (px * 7 + py * 11) % 5 == 0:
-                col = BALLAST
-            hb.set_pixel(px, py, col)
-
-    # ---- lamp post + head + warm glow pool (the single light source) ------------------
-    for y in range(LAMPY, GY):
-        for dx in (-1, 0):
-            px = LAMPX + dx
-            if 0 <= px < IW:
-                hb.set_pixel(px*2, y*2, GREY if dx == 0 else STEEL)
-                hb.set_pixel(px*2, y*2+1, GREY if dx == 0 else STEEL)
-    for py in range((LAMPY-3)*2, (LAMPY+3)*2+1):
-        for px in range((LAMPX-3)*2, (LAMPX+4)*2):
-            if math.hypot(px/2 - LAMPX, py/2 - LAMPY) <= 2.6:
-                hb.set_pixel(px, py, LAMP_HI)
-    for py in range((LAMPY-13)*2, (LAMPY+13)*2+1):
-        for px in range((LAMPX-13)*2, (LAMPX+14)*2):
-            d = math.hypot(px/2 - LAMPX, py/2 - LAMPY)
-            if d <= 13:
-                g = (1.0 - d/13.0) ** 1.6
-                col = LAMP_HI if g > 0.6 else (LAMP if g > 0.3 else GREY)
-                hb.set_pixel(px, py, col)
-
-    # ---- P2/P3: the KEEPER figure -- lit half-block tubes on top of the field ----------
-    _hb_tube(hb, 46.0, 33.0, 47.0, 21.0, halfw=3.6, Lfn=KL)           # torso
-    _hb_joint(hb, 46.0, 33.0, 3.0, KL)                                 # pelvis
-    _hb_joint(hb, 47.0, 21.0, 4.4, KL)                                 # chest/shoulders
-    _hb_tube(hb, 45.5, 22.0, 38.0, 24.0, halfw=2.2, Lfn=KL)           # left arm up
-    _hb_joint(hb, 38.0, 24.0, 2.4, KL)
-    _hb_tube(hb, 38.0, 24.0, 33.0, 28.0, halfw=1.6, Lfn=KL)           # left forearm->lantern
-    _hb_tube(hb, 48.5, 22.0, 53.0, 27.0, halfw=2.2, Lfn=KL)           # right arm (shadow flank)
-    _hb_joint(hb, 53.0, 27.0, 2.4, KL)
-    _hb_tube(hb, 53.0, 27.0, 54.0, 33.0, halfw=1.6, Lfn=KL)           # right forearm
-    _hb_tube(hb, 44.8, 34.0, 44.0, 45.0, halfw=2.3, Lfn=KL2)          # left thigh (weight-bearing)
-    _hb_joint(hb, 44.0, 45.0, 2.1, KL2)
-    _hb_tube(hb, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL2)          # left shin->foot
-    _hb_tube(hb, 47.2, 34.0, 49.0, 45.0, halfw=2.3, Lfn=KL2)          # right thigh (relaxed)
-    _hb_joint(hb, 49.0, 45.0, 2.1, KL2)
-    _hb_tube(hb, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL2)          # right shin->foot
-
-    # ---- head: a lit cranium + constructed eye (the 'alive' focal point) ---------------
+    # torso (slight lean toward the lamp/light)
+    capsule_tube(p, HIPX, HIPY, CHESTX, CHESTY, halfw=3.6, Lfn=KL)
+    joint_tube(p, HIPX, HIPY, 3.0, Lfn=KL)           # pelvis
+    joint_tube(p, CHESTX, CHESTY, 4.4, Lfn=KL)       # chest/shoulders
+    # head -- a 3/4 turned skull, lit warm on the lamp side
     HEADX, HEADCY = 49.0, 13.0
-    for py in range(int((HEADCY-4)*2), int((HEADCY+5)*2)+1):
-        for px in range(int((HEADX-3.6)*2), int((HEADX+3.6)*2)+1):
-            d = math.hypot(px/2 - HEADX, py/2 - HEADCY) / 4.0
-            if d <= 1.0:
+    for y in range(int(HEADCY - 4), int(HEADCY + 5)):
+        t = (y - HEADCY) / 4.0
+        if abs(t) <= 1.0:
+            hw = 3.4 * math.sqrt(1.0 - t * t)
+            for x in range(int(HEADX - hw), int(HEADX + hw) + 1):
+                d = math.hypot(x - HEADX, y - HEADCY) / 4.0
                 cyl = 1.0 - 0.5 * min(1.0, d) ** 1.2
-                Li = KL(px/2, py/2) * cyl
-                col = lit_wheel(min(1.0, Li + (0.16 if py % 2 == 0 else -0.14)))
-                hb.set_pixel(px, py, col)
-    # eye: sclera / iris / pupil / glint -- native pixels on top of the shading
-    EX, EY = int(HEADX*2 - 3), int(HEADCY*2 + 1)
-    for py in range(EY-4, EY+5):
-        for px in range(EX-4, EX+5):
-            if math.hypot(px-EX, py-EY) <= 3.6: hb.set_pixel(px, py, 7)        # sclera
-    for py in range(EY-2, EY+3):
-        for px in range(EX-2, EX+3):
-            if math.hypot(px-EX, py-EY) <= 1.8: hb.set_pixel(px, py, LAMP_HI) # iris
-    hb.set_pixel(EX, EY, 0)                               # pupil
-    hb.set_pixel(EX-1, EY-1, 15)                          # glint
+                Li = KL(x, y) * cyl
+                ch, fg = fc.shade(Li, base_fg=GREY_HI, hot_fg=LAMP_HI, ramp=RAMP)
+                setc(p, x, y, ch, lit_wheel(Li), 0)
+    # constructed face: brow ridge + eye (the "alive" focal point, _duel idiom)
+    fc.brow_ridge(p.canvas, HEADX - 1.5, HEADCY - 0.5, halfw=2.4, light=KL, base_fg=GREY_HI, hot_fg=LAMP_HI)
+    fc.eye(p.canvas, HEADX - 2.0, HEADCY + 0.8, r=1.6, iris_fg=LAMP_HI, glint=True)
 
-    out = hb.render()
-    out[0] = sl.c(LAMP_HI, 4) + "PANEL II // THE KEEPER" + sl.c(0,0) + " "*(IW-23)
-    return out
+    # LEFT arm (toward the lamp -- reaching/holding a lantern or bracing), lit warm
+    capsule_tube(p, CHESTX - 1.5, CHESTY + 1, 38.0, 24.0, halfw=2.2, Lfn=KL)
+    joint_tube(p, 38.0, 24.0, 2.4, Lfn=KL)
+    capsule_tube(p, 38.0, 24.0, 33.0, 28.0, halfw=1.6, Lfn=KL)   # forearm down to a held lantern
+    # RIGHT arm (away from light -- in shadow, cool steel)
+    capsule_tube(p, CHESTX + 1.5, CHESTY + 1, 53.0, 27.0, halfw=2.2, Lfn=KL)
+    joint_tube(p, 53.0, 27.0, 2.4, Lfn=KL)
+    capsule_tube(p, 53.0, 27.0, 54.0, 33.0, halfw=1.6, Lfn=KL)
+
+    # legs -- a standing contrapposto stance (weight on one leg), lit tubes
+    capsule_tube(p, HIPX - 1.2, HIPY + 1, 44.0, 45.0, halfw=2.3, Lfn=KL2)   # weight-bearing left thigh
+    joint_tube(p, 44.0, 45.0, 2.1, Lfn=KL2)
+    capsule_tube(p, 44.0, 45.0, 43.0, 50.0, halfw=1.6, Lfn=KL2)             # left shin to foot
+    capsule_tube(p, HIPX + 1.2, HIPY + 1, 49.0, 45.0, halfw=2.3, Lfn=KL2)   # relaxed right thigh
+    joint_tube(p, 49.0, 45.0, 2.1, Lfn=KL2)
+    capsule_tube(p, 49.0, 45.0, 51.0, 50.0, halfw=1.6, Lfn=KL2)             # right shin to foot
+
+    # the held lantern (warm glow in the left hand) -- a second small light accent
+    lamp_glow(p, 32.0, 29.0, R=5)
+    joint_tube(p, 32.0, 28.0, 1.4, Lfn=KL)
+
+    # --- platform edge the keeper stands on --------------------------------------------
+    for x in range(0, IW):
+        setc(p, x, GY + 1, '═', STEEL_HI, 0)
+        setc(p, x, GY + 2, '░', GREY, 0)
+
+     # v5 (hollis joint pass): the shins now end at y~46, so add a NEAR platform edge at y=47-48
+     # that the feet actually stand ON -- grounds the figure inside the panel instead of letting it
+     # float/bleed past the panel edge into the CREDIT band (the defect the blind second opinion caught).
+    for x in range(0, IW):
+        setc(p, x, 47, '═', STEEL_HI, 0)
+        setc(p, x, 48, '▒', GREY, 0)
+
+    p.put_text(1, 1, "PANEL II // THE KEEPER", LAMP_HI, 4)
+    return p
+
+# =====================================================================
+# TITLE CARD + CREDIT SEQUENCE
+# =====================================================================
 def make_title():
     p = sl.Panel(28)
     # dim steel field (muted, not the loud neon of _afterimage_scroll)
@@ -439,20 +389,12 @@ def muted_transition(height=8, index=None, label=None, power=None):
     neon HUE wheel. Keeps the recurring SCROLL//NN mark + running readout (the connective
     tissue STYLE.md asks for) but at low saturation to hold the dusk mood through the scroll."""
     p = sl.Panel(height)
-      # v7 (raze): give the handoff band a VERTICAL light gradient -- bright steel crest at the
-      # top fading to deep blue base -- so it reads as a lit transition, not a flat solid-blue
-      # fill. The old phase math produced ~80% contiguous '█' blocks that the flat-region gate
-      # (and the eye) read as unshaded dead fills. Keep the dim steel/grey/amber register + rare
-      # amber tick; just carry falloff across the band instead of a uniform wash.
-    ramp = [STEEL_HI, STEEL, GREY, STEEL]       # crest bright -> base deep
     for y in range(height):
-        vt = y / max(1, height - 1)             # 0 top (crest) -> 1 base
-        base_col = ramp[min(len(ramp)-1, int(vt * len(ramp)))]
         for x in range(IW):
             ph = x * 0.12 + y * 0.4
-             # muted wheel: steel <-> grey with a rare amber tick -- dim, not neon
+            # muted wheel: steel <-> grey with a rare amber tick -- dim, not neon
             m = int(ph) % 5
-            col = base_col if m < 3 else (GREY if m == 3 else LAMP)
+            col = STEEL if m < 2 else (GREY if m < 4 else LAMP)
             ch = '█' if m < 1 else ('▓' if m == 1 else ('▒' if m == 3 else '░'))
             p.set(x, y, ch, col, 0)
     if index is not None:
@@ -470,18 +412,13 @@ def muted_transition(height=8, index=None, label=None, power=None):
             p.set(px + i, height - 1, ch, LAMP, 4)
     return p
 
-class _LinesPanel:
-     """A panel already rendered to ANSI lines (the half-block keeper)."""
-    def __init__(self, lines): self._lines = lines
-    def render(self): return self._lines
-
 def main():
     panels = [
         make_title(),
         muted_transition(height=8, index=1, label="THE YARD", power="DUSK"),
         make_yard(),
         muted_transition(height=8, index=2, label="THE KEEPER", power="LAMP ON"),
-         _LinesPanel(make_keeper_lines()),
+        make_keeper(),
         muted_transition(height=6, index=3, label="CREDIT", power="OFF"),
         make_credit(),
     ]
