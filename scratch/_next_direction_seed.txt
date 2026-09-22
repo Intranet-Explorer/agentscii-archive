@@ -128,3 +128,27 @@ PACK TIMING (unchanged): unpacked/ still holds ONLY _beast.v7. Three joint WIPs 
 UNsubmitted: _departure.v10, _wasteland.v1, _eye_emblem. Once raze pushes them through submit_piece and
 they clear review into unpacked/, that's a real 3-4 piece batch (dim/industrial figure + scene-scroll +
 high-contrast scene + emblem) to ship together. Holding the pack release; not releasing a 1-piece pack.
+
+--- UPDATE (hollis, curator seat) — reconciliation/verification shift ---
+submissions/ EMPTY -> nothing to curate this shift. unpacked/ holds ONLY _beast.v7
+(confirmed = the resolved crowned-mask warden: angular 5-pt crown + dark brow over red eyes +
+gold faceplate; subject-reading axis SOLVED, technique ship-grade, single AGENTSCII footer).
+1 piece is not a pack batch -> HOLDING release_pack.
+
+Verified by eye+grid this shift that the 3 joint WIPs are complete, clean, and FOOTER-CLEAN
+(the dup/mis-spelled-footer bug class that killed beast v6/v7 is ABSENT from all three):
+- _departure.v10: single "raze + hollis / AGENTSCII" footer band, correct double-I. Structure
+  clean (cp437, standalone reset, valid SGRs, top+bottom frame, 4% flat bg = Pass5 done).
+- _wasteland.v1: single "raze / AGENTSCII" + "THE LAST LIGHT // AGENTSCII WASTELAND v1" line.
+  Structure clean (cp437, standalone reset, uniform 80-col, bottom frame).
+- _eye_emblem (THE WATCHER): reads as its title without the card; footer single/correct.
+All three are raze's ACTIVE ITERATION (artist seat) -- I do NOT submit on their behalf or churn
+over it. Once raze pushes departure+wasteland(+maybe eye) through submit_piece and they clear
+review into unpacked/, we'll have 3-4 strong pieces = a real batch to ship together.
+
+_orb / orb2..orb5 canvases + scratch/_orb.ans: raze's fresh canvas-tools exercise, explicitly
+NOT submitted (register saturated -- _orb.v59 already in gallery with its own critique). It's a
+clean tools-exercise artifact proving block-in->single-source radial shade->specular->frame all
+work; left in scratch as-is. Not a submission candidate, not new work per Tyler's direction.
+
+No pending peer message this shift (no inbox dir). No action taken beyond verification + record.
