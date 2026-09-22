@@ -313,43 +313,20 @@ def make_keeper_lines():
     KX2, KY2 = 43.0, 40.0
     def KL2(x, y): return fc.light_field(x, y, KX2, KY2, lmax=15.0, ambient=0.30)
 
-     # ---- P4a: continuous dusk gradient, LOW-FREQ MOTTLED (v10.1 fix) ----
-     # v10 tried a 2x2 Bayer dither -> too high-frequency, read as a hard checkerboard that
-     # competed with the figure and fought hollis's accepted MUTED register. Over-corrected.
-     # v10.1: keep the continuous top(lit dusk)->base(deep shadow) gradient but perturb it with
-     # LOW-FREQUENCY value noise (a hash on a coarse grid, interpolated), so the backdrop reads
-     # as soft graded atmosphere / mottled haze -- varied enough to break the dead flat fields
-     # the gate flagged, gentle enough to stay in the dim/industrial register. No checkerboard.
-    import random as _rnd
-    RAMP_STOPS = [DUSK_HI, DUSK, STEEL, GREY]       # top->bottom brightness ladder (all dim)
-    NB = len(RAMP_STOPS) - 1                         # number of dither intervals
-    def _hash(x, y):                                # cheap value-noise on a coarse grid
-        h = (x * 374761393 + y * 668265263) & 0xFFFFFFFF
-        return ((h >> 13) ^ h) % 1000 / 1000.0
-    def _vnoise(gx, gy):                            # bilinear interp of coarse hash grid
-        x0, y0 = int(gx), int(gy)
-        fx, fy = gx - x0, gy - y0
-        a = _hash(x0, y0); b = _hash(x0 + 1, y0)
-        c = _hash(x0, y0 + 1); d = _hash(x0 + 1, y0 + 1)
-        top = a + (b - a) * fx; bot = c + (d - c) * fx
-        return top + (bot - top) * fy
+    # ---- P4a: continuous dusk gradient across the whole panel (top lit -> base dark) ----
+    SKY = [DUSK_HI, DUSK, STEEL]           # upper sky bands (dim cyan -> dim blue -> steel)
+    GND = [STEEL, GREY, BALLAST]           # ground bands below horizon
     for px in range(W * 2):
         for py in range(hb.ph):
             cy = py // 2
             is_top = (py % 2 == 0)
-            t = cy / H                                # 0 top -> 1 base
-            # low-freq mottle: +-~0.35 ramp-steps of soft noise, gentle not checkerboard
-            nz = _vnoise(px / 9.0, py / 6.0) - 0.5
-            pos = t * NB + nz * 0.7
-            idx = int(pos)
-            if idx < 0:
-                idx = 0
-            elif idx >= NB:
-                idx = NB - 1
-            col = RAMP_STOPS[idx]
-            if is_top:
-                col = min(15, col + 1)               # top pixel one step brighter -> real ▀
-             # sparse ballast texture on the ground (scattered, low density -- anti-void)
+            t = cy / H
+            if cy < GY:
+                band = SKY[min(len(SKY)-1, int(t * GY / len(SKY)))]
+            else:
+                band = GND[min(len(GND)-1, int((cy - GY) / (H - GY) * len(GND)))]
+            col = band if not is_top else min(15, band + 1)     # top pixel one step brighter -> real ▀
+                # sparse ballast texture on the ground (scattered, low density -- anti-void)
             if cy >= GY and (px * 7 + py * 11) % 5 == 0:
                 col = BALLAST
             hb.set_pixel(px, py, col)
