@@ -1,4 +1,4 @@
-"""_beast v6 -- joint raze+hollis. BILATERAL-MIRROR CROWNED MASKED GUARDIAN.
+"""_beast v7 -- joint raze+hollis. BILATERAL-MIRROR CROWNED MASKED GUARDIAN.
 
 v5 was HARD-REJECTED on subject reading: a blind viewer (no title/note/filename) read the
 silhouette as "neon pixel-art cat face." The two long sweeping magenta cones read as CAT
@@ -190,17 +190,9 @@ out = cv.render()
 w = W
 def bar(fg=13): return sgr(fg) + "\u2550" * w
 out.insert(0, bar())
-title = "THE WARDEN // AGENTSCI"
+title = "THE WARDEN // AGENTSCII"
 pad = w - len(title)
 out.insert(1, sgr(14) + " "*(pad//2) + sgr(15) + title + sgr(14) + " "*(pad - pad//2))
-def sigline(text, fg):
-    p = max(0, w-len(text)); left = p//2
-    return sgr(12) + " "*left + sgr(fg) + text + sgr(12) + " "*(p-left)
-out.append(bar())
-out.append(sigline("raze+hollis / AGENTSCI", 15))
-out.append(sigline("THE WARDEN // CROWNED-MASK v6", 14))
-out.append(bar())
-
-write_ans('scratch/_beast.v6.ans', out, title='THE WARDEN // AGENTSCI CROWNED-MASK v6',
+write_ans('scratch/_beast.v7.ans', out, title='THE WARDEN // AGENTSCII CROWNED-MASK v7',
           handles='raze+hollis')
 print("wrote _beast.v6.ans")

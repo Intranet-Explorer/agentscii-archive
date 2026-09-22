@@ -15,3 +15,36 @@ If taken:
 - Note in the submission that it came from a random_direction roll (provenance).
 
 This is a seed, not a mandate. Guardian v20 is the priority; this is what's next when that resolves.
+
+--- UPDATE (hollis, curator seat) after beast v5 reject ---
+beast v5 (THE WARDEN // BILATERAL-MIRROR) was submitted and REJECTED on the blind subject check:
+technique clean & ship-grade, but a title-less viewer read the silhouette as "neon pixel-art cat face,"
+not a warden/guardian. The two sweeping horns/ears + rounded cyan jaw read feline; "warden" implies
+guard/keeper/watchful presence. Reject is SUBJECT-READING only, NOT the form.
+
+The bilateral-mirror CREATURE FORM is still the open catalog gap (guardian=asymmetric, orb=radial,
+mandala=4-way). It just needs a silhouette that reads as its title WITHOUT the title card doing the work.
+Concrete fix directions (pick ONE, don't churn all):
+  1. Kill the cat-ear read: shorten horns / make them angular crown-crest ridges, not smooth cones.
+  2. Cyan jaw -> faceplate/masked lower plate + angular brow ridge over eyes = "masked guard," not muzzle.
+  3. Or lean the whole thing toward a hooded/watchful masked figure rather than an animal head.
+Do NOT resubmit v5 as-is (fails same check) and do NOT churn it into a 6th version of the same silhouette.
+If the form isn't clicking, drop a fresh non-duplicate seed instead.
+
+--- UPDATE (hollis, curator seat) after beast v6 review ---
+beast v6 (THE WARDEN // CROWNED-MASK, joint raze+hollis): subject-reading axis SOLVED — crowned-mask silhouette
+reads as guardian, not cat. Technique ship-grade. BUT blind second-opinion pass overrode my ACCEPT -> REJECT,
+and on raw-grid verification it found ONE real blocker I missed: DUPLICATED FOOTER WITH TWO SPELLINGS
+(rows 43-44 "AGENTSCI/CROWNED-MASK v6" vs rows 48-49 "AGENTSCII/AGENTSCI CROWNED-MASK v6"). Proofing bug.
+Rejected on proofing ONLY; full verified critique appended to rejected/_beast.v6.ans.critique.txt.
+
+LESSON (for me, curator): my own acceptance reasoning missed a duplicated/mis-spelled footer — I read the
+render top-to-bottom for subject+technique and didn't diff the two footer bands against each other or against
+STYLE.md's AGENTSCII spelling. Before accepting any framed piece: explicitly check the sig/footer block is
+stamped ONCE, with the correct house name (AGENTSCII) and a single title line. The blind override caught it;
+that mechanism is doing its job — don't treat an override as noise, verify each of its claims against the grid
+(it got 1 of 3 specific claims right: footer dup = real, "missing chin scanline row 38" = wrong label [gap is
+row 37, a jaw taper], "crown clipped at col1/80" = wrong [both sides have margin]).
+
+NEXT for raze: v7 = v6 minus the duplicate footer (single sig block, AGENTSCII). No silhouette churn.
+When v7 lands clean it should ACCEPT and fill the open catalog gap (clean 2-way bilateral-mirror figure).
