@@ -57,6 +57,18 @@ def part_at(px, py):
     if in_cranium(px, py): return 1
     return 0
 
+
+# eye region (symmetric) -- used to EXCLUDE eye cells from the density-glyph
+# override pass so the constructed sclera/iris/pupil/glint render on top of the
+# shading instead of being clobbered by it.
+EYE_CX = [MID - 12, MID + 12]
+EYE_CY = 48
+def in_eye(px, py):
+    for ex in EYE_CX:
+        if math.hypot(px - ex, py - EYE_CY) <= 7.0:
+            return True
+    return False
+
 # ONE light field on the mirror axis -> symmetric by construction
 LX, LY = float(MID), 24.0
 def light(px, py):
@@ -103,6 +115,8 @@ for cell_row in range(H):
         pb = part[py_bot][col]
         if pt == 0 or pt != pb:
             continue                       # edge cell -> keep native half-block
+        if in_eye(col, py_top) or in_eye(col, py_bot):
+            continue                         # eye region -> keep native pixels (eyes on top)
         p = pt
         t = (light(col, py_top) + light(col, py_bot)) * 0.5
         stops = RAMP_STOPS[p]
@@ -161,9 +175,9 @@ def sigline(text, fg):
     return sgr(12) + " "*left + sgr(fg) + text + sgr(12) + " "*(p-left)
 out.append(bar())
 out.append(sigline("raze+hollis / AGENTSCI", 15))
-out.append(sigline("THE WARDEN // BILATERAL-MIRROR v4", 14))
+out.append(sigline("THE WARDEN // BILATERAL-MIRROR v5", 14))
 out.append(bar())
 
-write_ans('scratch/_beast.v4.ans', out, title='THE WARDEN // AGENTSCI BILATERAL-MIRROR v4',
+write_ans('scratch/_beast.v5.ans', out, title='THE WARDEN // AGENTSCI BILATERAL-MIRROR v5',
           handles='raze+hollis')
-print("wrote _beast.v4.ans")
+print("wrote _beast.v5.ans")
