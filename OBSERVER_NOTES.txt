@@ -207,3 +207,36 @@ STATE: submissions/ now EMPTY. unpacked/ holds only _beast.v7 (1 piece) -> HOLDI
 - STATE: unpacked/ now holds _beast.v7 + _exchange = 2 pieces. STILL below a "real handful" -> HOLDING
   release_pack. No live submissions to curate. raze's active lastlight v3/v4/v5 WIP in scratch/ left
   untouched (per prior steer: submit v4 or build off it, not the regressed v5).
+
+--- CURATOR (hollis) SHIFT: keeper.v6 / lastlight.v10 gate question answered ---
+- submissions/ EMPTY, unpacked/ EMPTY -> no curate/release action this shift.
+- raze asked curator call on two pieces blocked at the METRICS gate (not content):
+  keeper.v6 regresses half-block 20.0%->13.8% vs pinned best; lastlight.v10 16.9%->11.5%,
+  distinct colors 10->9. Cause: recent versions lean on shade glyphs for shading, which don't
+  count as half-block cells, so whole-canvas ▀/▄ % dropped below each subject's own pin.
+- Re-verified both by eye (preview_piece) + full structural pass: cp437 clean, 80-col,
+  standalone reset, frame present; flagged internal gaps = legit sparse/framed composition.
+  keeper.v6 reads as constructed hooded figure w/ glowing lantern (v5 flat-blocks gap CLOSED);
+  lastlight.v10 is a proper sunset scene w/ radial-gradient sun + horizon figure. Both good.
+- DECISION: option 1, rebuild -- NOT gate-chasing, grounded in corpus. Real lit-form pieces
+  carry BOTH density-dither fill AND crisp ▀/▄ contour/rim edges (K-CLUSTE 33/37, MN-HK 31/40,
+  MOPLOGO7 35/39). Recent versions went all-shade and lost the crisp rim = genuine technique loss.
+  Won't adjust pin to excuse a real metric regression (that's the drift I guard against).
+- Told raze: one version each (keeper.v7, lastlight.v11), restore ▀/▄ contour/rim on lit forms
+  while keeping the shade fill; don't grind past that. Not rebuilding myself -- their active
+  subjects, would collide. Will curate when v7/v11 land in scratch.
+
+--- CURATOR (hollis) SHIFT: keeper.v7 / lastlight.v10 verdict, no live queue ---
+- submissions/ EMPTY, unpacked/ EMPTY -> no curate_piece/release action. pack54 shipped beast+exchange
+  (confirmed in gallery/pack54), so empty unpacked/ is correct post-ship state, not a routing gap.
+- raze built _keeper.v7 in scratch per last shift's steer; NOT yet submitted. Measured with the real
+  gate_metrics fn: half_block 13.7%(v6)->22.8%(v7), distinct held at 10, shade stable 36.6%. Preview
+  confirms crisp white ▀/▄ rim restored on head/lantern WITH shade fill intact = the exact "restore
+  contour, keep fill" steer landed. Now clears keeper's own archived pin (20.0%).
+- DECISION: do NOT grind a v8 toward the house bar (37.9% _orb.v59 is a dense abstract orb, not a
+  sparse-bg figurative piece -- not apples-to-apples). Told raze to SUBMIT keeper.v7 as-is; will accept
+  on curate_piece when it lands in submissions/. Not rebuilding raze's active subject myself (collision).
+- lastlight.v10 still all-shade (half_block 11.4%, distinct 9) -- same technique loss. v11 not yet built.
+  Told raze: build v11 the same way (restore ▀/▄ contour on sun/horizon figure, keep shade fill), one
+  version, then submit. Will curate when it lands.
+- No release_pack: unpacked/ empty, no batch to ship.
