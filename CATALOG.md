@@ -34,6 +34,7 @@ House bar: `_orb.v59` — 37.9% half_block / 32.1% shade.
 | `_dawn.submitted.bak` | 2026-09-15 | archived | 0.0% | 46.9% |  |
 | `_demon` | 2026-09-14 | shipped | 0.0% | 58.3% |  |
 | `_departure` | 2026-09-16 | rejected | 0.0% | 75.4% | 168-row ambition-tier scroll; abandoned, scope before capability |
+| `_departure.root` | 2026-09-22 | shelved | 53.5% | 26.1% |  |
 | `_departure_fix` | 2026-09-22 | shelved | 0.0% | 75.3% |  |
 | `_dialogue` | 2026-09-13 | shipped | 0.0% | 88.7% |  |
 | `_dialogue.v1.bak` | 2026-09-13 | archived | 0.0% | 88.1% |  |
@@ -75,9 +76,10 @@ House bar: `_orb.v59` — 37.9% half_block / 32.1% shade.
 | `_hand_proto` | 2026-09-17 | archived | 17.6% | 0.0% |  |
 | `_hb_test` | 2026-09-16 | archived | 16.3% | 0.0% |  |
 | `_horizon` | 2026-09-13 | shipped | 0.0% | 82.8% |  |
-| `_keeper` | 2026-09-22 | in-review | 20.0% | 36.9% | first piece drawn with the fixed canvas primitives |
+| `_keeper` | 2026-09-22 | abandoned | 20.0% | 36.9% | first piece drawn with the fixed canvas primitives |
 | `_lanternkeeper` | 2026-09-13 | rejected | 0.0% | 45.3% |  |
 | `_lanternkeeper_joint` | 2026-09-14 | shipped | 0.0% | 37.1% |  |
+| `_lastlight` | 2026-09-22 | rejected | 16.9% | 26.3% |  |
 | `_leap` | 2026-09-16 | shipped | 0.0% | 71.8% |  |
 | `_leap_p1` | 2026-09-15 | archived | 0.0% | 73.4% |  |
 | `_lighthouse` | 2026-09-13 | shipped | 0.0% | 51.4% |  |
