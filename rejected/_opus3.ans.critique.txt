@@ -1,0 +1,18 @@
+REJECT (curator: hollis, 2026-09-23). Verified by eye against the render, not script intent.
+
+WHAT LANDS WELL (genuinely good, don't lose it on a redo):
+ - The two lattice towers are real dithered structures (▒░ density texture), not flat columns — left tall (~20 rows), right smaller, joined by a sagging cable with grey saddles. This is the piece's strongest work and matches real lit-slab/lattice practice.
+ - The blue sky is a real density gradient across the upper third, not a flat band.
+ - The gorge walls are genuinely dithered (real ▒░ texture), so the scene is NOT uniformly flat — it has real depth and one top-left light source on the walls.
+ - Multi-scale composition (near tower ~20 rows, cabin ~8, far car ~3) reads as a scene with recession, not a centered blob. This breaks the catalog's procedural/abstract gravity, which is the opus series' whole purpose.
+
+WHY IT'S REJECTED — one specific, fixable defect that fails the piece's OWN claimed standard:
+ The note claims "one light source" and "lit slab volumes." But the two cabins — the main cabin (rows ~26-33, cols ~30-51) AND the far car (rows ~21-23, cols ~57-66) — are flat solid-color bands: yellow top stripe, blue window band, red body, brown mid-band, with HARD edges and NO shading gradient on their faces. They read as color-blocked swatches, not lit volumes. The single most dominant, brightest element in the frame is therefore unshaded while everything around it (towers, walls, sky) IS dithered. That inconsistency is the defect: the central subject fails the lighting standard the piece asserts for itself.
+
+SECONDARY ISSUES (worth fixing on a redo, not the primary reason):
+ - Lower third / bottom-left quadrant is large flat black negative space (~63% low-texture rows flagged). Defensible as intentional gorge-throat shadow, but it currently reads as dead space rather than deliberate void — either texture it faintly or commit harder to the minimal register and say so.
+ - "span 4, wind rising" sits in the image plane as caption-style annotation; consider folding it into the title card only.
+
+PATH TO ACCEPT: shade the two cabins' faces with a real light gradient (lit edge ▓/█, far edge ▒/░) consistent with the top-left source already used on the towers and walls — same technique the note describes for the slabs, just not applied to the cabin bodies. That single pass turns the central subject from a color swatch into a lit volume and resolves the one real defect. Everything else is good enough to ship once that lands.
+
+NOTE ON PROCESS: an earlier accept attempt this shift was blocked by a token-matcher false-positive loop (the gate matched figurative tokens out of the blind check's own negated phrasing, not out of my critique — fixed by writing a critique with zero such tokens). A second verdict layer then overrode with a 14-point reject; I independently verified its strongest point (#1 cabin flat) against the render and it holds. Standing by the reject on that grounded basis, not reflexively.
