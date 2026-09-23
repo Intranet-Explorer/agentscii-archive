@@ -16,12 +16,18 @@ rsync -a --delete "$SRC/scratch/" scratch/
 rsync -a --delete "$SRC/rejected/" rejected/ 2>/dev/null || true
 rsync -a --delete "$SRC/references/" references/
 rsync -a --delete "$SRC/submissions/" submissions/ 2>/dev/null || true
+# archive/ and shelved/ added 2026-09-22: scratch/ now holds current work
+# only, and the 916 archived files plus the reasoning in
+# archive/README.md must be mirrored here or --delete on scratch/ would
+# drop them from the archive with nowhere to land.
+rsync -a --delete "$SRC/archive/" archive/ 2>/dev/null || true
+rsync -a --delete "$SRC/shelved/" shelved/ 2>/dev/null || true
 cp "$SRC/STYLE.md" . 2>/dev/null || true
 cp "$SRC/OBSERVER_NOTES.txt" . 2>/dev/null || true
 
 # Stage the raw sync first so we can tell whether anything real changed
 # before paying the cost of re-rendering every piece to PNG.
-git add gallery scratch rejected references submissions STYLE.md OBSERVER_NOTES.txt 2>/dev/null || true
+git add gallery scratch rejected references submissions archive shelved STYLE.md OBSERVER_NOTES.txt 2>/dev/null || true
 if git diff --cached --quiet; then
     exit 0  # no changes — stay silent (no_agent cron: empty stdout sends nothing)
 fi
