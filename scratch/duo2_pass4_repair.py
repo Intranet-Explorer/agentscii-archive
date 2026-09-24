@@ -12,8 +12,8 @@ casement is untouched. No element is added or removed.
      Correct, and it was one line's fault: the old field added a
      per-facet bias of +-0.086 keyed to an angular index, a value step
      with no visible cause, which came out as ░/▒ blotches at constant
-     average density. That is a stamp. It is gone, and so is the Bayer
-     jitter over the field. What is left is only what glass has a reason
+     average density. That is a stamp. It is gone, and so is the ordered
+     dither over the field. What is left is only what glass has a reason
      to do -- see `field` below -- and where it has no reason to do
      anything the field is now a single even density. Emptier on purpose.
 
@@ -26,15 +26,19 @@ casement is untouched. No element is added or removed.
      value a fold turned toward the source actually has, and the cast
      shadow no longer goes to near-black.
 
-  3. FLAT BLACK LOWER THIRD. About a quarter of the canvas was an
-     unrendered hole. It now carries the only thing that is really in
-     there: the depth of the opening itself. Still by a long way the
-     darkest region in the piece -- dim blue on black, never above a
-     third of the pane's value -- so the hole still reads as a hole.
+  3. FLAT BLACK LOWER THIRD. Root cause found, not painted over: the
+     forearm splits the breach into two void masses of 400 and 387px,
+     and D.hole_mask returns only the LARGEST, so every pass so far has
+     drawn into one lobe and left the other outside every mask it owned.
+     That unreachable lobe is precisely the region the review measured
+     as unrendered. Both lobes now carry the one thing really inside a
+     hole -- the depth of the opening. Still by a long way the darkest
+     region in the piece, so the hole still reads as a hole.
 """
 import math
 import runpy
 import sys
+from collections import deque
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -73,10 +77,41 @@ for y in range(D.PH):
 
 nh = D.paint(mask, D.HAND, val, (4, 6, 14), dither=0.02)
 
+
+# ======================================================================
+# the breach -- BOTH lobes (see defect 3 in the module docstring)
+# ======================================================================
+def breach_mask():
+    """Every void mass big enough to be part of the break. The next
+    largest thing in the void colour is a 53px crack spike, so 150 is a
+    clean cut."""
+    seen = [[False] * D.CW for _ in range(D.PH)]
+    out = [[False] * D.CW for _ in range(D.PH)]
+    for sy in range(D.PH):
+        for sx in range(D.CW):
+            if seen[sy][sx] or mask[sy][sx] != D.VOID:
+                continue
+            comp, q = [], deque([(sx, sy)])
+            seen[sy][sx] = True
+            while q:
+                x, y = q.popleft()
+                comp.append((x, y))
+                for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                    if 0 <= nx < D.CW and 0 <= ny < D.PH and not seen[ny][nx] \
+                            and mask[ny][nx] == D.VOID:
+                        seen[ny][nx] = True
+                        q.append((nx, ny))
+            if len(comp) >= 150:
+                for x, y in comp:
+                    out[y][x] = True
+    return out
+
+
+hole = breach_mask()
+
 # ======================================================================
 # defect 1 -- the pane
 # ======================================================================
-hole = D.hole_mask(mask)
 crack_px = [(x, y) for y in range(D.PH) for x in range(D.CW)
             if mask[y][x] == D.VOID and not hole[y][x]]
 angles = sorted({round(math.atan2(y - BREAK[1], x - BREAK[0]), 2)
@@ -110,7 +145,7 @@ def field(x, y):
     """
     d = math.hypot(x - BREAK[0], y - BREAK[1])
     v = 0.76 - 0.17 * (x / 79.0) - 0.16 * (y / 99.0)
-    v += 0.20 * math.exp(-((d - 34) / 20.0) ** 2)
+    v += 0.22 * math.exp(-((d - 30) / 13.0) ** 2)
     for c, wdt in ((24, 7.0), (57, 5.5)):
         v += 0.10 * max(0.0, 1.0 - y / 120.0) * \
             math.exp(-(((x - y * 0.55) - c) / wdt) ** 2)
@@ -215,15 +250,14 @@ np_ = D.paint(mask, D.PANE, pval, (0, 4, 12), dither=0.01)
 #     side of the opening, which catches what the front source spills
 #     past the glass; the further in from any rim, the less of that
 #     reaches, so value falls off with distance from the rim. This is
-#     what fills the two lower lobes -- they are ~20px across, so the
-#     falloff spans them exactly.
+#     what fills the two lobes -- each is ~20px across, so the falloff
+#     spans them exactly.
 #   - the pool. The source is up-LEFT and in front, so the light that
-#     gets through lands on the upper-left of whatever is behind and
-#     dies toward the bottom-right. The left lobe is therefore lighter
-#     than the right lobe, and both grade. Asymmetric because the light
-#     is asymmetric.
+#     gets through lands on the upper-left of what is behind and dies
+#     toward the bottom-right. The left lobe is therefore lighter than
+#     the right one, and both grade. Asymmetric because the light is.
 #
-# Top value 0.34 against the pane's 0.52 floor: the void is still the
+# Top value 0.36 against the pane's 0.52 floor: the void is still the
 # darkest region in the piece by a wide margin, every cell of it is dim
 # blue on black, and the hole keeps reading as a hole.
 rim_d = [[0] * D.CW for _ in range(D.PH)]
@@ -231,9 +265,9 @@ for y in range(D.PH):
     for x in range(D.CW):
         if not hole[y][x]:
             continue
-        best = 12
-        for ny in range(max(0, y - 12), min(D.PH, y + 13)):
-            for nx in range(max(0, x - 12), min(D.CW, x + 13)):
+        best = 14
+        for ny in range(max(0, y - 14), min(D.PH, y + 15)):
+            for nx in range(max(0, x - 14), min(D.CW, x + 15)):
                 if not hole[ny][nx]:
                     best = min(best, abs(x - nx) + abs(y - ny))
         rim_d[y][x] = best
@@ -243,10 +277,10 @@ for y in range(D.PH):
     for x in range(D.CW):
         if not hole[y][x]:
             continue
-        reveal = math.exp(-(rim_d[y][x] / 9.0) ** 2)
+        reveal = math.exp(-(rim_d[y][x] / 5.5) ** 2)
         u = (x - 9) * 0.62 + (y - 52) * 0.78          # down-light from the rim
         pool = math.exp(-(u / 34.0) ** 2)
-        vval[y][x] = 0.06 + 0.17 * reveal + 0.15 * reveal * pool
+        vval[y][x] = 0.035 + 0.20 * reveal + 0.13 * reveal * pool
 nv = D.paint(mask, D.VOID, vval, (0, 4, 8), dither=0.0)
 
 # ======================================================================
