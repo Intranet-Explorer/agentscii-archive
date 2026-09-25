@@ -6,6 +6,7 @@ list of cells and does one load/save. grid() is the other half of the
 loop: read what is already under a region so the next cell's glyph can be
 chosen from the value that is actually there.
 """
+import math
 import base64
 import sys
 
@@ -133,15 +134,21 @@ COVER = {'\u00b7': 0.04, '\u2591': 0.25, '\u2592': 0.50,
          # line between them.
          '\u2580': 0.50, '\u2584': 0.50, '\u258c': 0.50, '\u2590': 0.50}
 GLYPHS = '\u00b7\u2591\u2592\u2593\u2588'
+# Session 4, the review: "the hue breaks the palette: violet against an
+# otherwise red/orange/yellow fire scheme. Embers don't go purple."
+# There was an 'ambient': (5, [0]) band here for surfaces turned fully
+# away from the fire, and magenta was the wrong answer to a real
+# question. A surface facing away from the only light in a picture does
+# not change hue; it runs out of light. 'cool' already spells that in
+# the right hue and the far side of the head simply clamps to it now.
 BANDS = {
-    'ambient': (5, [0]),
     'cool': (1, [0]),
     'dark': (3, [0, 1]),
     'mid': (9, [0, 1, 3]),
     'hot': (11, [0, 1, 9]),
 }
 BANDS_BY_HEAT = [(0.90, 'hot'), (0.72, 'mid'), (0.30, 'dark'),
-                 (0.18, 'cool'), (0.00, 'ambient')]
+                 (0.00, 'cool')]
 EMBER_X, EMBER_Y = 47.0, 13.0
 
 
@@ -195,19 +202,38 @@ def ink(x0, y0, rows, width=None):
     return out
 
 
-# THE FRONT (session 3). One column per row where intact skin stops.
+# THE FRONT. One column per row where intact skin stops.
 #
-# Session 2's note said the dissolve was a gradient of striation because
-# the gap pattern was a function of x: more zeros the further right, in
-# every row, monotonically. Density that tracks x is a rule. Density that
-# tracks distance from a stated edge is structure. This is the stated
-# edge, and everything on the burning side is measured from it now.
+# Session 3 made it a stated edge instead of a function of x, which is
+# the difference between a gradient and a structure. Session 4 said what
+# was still wrong with it and did not fix it: the LEAN alone travels
+# three cells over the whole height of the head, a straighter line than
+# the silhouette I spent session 5 calling a wall. And it is not an
+# abstract edge -- duo3_model draws a LIP at front(y) in every row, two
+# rungs above the surface behind it, so a front that does not move is a
+# bright vertical bar three cells wide down the middle of the face. That
+# bar is the first thing you see in the render. It was the ruler line.
 #
-# It leans out and down -- 43 at the crown, 46 at the jaw -- because the
-# burn started at the temple and is working down across the face. The
-# notch at rows 12-14 is the socket: the front broke inward there first,
-# which is why there is a hole in that place and not in any other.
-FRONT = {
+# Session 6: PROMINENCE drives it, the way it already drives the plates,
+# the gaps, the heat and the reach.
+#
+# Which way it drives it is the whole content of the fix, and the answer
+# is not "the fire eats what is closest to it". Fire goes through what is
+# THIN. The brow ridge and the zygomatic arch are the two buttresses of
+# the facial skeleton -- the thickest bone in the face, which is exactly
+# why they are what is left of a skull -- so intact surface SURVIVES
+# further into the burn there and the front bulges out to meet it. The
+# orbital plate behind the socket is a wafer and the temporal fossa is
+# the thinnest bone on the whole skull, and the front notches back where
+# they gave way. The socket is a hole in this picture for the same
+# reason, which is a story session 3 already told; this makes the rest of
+# the edge agree with it.
+#
+# So the brow ridge at row 10 stands at x49 with the socket at x42 three
+# rows under it, and the arch at rows 16-17 overhangs the burnt cheek
+# hollow the same way. Those two overhangs are the drawing: a face coming
+# apart along its own structure, instead of a region fading out.
+FRONT_LEAN = {
     3: 43, 4: 43, 5: 43, 6: 44, 7: 44, 8: 44, 9: 45, 10: 45, 11: 45,
     12: 44, 13: 43, 14: 44, 15: 45, 16: 45, 17: 45, 18: 46, 19: 46,
     20: 46, 21: 46, 22: 45, 23: 44, 24: 43,
@@ -215,7 +241,13 @@ FRONT = {
 
 
 def front(y):
-    return FRONT.get(y, 44)
+    # No gain below row 21. PROMINENCE there ("the JAW LINE and the
+    # chin's corner") is how far the mandible projects toward the VIEWER,
+    # and the front is a width: the head's own silhouette has already run
+    # in to the chin by row 22, so a bulge there would hang a lip and a
+    # seam in open air beside the jaw with black in between.
+    g = (prom(y) - 4.5) * 0.85 if y <= 21 else 0.0
+    return int(round(FRONT_LEAN.get(y, 44) + g))
 
 
 # The ramp written out in order, dark to light. Session 3 needs to step
@@ -233,3 +265,71 @@ def levels(x0, y0, rows, width=None):
                 ch, fg, bg = RAMP[lv]
                 out.append((x0 + c, y0 + r, ch, fg, bg))
     return out
+
+
+# PROMINENCE (session 4). How far the flesh stood FORWARD at the burning
+# edge, row by row. The reviewer on the burning side: "Thirteen rows,
+# same ramp, no vertical variation. Charitably it's the head dissolving
+# into embers -- but a dissolve needs form to dissolve FROM, and this is
+# a gradient applied uniformly per row."
+#
+# That is right, and FRONT was not enough on its own. FRONT says where
+# the skin stops; it says nothing about what KIND of skin stopped there,
+# and it only moves three cells over the whole height of the head, so a
+# rule written in terms of it alone comes out the same in every row.
+# This is the missing term. A brow ridge is bone standing proud of the
+# fire and it comes off in big hot chips that carry a long way; a temple
+# hollow and an eye socket have less material, stand further back, and
+# the burn went through them first, so they shed small and thin and the
+# field falls short there.
+#
+# Nothing here is a number chosen to make a texture. Each one is a
+# statement about the head that duo3_model already draws on the intact
+# side, read across to the side that is coming apart.
+PROMINENCE = {
+    # Session 6. These six were 4,5,5,5,4,3 -- near-flat, on the
+    # reasoning that a forehead is a smooth plane. It is, and that was
+    # still the wrong reading, because PROMINENCE is not smoothness: it
+    # is how far the flesh stood forward AT THE BURNING EDGE, and the
+    # burning edge runs up the side of the forehead, not across its
+    # middle. Mirror planes2's own FRONTAL EMINENCE -- which it draws at
+    # x31-33, rows 5-7 -- about the centre line at x38 and it lands at
+    # x43-45, which is exactly where the front is. So the bump is ON the
+    # seam and the front has to ride over it.
+    3: 3, 4: 4,                # crown, curving away over the top
+    5: 6, 6: 7,                # the FRONTAL EMINENCE, square on the seam
+    7: 5, 8: 2,                # the forehead's lateral edge turning back
+    9: 8, 10: 9,               # the BROW RIDGE: the most proud bone up here
+    11: 3, 12: 2, 13: 2,       # the SOCKET -- a hole. The front notches
+    14: 3, 15: 4,              # inward at 12-14 for the same reason.
+    16: 8, 17: 9,              # the CHEEKBONE: widest plane on the face
+    18: 4, 19: 3,              # the hollow under it
+    20: 5, 21: 6, 22: 5,       # the barrel of the mouth and jaw
+    23: 7, 24: 6,              # the JAW LINE and the chin's corner
+}
+
+
+def prom(y):
+    return PROMINENCE.get(y, 4)
+
+
+def _silhouette(y):
+    """Right edge of the block-in's head mass, in cells, for this row."""
+    best = 0.0
+    for py in (2 * y, 2 * y + 1):
+        for cx, cy, r in ((38, 20, 14), (44, 30, 8), (38, 34, 6), (38, 42, 6)):
+            d = r * r - (py - cy) ** 2
+            if d > 0:
+                best = max(best, cx + math.sqrt(d))
+    return best
+
+
+def reach(y):
+    """Last column this row's shed material gets to: the block-in's
+    silhouette, pushed out or pulled in by how proud the form was. Lives
+    here rather than in duo3_right2 because duo3_bg has to agree with it
+    -- the background may not glow inside the dissolve, or the gaps stop
+    being gaps and become a slightly darker lavender, which is the exact
+    thing that made session 2's version have no readable edge.
+    """
+    return int(max(_silhouette(y), front(y) + 4) + round((prom(y) - 4.5) * 1.6))
