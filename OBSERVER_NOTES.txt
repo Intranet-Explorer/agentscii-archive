@@ -159,6 +159,99 @@ work what it needs before designing the fix. Two of the three
 capabilities in the proposed experiment already existed.
 
 
+OBSERVER NOTE (2026-09-25) — session 1 of the multi-session run produced
+a combination that has never occurred in this project.
+
+  piece: duo3 "EMBER", a face mid-transformation, 80x28 (deliberately
+  small, ~2,240 cells, so it can be worked cell by cell throughout)
+
+  zero near-uniform rows, out of 28
+  37% ink coverage
+  99.3% glyph-carried
+  gate PASS
+  blind read: "A human face rendered in ASCII/pixel art"
+  cost $8.49
+
+Why each number matters. "Near-uniform row" is the defect named in
+almost every rejection this project has collected -- "seventeen
+identical rows", "row 14 near-uniform, row 15 near-uniform", "structure
+by row-fill, not by form". Every previous piece had them. This one has
+none.
+
+37% ink is the opposite of the filling reflex. Asked in an earlier run
+to leave regions flatter where nothing justified texture, the artist
+filled MORE (83% -> 92%). Here it left nearly two thirds of the canvas
+empty.
+
+99.3% glyph-carried is the same number a previous piece reached by
+making every cell busy -- uniform noise that scored well and read as
+static. This one reaches it with zero flat rows and a third of the ink,
+which is the technique the number was supposed to be a symptom of
+rather than the cheat that satisfies it.
+
+What changed, in order: the artist was asked what it needed and said
+region-rules were the defect's source; it was given a zoom at the scale
+craft lives at; it was given permission to not finish; and the canvas
+was made small enough that per-cell work is achievable rather than
+aspirational. This is the first evidence that the defect class was a
+TOOLING AND PROCESS artifact rather than a model limitation.
+
+Not yet a success. The colour-only self-check -- every glyph flattened
+to a solid block -- still reads as a face, which is the CONTACT
+rejection ("remove the colour and nothing survives") present at session
+1. The difference is that we know now, mid-build, instead of at review.
+That is what the mid-build check was built for and the first time it
+has caught this while it was still cheap to fix.
+
+
+OBSERVER NOTE (2026-09-25) — the defect vocabulary changed. Same gate,
+same reviewer, same prompt. This is the clearest evidence that the
+tooling constraint was real and is now behind us.
+
+CONTACT (region tools, one-pass) — defects were ARTIFACTS OF THE API:
+  "a literally copy-pasted block rectangle"
+  "the border is a repeated stamp"
+  "seventeen identical rows"
+  "the background thirds are near-uniform noise regardless of what's on
+   screen"
+  "rows 32-50 have no readable subject at all"
+  "remove the colour and nothing survives"
+
+duo3 (cell-level, multi-session, 80x28) — defects are DRAWING PROBLEMS:
+  "No nose. Cols 37-45, rows 16-20 -- the exact center of the face -- is
+   undifferentiated mid-density fill. The feature that establishes a
+   head's volume is blank."
+  "One stamp does all three features. The left eye, the right eye, and
+   the mouth are the same construction... An eye and a mouth are
+   different objects and should not be built identically. This is a
+   motif placed three times, not three observed forms."
+  "A dissolve needs form to dissolve FROM, and this is a gradient
+   applied uniformly per row."
+  "Embers don't go purple."
+
+Both REJECT. But the first list describes what a region-rule API
+produces; the second is the note you would give a person who drew a
+face. "No nose" is not a tooling failure -- a nose is missing because
+nobody observed a nose, not because capsule_px could not express one.
+
+The verdict sentences track the same shift:
+  CONTACT: "composited rather than constructed"
+  duo3   : "a geometric assembly with a face's landmarks positioned
+            correctly on it, not a constructed head"
+
+The second is a harder problem and a better one to have. It is also the
+first mid-build defect review this project has run -- the list arrived
+with $95 of a $120 budget still unspent, which is the whole reason the
+mid-build checks exist.
+
+Supporting measurement, session 3: the colour-only self-check STOPPED
+reading as a face for the first time. Flatten every glyph to a solid
+block and the picture dies; strip all colour and brow, eye socket, nose
+line, mouth and jaw survive in density alone. That is the inverse of
+every rejection this project has collected, and it is what the accepted
+archive pieces do.
+
+
 gallery/pack36/_dialogue.ans ("TWO VOICES v1.1") shipped with a critique
 claiming "two facing profile heads in complementary hue phases... brow...
 jaw... eye-line built from gradient shading over anatomical regions."
