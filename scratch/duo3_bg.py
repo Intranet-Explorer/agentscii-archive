@@ -31,30 +31,31 @@ import duo3_tools as t
 EMBER_X, EMBER_Y = 47.0, 13.0      # the socket -- the piece's only light
 HEAD_L, HEAD_R = 24, 52
 
-def _mine(x, y):
-    """Is this cell this pass's territory at all?
+def _air(x, y):
+    """The cells this pass owns: the open air off the burning side.
 
-    Session 6 made the answer matter. The two guards below used to sit
-    inside a one-shot write into cells that were already empty, which
-    meant re-running the pass after the head changed shape LAYERED a new
-    halo over the old one instead of replacing it. The first time I
-    pulled the dissolve in, every cell it vacated kept its old glow and
-    the new glow went on top, and the render came back showing more of
-    the exact wash the reviewer had complained about. Territory is stated
-    once now, cleared, and redrawn.
+    Stated once and used for BOTH the clear and the write, which is the
+    whole point. Session 6 got this wrong twice in a row in the same way.
+    First the guards sat inside a write-only-into-empty-cells loop, so
+    pulling the dissolve in left the old halo underneath the new one.
+    Then the clear used the same test as the write, so when the write
+    stopped covering rows 0-2 and 25-27 the clear stopped covering them
+    too, and the stale block of glow up at x52-55 above the crown simply
+    stayed on the canvas through two more renders. A pass that redraws a
+    region has to own the region, not the marks it happens to make in it.
     """
-    if x < HEAD_L + 16 and 1 <= y <= 26:
-        # The head is between this light and everything on its far side,
-        # so there is no glow over there at all -- the intact half keeps
-        # the dark it was modelled against.
-        return False
-    if 3 <= y <= 24 and x <= t.reach(y) + 2:
-        # AND no glow anywhere inside the dissolve. The field has to end
-        # against black or its gaps are not gaps, they are a slightly
-        # darker ground, and the face fades into the air it is supposed
-        # to be leaving -- which is what session 2's version did.
-        return False
-    return True
+    if 3 <= y <= 24:
+        # Nothing left of the burning edge of this row. The field has to
+        # end against black or its gaps are not gaps -- they are a
+        # slightly darker ground, and the face fades into the air it is
+        # supposed to be leaving, which is what session 2's version did.
+        # Nor anything on the far side of the head: it is between this
+        # light and everything over there, so the intact half keeps the
+        # dark it was modelled against.
+        return x >= HEAD_L + 16 and x > t.reach(y) + 2
+    # Above the crown and below the jaw there is no burning edge to glow
+    # against, so this pass owns those rows only to keep them clear.
+    return x >= 50
 
 
 # SESSION 6, the falloff itself. This was three rings measured from the
@@ -74,12 +75,12 @@ def _mine(x, y):
 # away. Ember distance stays in as the second term, so the halo is deep
 # beside the orbit and thins to nothing at the crown and the jaw.
 cells = [(x, y, ' ', 0, 0) for y in range(28) for x in range(80)
-         if _mine(x, y)]
+         if _air(x, y)]
 for y, row in enumerate(t.grid(0, 0, 80, 28)):
     for x, (ch, fg, bg) in enumerate(row):
-        if not _mine(x, y):
+        if not (_air(x, y) and 3 <= y <= 24):
             continue
-        m = x - (t.reach(y) if 3 <= y <= 24 else HEAD_R)
+        m = x - t.reach(y)
         if m < 0:
             continue
         # cells are about twice as tall as wide, so vertical distance
