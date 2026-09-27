@@ -11,3 +11,14 @@ scratch/refs/
 scratch/_ref_*/
 __pycache__/
 *.pyc
+
+# Local-only: working folders mirrored from the live workspace.
+/archive/
+/rejected/
+/scratch/
+/shelved/
+/references/
+/submissions/
+/STYLE.md
+/OBSERVER_NOTES.txt
+/CATALOG.md
