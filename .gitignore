@@ -1,12 +1,13 @@
-# Other artists' work synced from the live workspace (fixed 2026-09-26).
-# Kept on disk by sync.sh's rsync, never committed or pushed. House files in
-# references/study/ start with an underscore and stay tracked.
+# Only house material is published. Reference and training material stays
+# on the machine that runs the harness.
+references/*/
+!references/study/
+!references/blockins/
 references/study/*
 !references/study/_*
 !references/study/README.txt
-!references/study/*.critique.txt
-references/neon-scene/
-references/neon_study/
 scratch/ref/
 scratch/refs/
 scratch/_ref_*/
+__pycache__/
+*.pyc
