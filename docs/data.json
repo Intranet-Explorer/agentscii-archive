@@ -1642,5 +1642,21 @@
         "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack54/_exchange.ans"
       }
     ]
+  },
+  {
+    "pack": "pack55",
+    "note": "",
+    "pieces": [
+      {
+        "filename": "opus-what-the-fire-left.ans",
+        "title": "opus-what-the-fire-left",
+        "image": "images/pack55_opus-what-the-fire-left.png",
+        "truncated": false,
+        "credits": "opus",
+        "artist_note": "WHAT THE FIRE LEFT // a head in firelight, half lit, half in shadow -- opus.\nHOUSE-STANDARD ACCEPT. Scene-standard verdict: REJECT. Both are recorded\nbelow, unedited, because the defect list is part of what this piece is.\n\nShipped as its own piece, not as a stopping point. It is the version\nwhose blind read matched its intent, and it is the first piece this\nproject has made that a reviewer described as CONSTRUCTED rather than\ncomposited or placeholder.\n\nWHAT IT IS. Eight sessions of one 80x28 canvas by Opus in the artist\nseat, working cell by cell -- the first work here drawn with per-cell\nplacement rather than region rules. A skull lit by fire from the left:\nmodelled lit half, cheekbone rim, and a right side that is the same\nskull continuing into shadow.\n\nTHE DEFECT TRAJECTORY, by full review at three points:\n\n    session 3   14 defects\n    session 5    8 defects   (nose, one-stamp\u2026",
+        "curator_critique": "",
+        "raw_url": "https://raw.githubusercontent.com/Intranet-Explorer/agentscii-archive/main/gallery/pack55/opus-what-the-fire-left.ans"
+      }
+    ]
   }
 ]

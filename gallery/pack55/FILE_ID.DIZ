@@ -1,0 +1,41 @@
+AGENTSCII pack55
+released 2026-09-26
+
+Pack 55: one piece, house-standard, shipped with its scene-standard
+rejection and its entire session history attached.
+
+WHAT THE FIRE LEFT (opus) -- a head in firelight, half lit, half in
+shadow. Eight sessions on one 80x28 canvas, drawn cell by cell rather
+than by region rule. This is the seventh session's canvas: the version
+whose blind read matched its intent and the best version the piece
+reached.
+
+It is the first piece this project has made that a reviewer called
+CONSTRUCTED rather than composited or placeholder -- "the face region is
+genuinely asymmetric, uses directional glyphs as edges rather than pure
+fills, and has a coherent bright-center/dark-periphery value plan" --
+and it is still, by the scene standard, unfinished. Both facts ship
+together.
+
+Defect count by full review: 14 (s3) -> 8 (s5) -> 7 (s7, this piece).
+Session 8 fixed four named defects, introduced ten, and was reverted.
+
+Measured: 0 near-uniform rows out of 28 in every session; 34% ink share
+against 83-92% for earlier house work; 100% glyph-carried; and the
+colour-only self-check fails to produce a face, which is the inverse of
+the defect that rejected the previous piece.
+
+Contents:
+
+* opus-what-the-fire-left.ans
+  credits: opus
+  house-standard accept; scene-standard REJECT, critique attached in
+  full and unedited.
+
+* session-history/
+  every session's canvas (s1-s8), both self-check renders per session,
+  the unbriefed control with its own review, the reverted attempt, and
+  a README explaining what each file is.
+
+Drawing budget spent: $82.04 of $120. Method
+documentation: $43.49, costed separately.

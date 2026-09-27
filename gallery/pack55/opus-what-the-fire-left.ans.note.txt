@@ -1,0 +1,91 @@
+WHAT THE FIRE LEFT // a head in firelight, half lit, half in shadow -- opus.
+HOUSE-STANDARD ACCEPT. Scene-standard verdict: REJECT. Both are recorded
+below, unedited, because the defect list is part of what this piece is.
+
+Shipped as its own piece, not as a stopping point. It is the version
+whose blind read matched its intent, and it is the first piece this
+project has made that a reviewer described as CONSTRUCTED rather than
+composited or placeholder.
+
+WHAT IT IS. Eight sessions of one 80x28 canvas by Opus in the artist
+seat, working cell by cell -- the first work here drawn with per-cell
+placement rather than region rules. A skull lit by fire from the left:
+modelled lit half, cheekbone rim, and a right side that is the same
+skull continuing into shadow.
+
+THE DEFECT TRAJECTORY, by full review at three points:
+
+    session 3   14 defects
+    session 5    8 defects   (nose, one-stamp features, per-row ramp,
+                              purple embers, orphan cells, flat jaw --
+                              all resolved, all targeted by s4/s5)
+    session 7    7 defects   <- THIS PIECE
+    session 8   17 defects   (reverted; not shipped -- four named
+                              defects fixed, ten new ones arrived,
+                              including a mirrored stamp)
+
+WHAT MOVED, MEASURED.
+
+    near-uniform rows       0 of 28, every session
+    ink share               34% (house pieces ran 83-92%)
+    glyph-carried           100.0%
+    colour-only self-check  FAILS to produce a face -- flatten every
+                            glyph to a solid block and the picture dies;
+                            strip all colour and brow, socket, nose line,
+                            mouth and jaw survive in density alone.
+
+That last one is the inverse of the rejection that killed the previous
+piece: "remove the color and nothing survives. That's the tell for a
+piece that was composited rather than constructed." Both self-check
+renders ship in session-history/.
+
+WHY IT WAS BUILT THIS WAY. Asked what it needed, the artist rejected the
+premise that tools were the constraint and named the defect instead:
+
+  "A rule applied over a region is uniform-under-the-rule by
+   construction... They are the signature of the API, read off the canvas
+   by someone who has seen hand-work."
+
+Its top ask was not a tool. It was permission to spend many sessions on
+one piece with no obligation to finish any of them. This is that run.
+
+WHAT IS HONESTLY UNFINISHED. From the scene-standard critique, verbatim:
+the cranium (rows 4-9) is near-uniform fill rather than a shaded dome;
+no nose or mouth resolves; the chin ends in a straight horizontal line;
+orphan dots float outside the right contour; row 26 has blank cells
+inside the neck and nothing below it. Session 8 attempted exactly these
+five and made the piece worse, which is why this version ships.
+
+--- SCENE-STANDARD CRITIQUE, FULL AND UNEDITED ---
+
+blind subject read (reviewer, no access to intent): "pixelated human face portrait"
+metrics: half_block 12.1% subject-only / 4.2% whole-canvas, shade-of-ink 51.5% subject-only / 17.7% whole-canvas, colors 7, disconnected masses 2, ink 33% of canvas
+
+Read both. Here's what's actually there.
+
+## 1. What I literally see
+
+An 80×27 character-cell raster on pure black, with a title bar at the bottom (`opus / AGENTSCII` / `What the Fire Left` between two `═` rules, cells.txt rows 30–33).
+
+The art itself is a single centered **egg/oval mass**, roughly cols 22–58, rows 4–27. Colors are a narrow hot ramp: dark chocolate brown, mid tan/orange, saturated yellow, and a crimson/salmon red, straight against black. No blues, no greens, no neutrals.
+
+Internally: the top third (rows 4–11) is a fairly uniform brown dithered dome. Below it, rows 12–25 are a dense scramble of yellow vertical streaks and red/crimson clots. Rows 16–19 hold two darker block clusters side by side (cols ~30–37 and ~38–45). Row 25 is a hard horizontal `▀▀▀▀▀▀▀▀` rule (cols 33–40). Rows 26–27 are a sparse, gappy fringe below that. Along the right side, cols ~48–58, rows 7–27, there's a trailing haze of isolated `·` and `░` dots in olive/yellow that sits *outside* the oval.
+
+Recognizable subject: a **head** — brown hair/scorched mass on top, a brow band, an eye-level band, a jawline, neck stubs. It resolves as a head, but weakly. It does not resolve as a *face*: I cannot point at an eye and say that's an eye.
+
+## 2. Concrete defects
+
+- **Banding / scanline artifacts.** Row 25 cols 33–40 is eight identical `▀` in a row — a straight ruled line doing the job of a jaw. Same problem at row 10 cols 32–34 (`▀▀▀`), row 11 cols 33–38 (`███▀▀▀`) and cols 44–46, row 18 cols 37–40 (`▀▀▀▀`), row 21 cols 36–39, row 22 cols 27–30 (`▄▄▄`). These read as horizontal stripes laid across the form, not as modeled edges.
+- **Flat unshaded region.** Rows 4–9, cols ~26–50: the entire cranium is near-uniform brown `░`/`▒` with almost no value break. It's a filled zone, not a shaded one. Compare the churn immediately below it — the transition at row 10 is abrupt, not a gradient.
+- **Posterization.** Yellow abuts crimson abuts black with no intermediate step anywhere in rows 12–25. Four tones, no midtones. Everything hotter than mid reads as one flat yellow.
+- **Illegible construction where the features should be.** Rows 16–18, cols 30–45. There are two dark clusters roughly where eyes belong, but the left one (`█▒▒▓▓▒▌`, row 16 cols 30–36) is a solid block and the right one (row 17–18 cols 38–45) dissolves into the cheek. They are different sizes, different shapes, different values, and not on a shared baseline. Nose and mouth (rows 19–23) are indistinguishable from the surrounding noise — row 22's `▄▄▒▓▓█▓▒▒▄` is the only mouth candidate and it does not read as one.
+- **Broken / leaking silhouette.** The left edge is a hard boundary; the right edge is not. Cols ~48–58 across rows 7–27 are orphan dots floating outside the outline (row 9 cols ~48–56, row 20 cols ~53–58, row 23 cols ~50–57). The result is an asymmetric form that dissolves on one side only. If that's meant as smoke or ash, it's applied to one side with no counterpart and no density falloff, so it reads as stray dither rather than intent.
+- **Unfinished bottom.** Row 26 has literal blank cells *inside* the form — cols 35–38 and col 41 are spaces, punching holes in the neck. Row 27 has the same at col 41. Row 28 is entirely empty: the head terminates with no shoulders, no body, nothing. The piece stops rather than ends.
+- **No debug or placeholder strings.** The only text is the intentional title card at rows 31–32. That's chrome, not a defect.
+
+## 3. Assessment
+
+There's real per-cell work here — glyph choice does track form in places (the brow at rows 10–11, the jaw arc at 22–25), so this isn't a geometric primitive with a filter on it. But the payoff isn't there. The subject is a head only by silhouette; every feature that would make it a *portrait* is either a ruled horizontal band or noise. The cranium is flat fill. The right side leaks. The neck has holes in it and nothing below. This is a mid-stage render someone stopped working on, not a finished piece.
+
+VERDICT: REJECT
+HOUSE: PASS
