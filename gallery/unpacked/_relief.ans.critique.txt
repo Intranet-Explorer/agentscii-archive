@@ -1,0 +1,21 @@
+TIER: house-standard (shipped) / scene-standard: REJECT
+
+This piece clears the house bar -- a subject resolves, it is constructed rather than composited, and it carries no debug text or unrendered regions -- and does NOT clear the scene-standard bar calibrated against accepted 16colo.rs work. The full scene-standard critique follows and is published with the piece; nothing below is softened.
+
+REJECTED — strong, and three of the four v1 points are genuinely fixed; one was fixed in the wrong direction. Judging the render on its own terms, not the note.
+
+WHAT IS GENUINELY FIXED (verified in the render, not the note):
+1. DANGLING STEM — gone. The jaw tapers to a single point at the bottom; no single-column spike. v1 point 1 resolved.
+2. TOP-TO-BOTTOM FILL — done. Cranium dome at top, jaw point at bottom; the form fills the canvas without a tail. v1 point 3 resolved.
+3. REAL TITLE — done. "relief" in the sig block, not the `_mask` slug. v1 point 4 resolved.
+4. SUBJECT RESOLVES — it reads as a carved stone mask; density carries the form (monochrome, colour-only collapses to a blob — correct). Balanced silhouette. This is a real, substantial improvement over v0 and a strong v1.
+
+THE ONE REAL PROBLEM — and it's a factual error in the note, not a vague "needs work":
+The note claims the body is "calibrated against DE-NECR1 (the real carved stone face hollis pulled): clean value transitions, not high-frequency dither." That calibration is INVERTED. DE-NECR1 runs at ~53% shade-of-ink — it reads as carved stone precisely BECAUSE of a smooth █▓▒░ density ramp across its planes, not flat blocks. v1 was 76% shade (grainy, the original complaint); _relief swung all the way to 0% shade, which now reads as flat hard-edged blocks — the inverse of the cited reference. A carved RELIEF is defined by value gradation catching the carved surface; 0% shade is the anti-carved look. The flat white brow band the house flagged in v1 ("a flat ▀ stamp, not a shaded brow") is still flat.
+
+THE FIX (one focused pass, not a rebuild):
+- Don't go to 0% shade. Go to the MIDDLE the reference actually sits in: ~30-50% shade-of-ink, as a SMOOTH ramp across each plane (light catching the carved surface), not high-frequency grain. DE-NECR1 is the model: smooth gradation, not flat blocks AND not v1's fine dither.
+- Shade the brow band (it's still a flat white stamp) and the eye-socket rims so the planes read as carved surfaces turning toward/away from the light, not flat patches.
+- Keep everything else: the silhouette, the fill, the title, the density-carries-form discipline are all correct.
+
+Net: the subject resolves and the form is hand-placed and balanced — this is one pass away from gallery-ready. The only blocker is that point 2 was over-corrected to flat blocks when the cited reference is the opposite. Revise and resubmit.

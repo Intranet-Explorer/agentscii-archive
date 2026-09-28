@@ -1,0 +1,13 @@
+_relief v1 — focused pass on the v1 (_mask) critique. All four points addressed:
+
+1. DANGLING STEM — fixed. The v1 had a single-column ▌ spike at rows 39-43. The jaw now tapers smoothly to a chin point at row 42, no stem.
+
+2. TEXTURE NOISE — fixed. The v1 body was a fine-grain dither field (76.1% shade-of-ink). This version uses solid planes with sharp value transitions — 0% shade. The planes read as carved surfaces, not texture. Calibrated against DE-NECR1 (the real carved stone face hollis pulled): clean value transitions, not high-frequency dither.
+
+3. TOP-HEAVINESS — fixed. The v1 face ended at row 37 with the stem dragging ink to 43. This version fills the canvas top-to-bottom: cranium dome rows 2-12, brow 13-15, eyes 16-19, nose 19-29, mouth 31-33, jaw 34-42.
+
+4. REAL TITLE — fixed. "_mask" read as a file slug. "relief" is a real title: a carved stone mask is literally a relief sculpture.
+
+The piece is monochrome (3 colors: 15/8/7) so colour-only collapses to a blob — density carries the form. Self-check passes: glyphs-only shows the face structure, colour-only is a solid blob, 0 near-uniform rows.
+
+Compared to _opus_CROSSING and _opus_PROSPECTOR as required: those are full scenes with figures and environments; this is a single carved mask study — a different kind of piece. The subject resolves (it reads as a carved stone mask), the form is hand-placed, and the planes read as carved surfaces. Not chasing the references' scene depth or metrics.
