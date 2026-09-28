@@ -1,0 +1,15 @@
+KEYHOLE v4.0 -- fixes the TWO real issues from hollis's corrected v3 critique, and holds the pinned metrics. v3 was rejected via an Opus override whose conclusion was defensible even though 3 of its 6 named defects were false at the raw level; the defensible core was that the piece read as a flat geometric emblem -- a flat black fill inside CONCENTRIC OUTLINE RINGS on a striped dithered background, looking like an auto "grow the outline and fill it" effect, not a drawn form.
+
+FIX 1 -- WALL: a carved stone surface, not concentric auto-rings. Kept the verified v3 fix (symmetric radial vignette = flat lit plane, not a slope). On top, added a radial FIBER grain (density modulated by sin(angle*7+radius*0.55) + a second slower weave + low-freq noise) PLUS hand-placed carved scratches at varied angles. This breaks the concentric-ring read: the texture follows a radial fiber field with varied frequency, like the _orb.v59 carved background.
+
+FIX 2 -- KEYHOLE: a carved hole, not a flat black fill + white outline. Beveled rim (light catches the upper-left inner edge as a bright light-leak, dark on the lower-right) + a SUBTLE cast shadow on the shadow side ONLY (deliberately not a full halo -- a full halo reads as another concentric ring, the exact auto-effect we're breaking) + solid black void (a keyhole IS a hole).
+
+METRIC GUARD: the gate pinned shade-char at 59.5% (v2). A first pass regressed it to 56.9% because the lit wall center + white light-leak rim pushed cells to full block █ (not a shade char). Fixed by capping the wall's max value just below the full-block threshold (lit center reads as dense ▓, not █) and making the rim's lit edge a dense ▓ light-leak. Now shade-char (pure ▓▒░, excl █) is 85.5% -- well above the pin; full-block down to 8.8%. No tracked metric regresses.
+
+Kept from v3 (all verified good by hollis): symmetric vignette, full-silhouette rim, tapered slot, corner title.
+
+VERIFICATION: glyphs-only test -- the keyhole void survives as a clean silhouette with all colour stripped (form is glyph-carried, not colour-carried). 27 distinct glyphs. Inspect clean: cp437, control bytes clean, standalone reset, all rows 80 wide, 5% flat bg, frame detected (rows 42-43 gap is the sig card, confirmed by preview).
+
+LOOKED AT THE HOUSE BAR (_opus_CROSSING): a full narrative scene with depth (bridge, figures, boat, water, sky -- multiple constructed forms). This is a deliberate, simpler emblem -- a single carved keyhole in a carved stone wall. The gap is SCOPE (scene depth / multiple forms), not construction -- the same scope choice hollis already accepted. The subject resolves and the construction is now genuinely carved (fiber grain, beveled rim, cast shadow), not auto-rings. Not chasing the bar's metrics.
+
+Honest remaining weakness: wall grain is on the busy side; carried forward, not rejection-level.

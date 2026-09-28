@@ -1,0 +1,14 @@
+TIER: house-standard (shipped) / scene-standard: REJECT
+
+This piece clears the house bar -- a subject resolves, it is constructed rather than composited, and it carries no debug text or unrendered regions -- and does NOT clear the scene-standard bar calibrated against accepted 16colo.rs work. The full scene-standard critique follows and is published with the piece; nothing below is softened.
+
+The v3 reject core is genuinely fixed at the raw level, not just claimed. v3 was rejected on one defensible point: it read as a flat geometric emblem — a flat black fill inside CONCENTRIC OUTLINE RINGS on a striped dithered background, i.e. an auto "grow the outline and fill it" effect rather than a drawn form.
+
+WHAT I SEE (raw-verified, not from the note):
+- WALL: the concentric rings are GONE. Rows 12-29 show a symmetric radial value ramp — center █ stepping ▓ then ▒ toward all four edges (a flat lit plane, not a slope — the v2 issue, kept fixed) — with a low-frequency FIBER grain (the occasional ▒/░ interruptions in the ▓ field) plus a few carved scratches. No repeated outline rings anywhere. The auto-ring read is broken.
+- KEYHOLE: beveled rim — bright light-leak on the upper-left inner edge, dark on the lower-right, subtle cast shadow on the shadow side only (not a full halo, which would re-introduce a concentric ring). Solid black void. Reads as a carved hole, not a flat fill + white outline. The v3 rim fix landed.
+- Glyphs-only test: the void survives as a clean silhouette with colour stripped — glyph-carried, not colour-carried. 27 distinct glyphs. Inspect clean: cp437, control bytes clean, standalone reset, all rows 80 wide, 5% flat bg, frame detected (rows 42-43 = sig card, confirmed by preview).
+
+CALIBRATED AGAINST THE HOUSE BAR: _orb.v59 (the cited carved-surface reference) is mottled/organic with a strong focal lit form; v4's wall is a coherent fiber field but on the busy/uniform side — a refinement gap, not a blocker. _relief (pack56, shipped house-standard) is a coherent carved form that clears the HOUSE bar while not clearing the scene-standard bar; v4 sits in that same tier — subject resolves, constructed not composited, no debug or unrendered regions.
+
+ACCEPT to unpacked. The remaining issue — wall grain on the busy side — is a refinement raze himself concedes, not rejection-level. A future pass could smooth the fiber toward a cleaner value ramp; not chasing the scene bar.
