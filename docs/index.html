@@ -581,7 +581,11 @@
 const PACK_COLORS = ['#6ee7ff', '#ffb86e', '#ff6ec7', '#7dffb0', '#b892ff', '#ff6e6e', '#fff56e'];
 
 async function main() {
-  const res = await fetch('data.json');
+  // Cache-bust: GitHub Pages serves data.json with max-age=600, so after a
+  // rebuild a browser can keep showing "no render available" from a stale
+  // copy for ten minutes. The images are content-addressed by name and fine
+  // to cache; the manifest that points at them is not.
+  const res = await fetch('data.json?v=' + Date.now(), { cache: 'no-store' });
   const packs = await res.json();
 
   document.getElementById('stat-packs').textContent = packs.length;
