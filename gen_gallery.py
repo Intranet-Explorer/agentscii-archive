@@ -55,6 +55,7 @@ def truncate(text, limit=900):
 def main():
     IMAGES.mkdir(parents=True, exist_ok=True)
     packs_data = []
+    last_error = None
 
     pack_dirs = sorted(
         [d for d in GALLERY.glob("pack*") if d.is_dir() and not d.name.startswith("_")],
@@ -84,6 +85,7 @@ def main():
                 b64, note = harness.render_ans_to_png_b64(piece_path, offset=0, max_rows=PREVIEW_ROWS)
             except Exception as e:
                 b64, note = None, f"(render failed: {e})"
+                last_error = f"{piece_path.name}: {e}"
 
             rendered = False
             if b64:
@@ -123,10 +125,25 @@ def main():
             "pieces": pieces,
         })
 
+    # A build where nothing rendered must fail loudly, not publish a gallery
+    # of empty frames. On 2026-09-28 the sync ran while harness.py was being
+    # edited, every render raised, and data.json was overwritten with 135
+    # "image": null entries and pushed -- the per-piece `except` made a total
+    # failure look like a successful build. data.json is left untouched here
+    # so the previous good one keeps serving.
+    total = sum(len(p["pieces"]) for p in packs_data)
+    rendered = sum(1 for p in packs_data for pc in p["pieces"] if pc["image"])
+    if total and rendered < total * 0.5:
+        raise SystemExit(
+            f"gen_gallery: only {rendered} of {total} pieces rendered -- refusing "
+            f"to overwrite docs/data.json. Last render error: {last_error}"
+        )
+
     (DOCS / "data.json").write_text(json.dumps(packs_data, indent=2), encoding="utf-8")
     print(f"wrote {len(packs_data)} packs, "
           f"{sum(len(p['pieces']) for p in packs_data)} pieces to docs/data.json")
     print(f"images in {IMAGES}")
+    print(f"rendered {rendered} of {total} pieces")
 
 
 if __name__ == "__main__":
